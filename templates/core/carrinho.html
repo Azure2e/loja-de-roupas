@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Carrinho - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-glow">🛒 Seu Carrinho</h1>
+
+    {% if carrinho %}
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Tamanho</th>
+                    <th>Cor</th>
+                    <th>Qtd</th>
+                    <th>Preço Unit.</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for id, item in carrinho.items %}
+                <tr>
+                    <td>{{ item.nome }}</td>
+                    <td>{{ item.tamanho }}</td>
+                    <td>{{ item.cor }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>R$ {{ item.preco|floatformat:2 }}</td>
+                    <td>R$ {{ item.subtotal|floatformat:2 }}</td>
+                    <td>
+                        <a href="{% url 'core:remover_carrinho' item.variante_id %}" class="btn btn-danger btn-sm">Remover</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="text-end">
+            <h5>Subtotal: R$ {{ subtotal_geral|floatformat:2 }}</h5>
+            <h5>Desconto: <span class="text-danger">- R$ {{ desconto|floatformat:2 }}</span></h5>
+            <hr>
+            <h3 class="text-success">Total: R$ {{ total_final|floatformat:2 }}</h3>
+            <a href="{% url 'core:checkout' %}" class="btn btn-primary btn-lg mt-3 px-5">
+                Finalizar Compra
+            </a>
+        </div>
+    {% else %}
+        <p class="text-center py-5">Seu carrinho está vazio 😢</p>
+    {% endif %}
+</div>
+{% endblock %}

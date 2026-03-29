@@ -1,0 +1,14 @@
+# =============================================
+# requirements.txt - Loja de Roupas Django
+# =============================================
+
+Django==6.0.3
+Pillow==11.1.0
+
+# =============================================
+# Pacotes extras (descomente quando precisar)
+# =============================================
+# django-allauth==0.63.6          # para login avançado com email + Google
+# django-crispy-forms             # deixa os forms mais bonitos
+# python-decouple                 # para guardar senhas e chaves secretas
+# whitenoise                     # para deploy (Railway, Render, etc)

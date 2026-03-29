@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Início - SuaLoja{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 text-center text-glow">🛍️ Nossas Roupas</h1>
+
+<div class="row">
+    {% for produto in produtos %}
+    <div class="col-md-4 col-sm-6 mb-4">
+        <div class="card product-card h-100">
+            
+            <!-- Imagem -->
+            <div style="height: 260px; overflow: hidden; border-radius: 15px 15px 0 0;">
+                {% if produto.imagem %}
+                    <img src="{{ produto.imagem.url }}" 
+                         class="card-img-top w-100 h-100"
+                         alt="{{ produto.nome }}"
+                         style="object-fit: cover;">
+                {% else %}
+                    <div class="bg-dark d-flex align-items-center justify-content-center h-100 text-muted">
+                        <h5>📷 Sem foto</h5>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ produto.nome }}</h5>
+                <p class="text-success fs-4 mb-3">R$ {{ produto.preco }}</p>
+                <small class="text-muted mb-3">{{ produto.categoria.nome }}</small>
+                
+                <!-- Botões -->
+                <div class="mt-auto d-grid gap-2">
+                    <!-- Botão Ver Detalhes -->
+                    <a href="{% url 'core:detalhe_produto' produto.slug %}" 
+                       class="btn btn-outline-light">
+                        Ver Detalhes
+                    </a>
+                    
+                    <!-- Botão Adicionar ao Carrinho (direto) -->
+                    {% if produto.variantes.exists %}
+                    <a href="{% url 'core:adicionar_carrinho' produto.variantes.first.id %}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>
+                        Sem estoque
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <h4>Nenhum produto disponível no momento 😢</h4>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

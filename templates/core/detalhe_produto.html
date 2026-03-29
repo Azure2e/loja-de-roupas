@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ produto.nome }} - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+
+    <!-- IMAGEM -->
+    <div class="col-lg-6">
+        <div class="rounded-4 overflow-hidden shadow-lg bg-dark">
+            {% if produto.imagem %}
+                <img src="{{ produto.imagem.url }}" 
+                     class="img-fluid w-100" 
+                     alt="{{ produto.nome }}"
+                     style="max-height: 550px; object-fit: cover;">
+            {% else %}
+                <div class="d-flex align-items-center justify-content-center" style="height: 550px;">
+                    <h1 class="text-muted" style="opacity: 0.1; font-size: 6rem;">📷</h1>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- DETALHES + SELEÇÃO VISUAL -->
+    <div class="col-lg-6">
+        <h1 class="display-5 fw-bold">{{ produto.nome }}</h1>
+        <p class="fs-3 text-success" id="preco-atual">R$ {{ produto.preco|floatformat:2 }}</p>
+        <p class="lead">{{ produto.descricao }}</p>
+
+        <hr>
+
+        <!-- TAMANHOS -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Tamanho</label>
+            <div class="d-flex gap-2 flex-wrap" id="tamanhos">
+                {% for v in variantes|dictsort:"tamanho" %}
+                <button type="button" 
+                        class="btn tamanho-btn btn-outline-light px-4 py-2"
+                        data-variante-id="{{ v.id }}"
+                        data-preco-extra="{{ v.preco_extra }}"
+                        data-estoque="{{ v.estoque }}">
+                    {{ v.tamanho }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- CORES (swatches) -->
+        <div class="mb-4">
+            <label class="form-label fw-bold">Cor</label>
+            <div class="d-flex gap-3 flex-wrap" id="cores">
+                <!-- As cores são filtradas pelo JavaScript conforme o tamanho escolhido -->
+            </div>
+        </div>
+
+        <p class="text-muted mb-4" id="info-estoque"></p>
+
+        <button id="btn-adicionar" class="btn btn-primary btn-lg w-100 py-3" disabled>
+            <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+        </button>
+
+        <a href="{% url 'core:home' %}" class="btn btn-outline-light mt-4">← Voltar ao catálogo</a>
+    </div>
+</div>
+
+<!-- JavaScript externo -->
+<script src="{% static 'js/main.js' %}" defer></script>
+{% endblock %}
