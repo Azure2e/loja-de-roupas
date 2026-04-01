@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Verificar Telefone - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card bg-dark border-0 shadow-lg p-5 text-white">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-glow">📱 Verificar Telefone</h2>
+                    <p class="text-muted">Vamos enviar um código de 6 dígitos para o seu WhatsApp</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Seu número de WhatsApp</label>
+                        <input type="tel" 
+                               name="phone" 
+                               class="form-control form-control-lg bg-dark text-white border-secondary"
+                               placeholder="+5511999999999 ou +59171234567"
+                               required>
+                        <small class="text-muted">Exemplo: +55 para Brasil ou +591 para Bolívia</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold">
+                        <i class="fas fa-paper-plane"></i> Enviar Código OTP
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

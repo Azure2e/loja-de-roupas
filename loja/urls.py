@@ -3,14 +3,25 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# ==================== URLS PRINCIPAIS DA LOJA ====================
+# Import da view de proteção do admin
+from core.views import admin_gate
+
+# ==================== CONFIGURAÇÃO DE SEGURANÇA DO ADMIN ====================
+admin.site.site_header = "SuaLoja - Painel Administrativo"
+admin.site.site_title = "SuaLoja Admin"
+admin.site.index_title = "Gerenciamento da Loja"
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('core.urls')),           # rotas da loja (home, produtos, carrinho, etc)
-    path('accounts/', include('accounts.urls')),  # rotas de login, cadastro e reset de senha
+    # URL SECRETA + Senha Master
+    path('gestao-secreta-jaques-2026/', admin_gate, name='admin_gate'),
+    path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
+
+    path('', include('core.urls')),
+    path('accounts/', include('accounts.urls')),
+    
+    # Axes (proteção força bruta) - comentado temporariamente para fazer as migrações
+    # path('axes/', include('axes.urls')),
 ]
 
-# ==================== SERVIR ARQUIVOS DE MÍDIA (IMAGENS DOS PRODUTOS) ====================
-# Apenas em modo desenvolvimento (DEBUG = True)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

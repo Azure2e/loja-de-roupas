@@ -1,17 +1,32 @@
 # Django
-__pycache__/
 *.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Banco de dados
 db.sqlite3
 db.sqlite3-journal
-media/
-staticfiles/
-static/CACHE/
 
-# Ambientes virtuais
-.venv/
-venv/
-env/
-ENV/
+# Arquivos de mídia e estáticos gerados
+staticfiles/
+media/
+
+# Arquivos de ambiente e chaves secretas
+.env
+*.env
+settings.py.bak
+
+# Logs
+*.log
+logs/
 
 # IDEs
 .vscode/
@@ -19,10 +34,5 @@ ENV/
 *.swp
 *.swo
 
-# Logs
-*.log
-logs/
-
-# Arquivos grandes (imagens de teste)
-*.psd
-*.ai
+# MacOS
+.DS_Store

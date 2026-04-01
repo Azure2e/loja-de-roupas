@@ -2,47 +2,41 @@
 {% block title %}Login - SuaLoja{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-lg-5 col-md-7 col-sm-10">
-        
-        <div class="card p-5 shadow-lg">
-            
-            <!-- Cabeçalho com ícone -->
-            <div class="text-center mb-4">
-                <h1 class="display-6 fw-bold text-glow">
-                    <i class="fas fa-user-circle fa-2x mb-3"></i><br>
-                    Entrar
-                </h1>
-                <p class="text-muted">Bem-vindo de volta à sua loja de roupas favorita</p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card bg-dark border-0 shadow-lg p-5 text-white">
+                <div class="text-center mb-4">
+                    <h1 class="display-6 fw-bold text-glow">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </h1>
+                    <p class="text-muted">Acesse sua conta e continue comprando</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {{ form.as_p }}
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 py-3 fw-bold">
+                        <i class="fas fa-sign-in-alt"></i> Entrar na minha conta
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="mb-2">
+                        <a href="{% url 'accounts:password_reset' %}" class="text-info fw-bold text-decoration-none">
+                            Esqueci minha senha
+                        </a>
+                    </p>
+                    <p>
+                        Ainda não tem conta? 
+                        <a href="{% url 'accounts:register' %}" class="text-info fw-bold text-decoration-none">
+                            Criar conta agora
+                        </a>
+                    </p>
+                </div>
             </div>
-
-            <!-- Formulário de Login -->
-            <form method="post">
-                {% csrf_token %}
-
-                <!-- Django renderiza os campos automaticamente -->
-                {{ form.as_p }}
-
-                <!-- Botão de Login -->
-                <button type="submit" class="btn btn-primary w-100 mt-4 py-3 fs-5">
-                    <i class="fas fa-sign-in-alt me-2"></i> 
-                    Entrar na Loja
-                </button>
-            </form>
-
-            <!-- Links extras -->
-            <div class="text-center mt-4">
-                <p class="mb-1">
-                    Não tem conta ainda? 
-                    <a href="{% url 'accounts:register' %}" class="text-info fw-bold">
-                        Criar conta agora
-                    </a>
-                </p>
-                <a href="#" class="text-muted small">
-                    Esqueci minha senha
-                </a>
-            </div>
-
         </div>
     </div>
 </div>

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Pagamento Aprovado - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="text-success">🎉 Pagamento Aprovado!</h1>
+    <p class="lead">Obrigado pela sua compra. Seu pedido foi confirmado.</p>
+    <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg mt-4">Voltar à Loja</a>
+</div>
+{% endblock %}

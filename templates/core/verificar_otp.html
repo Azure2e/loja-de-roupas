@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Digite o Código - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card bg-dark border-0 shadow-lg p-5 text-white">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-glow">🔑 Digite o Código</h2>
+                    <p class="text-muted">Enviamos um código de 6 dígitos para o seu WhatsApp</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <input type="text" 
+                               name="code" 
+                               maxlength="6"
+                               class="form-control form-control-lg text-center fs-1 fw-bold bg-dark text-white border-secondary"
+                               placeholder="000000"
+                               autocomplete="off"
+                               required>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold">
+                        <i class="fas fa-check-circle"></i> Verificar Código
+                    </button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:gerar_otp' %}" class="text-decoration-none text-muted">
+                        ← Reenviar código
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

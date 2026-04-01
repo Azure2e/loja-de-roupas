@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Pagamento Recusado - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="text-danger">❌ Pagamento Recusado</h1>
+    <p class="lead">Não foi possível processar seu pagamento.</p>
+    <a href="{% url 'core:ver_carrinho' %}" class="btn btn-primary btn-lg mt-4">Tentar Novamente</a>
+</div>
+{% endblock %}

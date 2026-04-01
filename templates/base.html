@@ -4,48 +4,82 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}SuaLoja - Loja de Roupas{% endblock %}</title>
-    
-    <!-- Bootstrap -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SuaLoja{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- NOSSO CSS (este é o que estava faltando) -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
+<body class="bg-dark text-white">
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-dark py-3">
-        <div class="container">
-            <a class="navbar-brand fs-3 fw-bold text-glow" href="{% url 'core:home' %}">🛍️ SuaLoja</a>
-            <div class="d-flex align-items-center gap-3">
+<nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-glow" href="{% url 'core:home' %}">
+            🛍️ SuaLoja
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                
+                <!-- Link OTP -->
+                <li class="nav-item">
+                    <a href="{% url 'core:gerar_otp' %}" class="nav-link text-info fw-semibold">
+                        <i class="fas fa-shield-alt"></i> Verificar Telefone
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'core:ver_carrinho' %}" class="nav-link position-relative">
+                        <i class="fas fa-shopping-cart"></i> Carrinho
+                        {% if request.session.carrinho %}
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                {{ request.session.carrinho|length }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+
                 {% if user.is_authenticated %}
-                    <span class="me-2">Olá, <strong>{{ user.username|default:user.email }}</strong>!</span>
-                    <a href="{% url 'accounts:logout' %}" class="btn btn-outline-light btn-sm">Sair</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            👤 {{ user.first_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu bg-dark border-primary">
+                            <!-- LOGOUT COM POST (corrigido) -->
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-white border-0 bg-transparent text-start w-100">
+                                        <i class="fas fa-sign-out-alt"></i> Sair
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
                 {% else %}
-                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm">Entrar</a>
-                    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Criar Conta</a>
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">Entrar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Criar Conta</a>
+                    </li>
                 {% endif %}
-                <a href="{% url 'core:ver_carrinho' %}" class="btn btn-outline-light btn-sm position-relative">
-                    🛒 Carrinho
-                    {% if request.session.carrinho %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            {{ request.session.carrinho|length }}
-                        </span>
-                    {% endif %}
-                </a>
-            </div>
+            </ul>
         </div>
-    </nav>
-
-    <div class="container mt-5">
-        {% block content %}{% endblock %}
     </div>
+</nav>
 
-    <!-- JavaScript -->
-    <script src="{% static 'js/main.js' %}" defer></script>
+<div class="container mt-4">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}" defer></script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>
