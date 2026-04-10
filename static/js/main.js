@@ -1,0 +1,114 @@
+// static/js/main.js
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ==================== reCAPTCHA v3 (invisível) ====================
+    const RECAPTCHA_SITE_KEY = '6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x';
+
+    // Carrega o reCAPTCHA apenas uma vez
+    function loadRecaptcha() {
+        if (window.grecaptcha) return;
+
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
+    }
+
+    loadRecaptcha();
+
+    // ==================== LÓGICA DE PRODUTOS (tamanho / cor) ====================
+    const selectTamanho = document.getElementById('select-tamanho');
+    const selectCor = document.getElementById('select-cor');
+    const btnAdicionar = document.getElementById('btn-adicionar');
+    const precoAtual = document.getElementById('preco-atual');
+    const infoEstoque = document.getElementById('info-estoque');
+
+    if (selectTamanho) {
+        const basePreco = parseFloat(precoAtual.dataset.basePreco) || 0;
+
+        selectTamanho.addEventListener('change', function () {
+            const tamanhoId = this.value;
+            selectCor.innerHTML = '<option value="">Escolha a cor</option>';
+
+            if (!tamanhoId) {
+                btnAdicionar.disabled = true;
+                return;
+            }
+
+            const variantes = JSON.parse(document.getElementById('variantes-data').textContent || '[]');
+
+            variantes.forEach(v => {
+                if (String(v.tamanho_id) === tamanhoId) {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = v.cor;
+                    opt.dataset.precoExtra = v.preco_extra;
+                    opt.dataset.estoque = v.estoque;
+                    selectCor.appendChild(opt);
+                }
+            });
+        });
+
+        selectCor.addEventListener('change', function () {
+            const option = this.options[this.selectedIndex];
+            if (!option.value) {
+                btnAdicionar.disabled = true;
+                return;
+            }
+
+            const precoExtra = parseFloat(option.dataset.precoExtra) || 0;
+            const estoque = parseInt(option.dataset.estoque) || 0;
+            const precoFinal = basePreco + precoExtra;
+
+            precoAtual.textContent = `R$ ${precoFinal.toFixed(2)}`;
+            infoEstoque.innerHTML = `Estoque disponível: <strong>${estoque}</strong> unidades`;
+
+            btnAdicionar.disabled = false;
+            btnAdicionar.dataset.varianteId = option.value;
+        });
+
+        btnAdicionar.addEventListener('click', function () {
+            const varianteId = this.dataset.varianteId;
+            if (varianteId) {
+                window.location.href = `/adicionar/${varianteId}/`;
+            }
+        });
+    }
+
+    // ==================== reCAPTCHA NO FORMULÁRIO DE LOGIN ====================
+    const loginForm = document.getElementById('login-form');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();   // impede envio imediato
+
+            if (!window.grecaptcha) {
+                alert('reCAPTCHA não carregou. Recarregue a página e tente novamente.');
+                return;
+            }
+
+            grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'login' })
+                .then(function (token) {
+                    // Adiciona o token ao formulário
+                    let tokenInput = document.getElementById('recaptcha-token');
+                    if (!tokenInput) {
+                        tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = 'g-recaptcha-response';
+                        tokenInput.id = 'recaptcha-token';
+                        loginForm.appendChild(tokenInput);
+                    }
+                    tokenInput.value = token;
+
+                    // Envia o formulário
+                    loginForm.submit();
+                })
+                .catch(function (error) {
+                    console.error('Erro no reCAPTCHA:', error);
+                    alert('Erro ao verificar reCAPTCHA. Tente novamente.');
+                });
+        });
+    }
+
+});

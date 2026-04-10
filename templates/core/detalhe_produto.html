@@ -4,66 +4,82 @@
 {% block title %}{{ produto.nome }} - SuaLoja{% endblock %}
 
 {% block content %}
-<div class="row g-5">
+<div class="container mt-4">
+    <div class="row g-5">
 
-    <!-- IMAGEM -->
-    <div class="col-lg-6">
-        <div class="rounded-4 overflow-hidden shadow-lg bg-dark">
-            {% if produto.imagem %}
-                <img src="{{ produto.imagem.url }}" 
-                     class="img-fluid w-100" 
-                     alt="{{ produto.nome }}"
-                     style="max-height: 550px; object-fit: cover;">
-            {% else %}
-                <div class="d-flex align-items-center justify-content-center" style="height: 550px;">
-                    <h1 class="text-muted" style="opacity: 0.1; font-size: 6rem;">📷</h1>
+        <!-- IMAGEM DO PRODUTO -->
+        <div class="col-lg-6">
+            <div class="rounded-4 overflow-hidden shadow-custom bg-dark p-3">
+                {% if produto.imagem %}
+                    <img src="{{ produto.imagem.url }}" 
+                         class="img-fluid w-100 rounded-3" 
+                         alt="{{ produto.nome }}"
+                         style="max-height: 580px; object-fit: cover;">
+                {% else %}
+                    <div class="d-flex align-items-center justify-content-center bg-black rounded-3" 
+                         style="height: 580px;">
+                        <h1 class="text-muted" style="opacity: 0.15; font-size: 9rem;">📷</h1>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DETALHES DO PRODUTO -->
+        <div class="col-lg-6">
+            <h1 class="display-5 fw-bold text-glow">{{ produto.nome }}</h1>
+            
+            <!-- Preço -->
+            <p class="fs-2 fw-bold text-success mb-1" id="preco-atual">
+                R$ {{ produto.preco|floatformat:2 }}
+            </p>
+            
+            <p class="lead text-muted">{{ produto.descricao }}</p>
+
+            <hr class="border-secondary">
+
+            <!-- TAMANHOS -->
+            <div class="mb-4">
+                <label class="form-label fw-bold fs-5">Tamanho</label>
+                <div class="d-flex gap-2 flex-wrap" id="tamanhos">
+                    {% for v in variantes|dictsort:"tamanho" %}
+                    <button type="button" 
+                            class="btn tamanho-btn btn-outline-light px-4 py-2 rounded-3"
+                            data-variante-id="{{ v.id }}"
+                            data-preco-extra="{{ v.preco_extra }}"
+                            data-estoque="{{ v.estoque }}">
+                        {{ v.tamanho }}
+                    </button>
+                    {% endfor %}
                 </div>
-            {% endif %}
-        </div>
-    </div>
+            </div>
 
-    <!-- DETALHES + SELEÇÃO VISUAL -->
-    <div class="col-lg-6">
-        <h1 class="display-5 fw-bold">{{ produto.nome }}</h1>
-        <p class="fs-3 text-success" id="preco-atual">R$ {{ produto.preco|floatformat:2 }}</p>
-        <p class="lead">{{ produto.descricao }}</p>
+            <!-- CORES (Swatches) -->
+            <div class="mb-4">
+                <label class="form-label fw-bold fs-5">Cor</label>
+                <div class="d-flex gap-3 flex-wrap" id="cores">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
 
-        <hr>
+            <!-- Estoque -->
+            <p class="text-muted mb-4" id="info-estoque" style="min-height: 28px;"></p>
 
-        <!-- TAMANHOS -->
-        <div class="mb-4">
-            <label class="form-label fw-bold">Tamanho</label>
-            <div class="d-flex gap-2 flex-wrap" id="tamanhos">
-                {% for v in variantes|dictsort:"tamanho" %}
-                <button type="button" 
-                        class="btn tamanho-btn btn-outline-light px-4 py-2"
-                        data-variante-id="{{ v.id }}"
-                        data-preco-extra="{{ v.preco_extra }}"
-                        data-estoque="{{ v.estoque }}">
-                    {{ v.tamanho }}
-                </button>
-                {% endfor %}
+            <!-- Botão Adicionar -->
+            <button id="btn-adicionar" 
+                    class="btn btn-primary btn-lg w-100 py-3 fw-bold"
+                    disabled>
+                <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+            </button>
+
+            <div class="mt-4 text-center">
+                <a href="{% url 'core:home' %}" class="text-muted text-decoration-none">
+                    ← Voltar ao Catálogo
+                </a>
             </div>
         </div>
-
-        <!-- CORES (swatches) -->
-        <div class="mb-4">
-            <label class="form-label fw-bold">Cor</label>
-            <div class="d-flex gap-3 flex-wrap" id="cores">
-                <!-- As cores são filtradas pelo JavaScript conforme o tamanho escolhido -->
-            </div>
-        </div>
-
-        <p class="text-muted mb-4" id="info-estoque"></p>
-
-        <button id="btn-adicionar" class="btn btn-primary btn-lg w-100 py-3" disabled>
-            <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
-        </button>
-
-        <a href="{% url 'core:home' %}" class="btn btn-outline-light mt-4">← Voltar ao catálogo</a>
     </div>
 </div>
 
-<!-- JavaScript externo -->
+<!-- JavaScript do Detalhe do Produto -->
 <script src="{% static 'js/main.js' %}" defer></script>
 {% endblock %}

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meu Perfil - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient py-4 py-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+
+            <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-4 overflow-hidden">
+
+                <div class="card-body p-4 p-sm-5">
+
+                    <div class="text-center mb-5">
+                        <h1 class="display-5 fw-bold text-white mb-1">Meu Perfil</h1>
+                        <p class="lead text-light opacity-75">Olá, <strong>{{ user.username }}</strong>!</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- FOTO DE PERFIL - ESTILO LINKEDIN -->
+                    <div class="text-center mb-5">
+                        <label for="foto-upload" class="linkedin-photo-container d-inline-block position-relative cursor-pointer">
+                            <div class="linkedin-avatar mx-auto">
+                                <img id="preview-img" 
+                                     src="{% if profile.user.profile_picture %}{{ profile.user.profile_picture.url }}{% else %}https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤{% endif %}" 
+                                     alt="Foto de perfil" class="rounded-circle">
+                                <div class="linkedin-overlay">
+                                    <i class="fas fa-camera"></i>
+                                    <p class="small mb-0">Alterar foto</p>
+                                </div>
+                            </div>
+                        </label>
+                        <input type="file" id="foto-upload" name="profile_picture" accept="image/*" class="d-none">
+                        <button type="button" id="btn-remover-foto" class="btn btn-outline-danger btn-sm mt-3">Remover foto</button>
+                    </div>
+
+                    <!-- FIDELIDADE -->
+                    <div class="text-center mb-4">
+                        <p class="mb-1 text-light">
+                            <strong>Nível de Fidelidade:</strong> 
+                            <span class="text-white">{{ profile.nivel_fidelidade }}</span>
+                        </p>
+                        <p class="text-light small opacity-75 mb-0">
+                            {{ profile.total_pedidos }} pedidos • {{ profile.pontos_fidelidade }} pontos
+                        </p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label text-light small fw-medium">E-mail</label>
+                                <input type="email" class="form-control bg-dark text-white border-secondary" 
+                                       value="{{ request.user.email }}" readonly>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label text-light small fw-medium">Nome Completo</label>
+                                {{ form.nome_completo }}
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label text-light small fw-medium">Telefone / WhatsApp</label>
+                                {{ form.phone }}
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label text-light small fw-medium">Sexo</label>
+                                {{ form.sexo }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label text-light small fw-medium">Estado Civil</label>
+                                {{ form.estado_civil }}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label text-light small fw-medium">Endereço Completo</label>
+                                {{ form.address }}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 rounded-4 mt-5">
+                            💾 SALVAR ALTERAÇÕES
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,101 +1,125 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Meu Carrinho - SuaLoja{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4 text-glow">🛒 Meu Carrinho</h2>
+    <h1 class="mb-4 text-glow">
+        <i class="fas fa-shopping-cart"></i> Meu Carrinho
+    </h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} rounded-4">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
 
     {% if carrinho %}
-        <div class="row">
-            <!-- Lista de produtos -->
-            <div class="col-lg-8">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Tamanho / Cor</th>
-                                <th>Preço</th>
-                                <th>Qtd</th>
-                                <th>Subtotal</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for id, item in carrinho.items %}
-                            <tr>
-                                <td>{{ item.nome }}</td>
-                                <td>{{ item.tamanho }} - {{ item.cor }}</td>
-                                <td>R$ {{ item.preco|floatformat:2 }}</td>
-                                <td>{{ item.quantidade }}</td>
-                                <td><strong>R$ {{ item.subtotal|floatformat:2 }}</strong></td>
-                                <td>
-                                    <a href="{% url 'core:remover_carrinho' id %}" class="btn btn-outline-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="row">
+        <!-- ==================== ITENS DO CARRINHO ==================== -->
+        <div class="col-lg-8">
+            {% for id, item in carrinho.items %}
+            <div class="card bg-dark border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <!-- Produto -->
+                        <div class="col-12 col-md-5">
+                            <strong class="fs-5">{{ item.nome }}</strong>
+                            <div class="small text-light mt-1">
+                                {{ item.tamanho }} - {{ item.cor }}
+                            </div>
+                        </div>
+
+                        <!-- Preço + Quantidade -->
+                        <div class="col-12 col-md-4 mt-3 mt-md-0">
+                            <div class="d-flex align-items-center gap-3">
+                                <div>
+                                    <small class="text-light">Preço unitário</small><br>
+                                    <strong>R$ {{ item.preco|floatformat:2 }}</strong>
+                                </div>
+
+                                <!-- Quantidade com label acessível -->
+                                <form method="post" action="{% url 'core:atualizar_quantidade' id %}" class="d-flex align-items-center">
+                                    {% csrf_token %}
+                                    <label for="qtd-{{ id }}" class="visually-hidden">Quantidade</label>
+                                    <input type="number" 
+                                           id="qtd-{{ id }}"
+                                           name="quantidade" 
+                                           value="{{ item.quantidade }}" 
+                                           min="1"
+                                           class="form-control form-control-sm text-center"
+                                           style="width: 85px;">
+                                    <button type="submit" class="btn btn-outline-light btn-sm ms-2">
+                                        Atualizar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Subtotal + Remover -->
+                        <div class="col-12 col-md-3 text-md-end mt-3 mt-md-0">
+                            <div>
+                                <small class="text-light">Subtotal</small><br>
+                                <strong class="text-success fs-5">R$ {{ item.subtotal|floatformat:2 }}</strong>
+                            </div>
+                            <a href="{% url 'core:remover_carrinho' id %}" 
+                               class="btn btn-outline-danger btn-sm mt-2">
+                                <i class="fas fa-trash"></i> Remover
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
+        </div>
 
-            <!-- Resumo do pedido + Fidelidade -->
-            <div class="col-lg-4">
-                <div class="card bg-dark p-4 sticky-top" style="top: 20px;">
-                    <h5 class="mb-3">Resumo do Pedido</h5>
-                    <hr>
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>R$ {{ subtotal_geral|floatformat:2 }}</span>
-                    </div>
-
-                    {% if desconto > 0 %}
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span>Cupom aplicado</span>
-                        <span>- R$ {{ desconto|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-
-                    <!-- Fidelidade: Resgate de pontos -->
-                    {% if user.is_authenticated and pontos_usuario > 0 %}
-                    <div class="mt-4 border-top pt-3">
-                        <h6 class="text-info">🎟️ Seus Pontos de Fidelidade: <strong>{{ pontos_usuario }}</strong></h6>
-                        <small class="text-muted">100 pontos = R$ 10,00</small>
-                        
-                        <form method="post" action="{% url 'core:resgatar_pontos' %}" class="mt-2">
-                            {% csrf_token %}
-                            <div class="input-group">
-                                <input type="number" name="pontos" class="form-control" placeholder="100" min="100" step="100" value="100">
-                                <button type="submit" class="btn btn-outline-success">Resgatar</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    {% if desconto_pontos > 0 %}
-                    <div class="d-flex justify-content-between mt-3 text-success">
-                        <span>Desconto por pontos</span>
-                        <span>- R$ {{ desconto_pontos|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-                    {% endif %}
-
-                    <hr>
-                    <div class="d-flex justify-content-between fs-4 fw-bold">
-                        <span>Total</span>
-                        <span class="text-success">R$ {{ total_final|floatformat:2 }}</span>
-                    </div>
-
-                    <a href="{% url 'core:checkout' %}" class="btn btn-success btn-lg w-100 mt-4 py-3">
-                        <i class="fas fa-credit-card"></i> Finalizar Compra
-                    </a>
-
-                    <a href="{% url 'core:home' %}" class="btn btn-outline-light mt-3 w-100">Continuar Comprando</a>
+        <!-- ==================== RESUMO DO PEDIDO + CUPOM ==================== -->
+        <div class="col-lg-4">
+            <div class="card bg-dark border-0 shadow-lg p-4 sticky-top" style="top: 20px;">
+                <h4 class="mb-4">Resumo do Pedido</h4>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span>
+                    <span>R$ {{ subtotal_geral|floatformat:2 }}</span>
                 </div>
+
+                {% if desconto > 0 %}
+                <div class="d-flex justify-content-between mb-2 text-success">
+                    <span>Cupom aplicado</span>
+                    <span>- R$ {{ desconto|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <div class="d-flex justify-content-between fs-4 fw-bold">
+                    <span>Total</span>
+                    <span class="text-success">R$ {{ total_final|floatformat:2 }}</span>
+                </div>
+
+                <!-- ==================== CUPOM ==================== -->
+                <div class="mt-4 border-top pt-4">
+                    <h6 class="mb-2">Tem um cupom?</h6>
+                    <form method="post" action="{% url 'core:aplicar_desconto' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="cupom" class="form-control" placeholder="Digite o cupom" maxlength="20" style="text-transform: uppercase;">
+                            <button type="submit" class="btn btn-outline-success">Aplicar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <a href="{% url 'core:checkout' %}" class="btn btn-success btn-lg w-100 mt-4 py-3 fw-bold">
+                    <i class="fas fa-lock me-2"></i> FINALIZAR COMPRA
+                </a>
+
+                <a href="{% url 'core:home' %}" class="btn btn-outline-light mt-3 w-100">
+                    ← Continuar Comprando
+                </a>
             </div>
         </div>
+    </div>
     {% else %}
         <div class="text-center py-5">
             <h4>Seu carrinho está vazio 😢</h4>

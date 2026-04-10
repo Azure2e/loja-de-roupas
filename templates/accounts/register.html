@@ -1,37 +1,80 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Criar Conta - SuaLoja{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-5 col-md-7">
-            <div class="card bg-dark border-0 shadow-lg p-5 text-white">
-                <div class="text-center mb-4">
-                    <h1 class="display-6 fw-bold text-glow">
-                        <i class="fas fa-user-plus"></i> Criar Conta
-                    </h1>
-                    <p class="text-muted">Comece a comprar as melhores roupas agora</p>
-                </div>
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-10">
 
-                <form method="post">
-                    {% csrf_token %}
+            <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-5 overflow-hidden position-relative animate-card">
+                
+                <div class="position-absolute top-0 start-50 translate-middle-x bg-gradient-glow animate-glow"></div>
 
-                    {{ form.as_p }}
+                <div class="card-body p-5">
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 py-3 fw-bold">
-                        <i class="fas fa-user-plus"></i> Criar minha conta
-                    </button>
-                </form>
+                    <div class="text-center mb-5 animate-header">
+                        <div class="mx-auto mb-4 d-flex align-items-center justify-content-center animate-avatar"
+                             style="width: 90px; height: 90px; background: linear-gradient(135deg, #00ff88, #00b4ff); border-radius: 50%; box-shadow: 0 0 60px rgba(0, 255, 136, 0.6);">
+                            ✨
+                        </div>
+                        <h1 class="display-4 fw-bold text-white mb-2">Crie sua conta</h1>
+                        <p class="lead text-light opacity-75">E comece a comprar com estilo</p>
+                    </div>
 
-                <div class="text-center mt-4">
-                    <p class="mb-0">
-                        Já tem uma conta? 
-                        <a href="{% url 'accounts:login' %}" class="text-info fw-bold text-decoration-none">
-                            Entrar aqui
-                        </a>
-                    </p>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4 animate-message">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">E-mail</label>
+                            <input type="email" name="email" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="Digite seu e-mail" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">Usuário</label>
+                            <input type="text" name="username" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="Escolha um nome de usuário" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">Senha</label>
+                            <input type="password" name="password1" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="Crie uma senha forte" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">Confirmar Senha</label>
+                            <input type="password" name="password2" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="Repita a senha" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 rounded-4 shadow-sm hover-scale animate-button">
+                            <i class="fas fa-user-plus me-2"></i> CRIAR CONTA GRÁTIS
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-5 pt-3 border-top border-secondary">
+                        <p class="mb-0 text-light">
+                            Já tem conta? 
+                            <a href="{% url 'accounts:login' %}" class="text-primary fw-bold text-decoration-none">
+                                Entrar agora →
+                            </a>
+                        </p>
+                    </div>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>

@@ -1,13 +1,20 @@
+# loja/settings.py
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-sualoja1234567890abcdef'
+# ==================== SEGURANÇA ====================
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False   # ← Produção
 
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
+# ==================== INSTALLED APPS ====================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,12 +23,29 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+
+    # Suas apps
     'core',
     'accounts',
+
+    # Pacotes externos
     'phonenumber_field',
     'axes',
+
+    # ==================== ALLAUTH ====================
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
+    # ==================== DJANGO CHANNELS ====================
+    'channels',
+
+    # ==================== reCAPTCHA ====================
+    'captcha',
 ]
 
+# ==================== MIDDLEWARE ====================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -32,10 +56,21 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'loja.urls'
+WSGI_APPLICATION = 'loja.wsgi.application'
+ASGI_APPLICATION = 'loja.asgi.application'
 
+# ==================== CHANNEL LAYERS ====================
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
+# ==================== TEMPLATES ====================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -52,20 +87,19 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'loja.wsgi.application'
-
+# ==================== BANCO DE DADOS (PostgreSQL - Render) ====================
+import dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(conn_max_age=600)
 }
 
+# ==================== IDIOMA E FUSO HORÁRIO ====================
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = 'America/La_Paz'
 USE_I18N = True
 USE_TZ = True
 
+# ==================== STATIC / MEDIA ====================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -74,34 +108,43 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ==================== AUTHENTICATION ====================
 LOGIN_REDIRECT_URL = 'core:home'
 LOGOUT_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'accounts:login'
 
+SESSION_COOKIE_AGE = 1209600
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==================== CHAVES SECRETAS (vindas do .env) ====================
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+# ==================== CHAVES SECRETAS DO .ENV ====================
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
-
+WHATSAPP_SENDER = os.getenv('WHATSAPP_SENDER')
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
-
 ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
 
-# ==================== CONFIGURAÇÃO DE EMAIL - BREVO ====================
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# ==================== GOOGLE SOCIAL LOGIN ====================
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_SECRET = os.getenv('GOOGLE_SECRET')
+
+# ==================== GOOGLE reCAPTCHA v3 ====================
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
+RECAPTCHA_REQUIRED_SCORE = 0.7
+
+# ==================== EMAIL ====================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # ← Mudado para produção
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'SuaLoja <noreply@sualoja.com>'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-# ==================== PROTEÇÃO CONTRA FORÇA BRUTA ====================
-AXES_FAILURE_LIMIT = 5
-AXES_LOCKOUT_DURATION = 30
+# ==================== PROTEÇÃO AXES ====================
+AXES_FAILURE_LIMIT = 8
+AXES_LOCKOUT_DURATION = 180
+AXES_COOLOFF_TIME = 180
 AXES_RESET_ON_SUCCESS = True
-AXES_COOLOFF_TIME = 30
 AXES_VERBOSE = True
 AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
 
@@ -109,4 +152,32 @@ AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
+
+# ==================== ALLAUTH CONFIG ====================
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# ==================== GOOGLE SOCIAL ACCOUNT ====================
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_SECRET'),
+            'key': ''
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# ==================== PRODUÇÃO - SEGURANÇA EXTRA ====================
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

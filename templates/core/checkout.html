@@ -5,60 +5,111 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4 text-glow">🔒 Checkout Seguro</h1>
+    <h1 class="mb-4 text-glow">
+        <i class="fas fa-lock"></i> Checkout Seguro
+    </h1>
 
     <div class="row">
+        <!-- ==================== INFORMAÇÕES DO CLIENTE ==================== -->
         <div class="col-lg-7">
-            <h4>Endereço de Entrega</h4>
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label>Endereço completo</label>
-                    <textarea class="form-control" rows="3" placeholder="Rua, número, bairro, cidade..."></textarea>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label>CEP</label>
-                        <input type="text" class="form-control" placeholder="00000-000">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label>Telefone</label>
-                        <input type="text" class="form-control" placeholder="(XX) 99999-9999">
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div class="card bg-dark border-0 shadow-lg p-4 mb-4">
+                <h4 class="mb-3">👤 Informações do Cliente</h4>
 
-        <div class="col-lg-5">
-            <div class="card bg-dark p-4">
-                <h5>Resumo do Pedido</h5>
-                <hr>
-                {% for id, item in carrinho.items %}
+                <!-- Nome Completo -->
+                <div class="mb-3">
+                    <strong>Nome Completo:</strong>
+                    <span class="ms-2">
+                        {{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}
+                    </span>
+                </div>
+
+                <!-- E-mail -->
+                <div class="mb-3">
+                    <strong>E-mail:</strong>
+                    <span class="ms-2">{{ request.user.email|default:"Não cadastrado" }}</span>
+                </div>
+
+                <!-- Telefone / WhatsApp -->
+                <div class="mb-3">
+                    <strong>Telefone / WhatsApp:</strong>
+                    <span class="ms-2">
+                        {{ profile.phone|default:"Não cadastrado" }}
+                    </span>
+                    {% if not profile.phone %}
+                        <a href="{% url 'accounts:perfil' %}" class="text-info small ms-2">Cadastrar telefone →</a>
+                    {% endif %}
+                </div>
+
+                <!-- Endereço -->
+                <div class="mb-4">
+                    <strong>Endereço de Entrega:</strong><br>
+                    <span class="ms-2">
+                        {{ profile.address|default:"Nenhum endereço cadastrado" }}
+                    </span>
+                    <a href="{% url 'accounts:perfil' %}" class="text-info small d-block mt-1">Editar endereço no perfil →</a>
+                </div>
+
+                {% if not profile.address or not profile.phone %}
+                    <div class="alert alert-warning small">
+                        ⚠️ Complete seu endereço e telefone no <strong>Perfil</strong> para finalizar a compra mais rápido.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Resumo do Pedido -->
+            <div class="card bg-dark border-0 shadow-lg p-4">
+                <h4 class="mb-3">🛒 Resumo do Pedido</h4>
+                {% for item in carrinho.values %}
                 <div class="d-flex justify-content-between mb-2">
                     <span>{{ item.nome }} ({{ item.tamanho }} - {{ item.cor }}) × {{ item.quantidade }}</span>
                     <span>R$ {{ item.subtotal|floatformat:2 }}</span>
                 </div>
                 {% endfor %}
+
                 <hr>
-                <div class="d-flex justify-content-between">
-                    <strong>Subtotal</strong>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Subtotal</span>
                     <span>R$ {{ subtotal_geral|floatformat:2 }}</span>
                 </div>
-                <div class="d-flex justify-content-between text-danger">
-                    <strong>Desconto</strong>
+
+                {% if desconto > 0 %}
+                <div class="d-flex justify-content-between mb-2 text-success">
+                    <span>Cupom aplicado</span>
                     <span>- R$ {{ desconto|floatformat:2 }}</span>
                 </div>
-                <hr>
-                <div class="d-flex justify-content-between fs-4">
-                    <strong>Total</strong>
+                {% endif %}
+
+                <div class="d-flex justify-content-between fs-4 fw-bold">
+                    <span>Total a pagar</span>
                     <span class="text-success">R$ {{ total_final|floatformat:2 }}</span>
                 </div>
+            </div>
+        </div>
 
-                <!-- BOTÃO MERCADO PAGO REAL -->
-                <a href="{% url 'core:mercadopago' %}" class="btn btn-success btn-lg w-100 mt-4">
-                    <i class="fas fa-credit-card"></i> Pagar com Mercado Pago
+        <!-- ==================== PAGAMENTO ==================== -->
+        <div class="col-lg-5">
+            <div class="card bg-dark border-0 shadow-lg p-4 sticky-top" style="top: 20px;">
+                <h4 class="mb-3">💳 Como você quer pagar?</h4>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                <a href="{% url 'core:mercadopago' %}" 
+                   class="btn btn-success btn-lg w-100 py-3 fw-bold shadow mb-3">
+                    <i class="fas fa-credit-card me-2"></i> 
+                    PAGAR COM MERCADO PAGO
                 </a>
-                <small class="text-muted d-block text-center mt-3">🔒 Conexão segura • SSL 256-bit</small>
+
+                <div class="text-center small text-muted">
+                    🔒 Pagamento 100% seguro • Protegido pelo Mercado Pago
+                </div>
+
+                <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light mt-4 w-100">
+                    ← Voltar ao Carrinho
+                </a>
             </div>
         </div>
     </div>

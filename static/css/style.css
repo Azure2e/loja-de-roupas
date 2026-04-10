@@ -1,12 +1,14 @@
 /* =============================================
    CSS COMPLETO - SUA LOJA DE ROUPAS
    Tema Dark Premium + Totalmente Responsivo
+   Versão Final - Abril 2026
    ============================================= */
 
 :root {
     --primary-gradient: linear-gradient(45deg, #ff00cc, #00ffff);
     --text-glow: 0 0 20px rgba(0, 255, 255, 0.6);
     --card-bg: rgba(255,255,255,0.08);
+    --text-light: #f0f0f0;
 }
 
 * {
@@ -16,8 +18,9 @@
 body {
     background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     color: #fff;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 /* ===================== NAVBAR ===================== */
@@ -28,8 +31,19 @@ body {
 }
 
 .navbar-brand {
-    font-size: 1.8rem;
+    font-size: 1.9rem;
     font-weight: 700;
+    text-shadow: var(--text-glow);
+    letter-spacing: -1px;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #fff !important;
+}
+
+.nav-link:hover {
+    color: #00ffff !important;
     text-shadow: var(--text-glow);
 }
 
@@ -40,6 +54,7 @@ body {
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    height: 100%;
 }
 
 .product-card:hover {
@@ -52,10 +67,15 @@ body {
     object-fit: cover;
 }
 
-/* ===================== PÁGINA DE DETALHE ===================== */
+/* ===================== PÁGINA DE DETALHE DO PRODUTO ===================== */
 #preco-atual {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 700;
+    color: #00ffff;
+}
+
+#info-estoque {
+    font-size: 1.1rem;
 }
 
 /* ===================== CARRINHO E CHECKOUT ===================== */
@@ -63,6 +83,16 @@ body {
     background: rgba(255,255,255,0.05);
 }
 
+.cart-item {
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.total-box {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+}
+
+/* ===================== BOTÕES ===================== */
 .btn-primary {
     background: var(--primary-gradient);
     border: none;
@@ -70,42 +100,70 @@ body {
     font-weight: 700;
     border-radius: 50px;
     padding: 14px 32px;
+    font-size: 1.1rem;
 }
 
 .btn-primary:hover {
     transform: scale(1.05);
     box-shadow: var(--text-glow);
+    color: #000;
 }
 
-/* ===================== RESPONSIVIDADE ===================== */
+.btn-outline-light {
+    border-color: #fff;
+    color: #fff;
+}
 
-/* Mobile */
+.btn-outline-light:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* ===================== FORMULÁRIOS ===================== */
+.form-control, .form-select {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.form-control:focus, .form-select:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.3);
+    color: #fff;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+/* ===================== MENSAGENS ===================== */
+.alert {
+    border-radius: 12px;
+    border: none;
+}
+
+/* ===================== FOOTER ===================== */
+footer {
+    background: rgba(0, 0, 0, 0.9);
+    padding: 60px 0 30px;
+}
+
+/* ===================== RESPONSIVIDADE GERAL ===================== */
 @media (max-width: 576px) {
-    .product-card .card-img-top {
-        height: 200px;
-    }
-    
-    h1.display-5 {
-        font-size: 2rem;
-    }
-    
-    .navbar-brand {
-        font-size: 1.5rem;
-    }
+    .card-img-top { height: 200px; }
+    .navbar-brand { font-size: 1.6rem; }
+    #preco-atual { font-size: 1.9rem; }
+    .btn-primary { padding: 12px 24px; font-size: 1rem; }
 }
 
-/* Tablet */
 @media (max-width: 768px) {
-    .row.g-5 {
-        gap: 1.5rem;
-    }
+    .row.g-5 { gap: 1.5rem; }
 }
 
-/* Desktop grande */
 @media (min-width: 992px) {
-    .product-card {
-        min-height: 420px;
-    }
+    .product-card { min-height: 430px; }
 }
 
 /* ===================== EFEITOS EXTRAS ===================== */
@@ -122,23 +180,83 @@ body {
     50% { transform: scale(1.15); }
 }
 
-/* Formulários */
-.form-control {
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: #fff;
-    border-radius: 12px;
+/* ===================== UTILITÁRIOS ===================== */
+.cursor-pointer { cursor: pointer; }
+.shadow-custom { box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+/* =============================================
+   LOGIN & REGISTER - TELA QUASE CHEIA NO PC
+   Responsivo para Celular
+   ============================================= */
+
+.bg-gradient {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%);
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 20px;
 }
 
-.form-control:focus {
-    background: rgba(255,255,255,0.2);
-    box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.3);
-    color: #fff;
+/* =============================================
+   PERFIL DO USUÁRIO - ESTILO LINKEDIN (Mobile First)
+   ============================================= */
+
+.linkedin-avatar {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid #00d4ff;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    transition: all 0.3s ease;
 }
 
-/* Botão de adicionar no detalhe */
-#add-to-cart-btn {
-    background: var(--primary-gradient);
-    border: none;
-    font-weight: bold;
+@media (min-width: 576px) {
+    .linkedin-avatar {
+        width: 170px;
+        height: 170px;
+    }
+}
+
+@media (min-width: 768px) {
+    .linkedin-avatar {
+        width: 190px;
+        height: 190px;
+    }
+}
+
+.linkedin-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.linkedin-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.linkedin-photo-container:hover .linkedin-overlay {
+    opacity: 1;
+}
+
+.linkedin-overlay i {
+    font-size: 1.8rem;
+    color: white;
+    margin-bottom: 6px;
+}
+
+.linkedin-overlay p {
+    color: white;
+    font-size: 0.95rem;
+    margin: 0;
 }

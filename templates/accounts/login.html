@@ -1,43 +1,111 @@
 {% extends 'base.html' %}
-{% block title %}Login - SuaLoja{% endblock %}
+{% load static %}
+
+{% block title %}Entrar - SuaLoja{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-5 col-md-7">
-            <div class="card bg-dark border-0 shadow-lg p-5 text-white">
-                <div class="text-center mb-4">
-                    <h1 class="display-6 fw-bold text-glow">
-                        <i class="fas fa-sign-in-alt"></i> Entrar
-                    </h1>
-                    <p class="text-muted">Acesse sua conta e continue comprando</p>
-                </div>
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-10">
 
-                <form method="post">
-                    {% csrf_token %}
+            <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-5 overflow-hidden">
 
-                    {{ form.as_p }}
+                <div class="card-body p-5">
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 py-3 fw-bold">
-                        <i class="fas fa-sign-in-alt"></i> Entrar na minha conta
-                    </button>
-                </form>
+                    <div class="text-center mb-5">
+                        <div class="mx-auto mb-4 d-flex align-items-center justify-content-center"
+                             style="width: 90px; height: 90px; background: linear-gradient(135deg, #00ff88, #00b4ff); border-radius: 50%; box-shadow: 0 0 60px rgba(0, 255, 136, 0.6);">
+                            👋
+                        </div>
+                        <h1 class="display-4 fw-bold text-white mb-2">Olá, que bom te ver!</h1>
+                        <p class="lead text-light opacity-75">Faça login e volte a comprar com estilo</p>
+                    </div>
 
-                <div class="text-center mt-4">
-                    <p class="mb-2">
-                        <a href="{% url 'accounts:password_reset' %}" class="text-info fw-bold text-decoration-none">
-                            Esqueci minha senha
-                        </a>
-                    </p>
-                    <p>
-                        Ainda não tem conta? 
-                        <a href="{% url 'accounts:register' %}" class="text-info fw-bold text-decoration-none">
-                            Criar conta agora
-                        </a>
-                    </p>
+                    {% if request.GET.next and 'checkout' in request.GET.next %}
+                        <div class="alert alert-info rounded-4 text-center mb-4">
+                            <i class="fas fa-lock me-2"></i>
+                            Você precisa estar logado para <strong>finalizar a compra</strong>.<br>
+                            Após o login, você voltará automaticamente para o checkout.
+                        </div>
+                    {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="login-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">E-mail ou Usuário</label>
+                            <input type="text" name="username" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="Digite seu e-mail ou usuário" required autofocus>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">Senha</label>
+                            <input type="password" name="password" class="form-control form-input bg-dark text-white border-0 rounded-4 py-3" 
+                                   placeholder="••••••••••••" required>
+                        </div>
+
+                        <!-- reCAPTCHA v3 invisível -->
+                        <div class="g-recaptcha" data-sitekey="6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x" data-size="invisible"></div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 rounded-4 shadow-sm" id="login-btn">
+                            <i class="fas fa-sign-in-alt me-2"></i> ENTRAR AGORA
+                        </button>
+                    </form>
+
+                    <div class="d-flex align-items-center my-5">
+                        <hr class="flex-grow-1 border-secondary">
+                        <span class="px-4 text-light small fw-medium">OU ENTRE COM</span>
+                        <hr class="flex-grow-1 border-secondary">
+                    </div>
+
+                    <a href="{% url 'account_login' %}" 
+                       class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-3 py-3 rounded-4 fw-semibold">
+                        <i class="fab fa-google text-danger fs-4"></i>
+                        Continuar com Google
+                    </a>
+
+                    <div class="text-center mt-5 pt-3 border-top border-secondary">
+                        <p class="mb-0 text-light">
+                            Ainda não tem conta? 
+                            <a href="{% url 'accounts:register' %}" class="text-primary fw-bold text-decoration-none">
+                                Criar conta grátis →
+                            </a>
+                        </p>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Google reCAPTCHA v3 -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x"></script>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    grecaptcha.ready(function() {
+        grecaptcha.execute('6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x', {action: 'login'})
+            .then(function(token) {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'g-recaptcha-response';
+                input.value = token;
+                document.getElementById('login-form').appendChild(input);
+                document.getElementById('login-form').submit();
+            });
+    });
+});
+</script>
 {% endblock %}

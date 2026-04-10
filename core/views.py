@@ -10,6 +10,11 @@ from django.utils import timezone
 from django.conf import settings
 from core.utils.whatsapp import enviar_whatsapp
 
+# ==================== IMPORTS DO WEBHOOK ====================
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 
 # ==================== PÁGINAS PRINCIPAIS ====================
 def home(request):
@@ -44,7 +49,7 @@ def adicionar_ao_carrinho(request, variante_id):
 
     request.session['carrinho'] = carrinho
     messages.success(request, f'{variante.produto.nome} ({variante.tamanho} - {variante.cor}) adicionado ao carrinho!')
-    return redirect('core:ver_carrinho')
+    return redirect('core:carrinho')
 
 
 def ver_carrinho(request):
@@ -70,7 +75,33 @@ def remover_do_carrinho(request, variante_id):
         del carrinho[str(variante_id)]
         request.session['carrinho'] = carrinho
         messages.success(request, 'Item removido do carrinho!')
-    return redirect('core:ver_carrinho')
+    return redirect('core:carrinho')
+
+
+# ==================== ATUALIZAR QUANTIDADE ====================
+def atualizar_quantidade(request, variante_id):
+    """Atualiza a quantidade de um item no carrinho"""
+    carrinho = request.session.get('carrinho', {})
+    
+    if str(variante_id) in carrinho:
+        try:
+            nova_quantidade = int(request.POST.get('quantidade', 1))
+            
+            if nova_quantidade > 0:
+                carrinho[str(variante_id)]['quantidade'] = nova_quantidade
+                carrinho[str(variante_id)]['subtotal'] = carrinho[str(variante_id)]['preco'] * nova_quantidade
+                
+                request.session['carrinho'] = carrinho
+                request.session.modified = True
+                messages.success(request, 'Quantidade atualizada com sucesso!')
+            else:
+                messages.error(request, 'A quantidade deve ser pelo menos 1.')
+        except ValueError:
+            messages.error(request, 'Quantidade inválida.')
+    else:
+        messages.error(request, 'Item não encontrado no carrinho.')
+    
+    return redirect('core:carrinho')
 
 
 def aplicar_desconto(request):
@@ -90,8 +121,8 @@ def aplicar_desconto(request):
             messages.success(request, f'Cupom {codigo} aplicado!')
         else:
             messages.error(request, 'Cupom inválido ou expirado!')
-        return redirect('core:ver_carrinho')
-    return redirect('core:ver_carrinho')
+        return redirect('core:carrinho')
+    return redirect('core:carrinho')
 
 
 # ==================== CHECKOUT PROTEGIDO ====================
@@ -105,12 +136,15 @@ def checkout(request):
     subtotal_geral = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     desconto = request.session.get('desconto', 0)
     total_final = max(subtotal_geral - desconto, 0)
-    
+
+    profile = request.user.profile
+
     return render(request, 'core/checkout.html', {
         'carrinho': carrinho,
         'subtotal_geral': subtotal_geral,
         'desconto': desconto,
-        'total_final': total_final
+        'total_final': total_final,
+        'profile': profile,
     })
 
 
@@ -124,7 +158,7 @@ def criar_preferencia_mercadopago(request):
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     if total <= 0:
         messages.error(request, 'Valor inválido para pagamento.')
-        return redirect('core:ver_carrinho')
+        return redirect('core:carrinho')
 
     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
 
@@ -151,7 +185,6 @@ def criar_preferencia_mercadopago(request):
 
     try:
         preference_response = sdk.preference().create(preference_data)
-        print("✅ Resposta completa do Mercado Pago:", preference_response)
 
         if preference_response.get("status") == 201:
             init_point = preference_response["response"]["init_point"]
@@ -159,46 +192,47 @@ def criar_preferencia_mercadopago(request):
         else:
             error_msg = preference_response.get("response", preference_response)
             messages.error(request, f'Erro do Mercado Pago: {error_msg}')
-            return redirect('core:ver_carrinho')
+            return redirect('core:carrinho')
 
     except Exception as e:
         print("❌ Erro completo ao criar preferência:", str(e))
         messages.error(request, f'Erro ao gerar pagamento: {str(e)}')
-        return redirect('core:ver_carrinho')
+        return redirect('core:carrinho')
 
 
-# ==================== CHECKOUT SUCESSO - COM FIDELIDADE AUTOMÁTICA ====================
+# ==================== CHECKOUT SUCESSO ====================
 def checkout_sucesso(request):
     carrinho = request.session.get('carrinho', {})
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
 
-    # ==================== CRIAÇÃO DO PEDIDO + FIDELIDADE ====================
     if request.user.is_authenticated and carrinho:
-        # Cria o pedido no banco
         pedido = Pedido.objects.create(
             user=request.user,
             total=total,
             status='pago'
         )
 
-        # Atualiza fidelidade automaticamente
         profile = request.user.profile
         profile.total_pedidos += 1
-        profile.pontos_fidelidade += 10          # 10 pontos por compra
+        profile.pontos_fidelidade += 10
         profile.ultima_compra = timezone.now()
         profile.save()
 
-        # Mensagens automáticas de fidelidade
         if profile.total_pedidos == 3:
-            messages.success(request, '🎉 Parabéns! Você agora é cliente Fiel e ganhou 10% OFF na próxima compra!')
+            messages.success(request, '🎉 Parabéns! Você agora é cliente Fiel!')
         elif profile.total_pedidos >= 6:
-            messages.success(request, '👑 Você é VIP! Ganhou 15% OFF na próxima compra!')
+            messages.success(request, '👑 Você é VIP!')
 
-    # Limpa o carrinho
-    request.session['carrinho'] = {}
-    request.session['desconto'] = 0
+    # Limpeza forçada do carrinho
+    if 'carrinho' in request.session:
+        del request.session['carrinho']
+    if 'desconto' in request.session:
+        del request.session['desconto']
 
-    messages.success(request, 'Pagamento aprovado com sucesso! 🎉')
+    request.session.modified = True
+    request.session.save()
+
+    messages.success(request, '✅ Pagamento aprovado com sucesso! Seu carrinho foi limpo.')
 
     return render(request, 'core/checkout_sucesso.html')
 
@@ -213,7 +247,18 @@ def checkout_pendente(request):
     return render(request, 'core/checkout_pendente.html')
 
 
-# ==================== OTP - VALIDAÇÃO POR TELEFONE ====================
+# ==================== MEUS PEDIDOS ====================
+@login_required
+def meus_pedidos(request):
+    pedidos = Pedido.objects.filter(user=request.user).order_by('-criado_em')
+    context = {
+        'pedidos': pedidos,
+        'total_pedidos': pedidos.count(),
+    }
+    return render(request, 'core/meus_pedidos.html', context)
+
+
+# ==================== OTP ====================
 def gerar_otp(request):
     if request.method == 'POST':
         phone = request.POST.get('phone')
@@ -222,7 +267,6 @@ def gerar_otp(request):
             return render(request, 'core/gerar_otp.html')
 
         code = str(random.randint(100000, 999999))
-
         OTPCode.objects.create(
             user=request.user if request.user.is_authenticated else None,
             phone=phone,
@@ -278,11 +322,9 @@ Use o cupom **BEMVINDO15** e ganhe 15% OFF na sua primeira compra.
 Aproveite!
     """
     return enviar_whatsapp(str(user.profile.phone), mensagem.strip())
-# ==================== PROTEÇÃO EXTRA DO ADMIN (Senha Master) ====================
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.conf import settings
 
+
+# ==================== PROTEÇÃO EXTRA DO ADMIN ====================
 def admin_gate(request):
     if request.method == 'POST':
         senha_digitada = request.POST.get('master_password', '')
@@ -290,8 +332,50 @@ def admin_gate(request):
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
             messages.success(request, '✅ Acesso ao Admin liberado!')
-            return redirect('admin:login')   # ou 'gestao-secreta-jaques-2026/admin/'
+            return redirect('admin:login')
         else:
             messages.error(request, '❌ Senha master incorreta!')
     
     return render(request, 'core/admin_gate.html')
+
+
+# ==================== WEBHOOK MERCADO PAGO ====================
+@csrf_exempt
+def webhook_mercadopago(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            if data.get('type') == 'payment':
+                payment_id = data.get('data', {}).get('id')
+                
+                if payment_id:
+                    sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
+                    payment_info = sdk.payment().get(payment_id)
+                    
+                    if payment_info['status'] == 200:
+                        payment = payment_info['response']
+                        external_reference = payment.get('external_reference')
+                        
+                        if external_reference and 'pedido-' in external_reference:
+                            try:
+                                pedido_id = external_reference.split('-')[1]
+                                pedido = Pedido.objects.get(id=pedido_id)
+                                
+                                status_mp = payment['status']
+                                
+                                if status_mp == 'approved':
+                                    pedido.status = 'pago'
+                                    pedido.save()
+                                elif status_mp in ['in_process', 'pending']:
+                                    pedido.status = 'pendente'
+                                    pedido.save()
+                                elif status_mp in ['rejected', 'cancelled']:
+                                    pedido.status = 'pendente'
+                                    pedido.save()
+                            except Pedido.DoesNotExist:
+                                print(f"Pedido não encontrado: {external_reference}")
+        except Exception as e:
+            print("Erro no webhook Mercado Pago:", str(e))
+    
+    return HttpResponse(status=200)

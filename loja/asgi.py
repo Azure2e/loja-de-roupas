@@ -1,16 +1,32 @@
 """
 ASGI config for loja project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
+Configuração completa para WebSocket com Django Channels.
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "loja.settings")
+# Define o módulo de configurações do Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'loja.settings')
 
-application = get_asgi_application()
+django_asgi_app = get_asgi_application()
+
+# Importa o routing das notificações WebSocket
+import accounts.routing
+
+application = ProtocolTypeRouter({
+    # Rotas HTTP normais (páginas, admin, etc.)
+    "http": django_asgi_app,
+
+    # Rotas WebSocket (notificações em tempo real)
+    "websocket": AllowedHostsOriginValidator(
+        AuthMiddlewareStack(
+            URLRouter(
+                accounts.routing.websocket_urlpatterns
+            )
+        )
+    ),
+})

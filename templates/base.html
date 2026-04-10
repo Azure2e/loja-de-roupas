@@ -1,17 +1,25 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SuaLoja{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Seu CSS personalizado -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-dark text-white">
 
+<!-- ==================== NAVBAR ==================== -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-primary">
     <div class="container">
         <a class="navbar-brand fw-bold text-glow" href="{% url 'core:home' %}">
@@ -24,32 +32,42 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
-                
-                <!-- Link OTP -->
-                <li class="nav-item">
-                    <a href="{% url 'core:gerar_otp' %}" class="nav-link text-info fw-semibold">
-                        <i class="fas fa-shield-alt"></i> Verificar Telefone
-                    </a>
-                </li>
 
-                <li class="nav-item">
-                    <a href="{% url 'core:ver_carrinho' %}" class="nav-link position-relative">
-                        <i class="fas fa-shopping-cart"></i> Carrinho
-                        {% if request.session.carrinho %}
-                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-                                {{ request.session.carrinho|length }}
+                <!-- Carrinho -->
+                <li class="nav-item position-relative me-4">
+                    <a class="nav-link" href="{% url 'core:carrinho' %}">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                        {% if cart_items_count and cart_items_count > 0 %}
+                            <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle fs-6 px-2 py-1">
+                                {{ cart_items_count }}
                             </span>
                         {% endif %}
                     </a>
                 </li>
 
                 {% if user.is_authenticated %}
+                    <!-- Notificações -->
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-2x"></i>
+                            <span id="unread-count" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+                                  style="font-size: 0.65rem; padding: 2px 6px; display: none;">0</span>
+                        </a>
+                        <ul class="dropdown-menu bg-dark border-primary" style="width: 320px; max-height: 420px; overflow-y: auto;">
+                            <li class="dropdown-header fw-bold text-center py-2 border-bottom border-secondary">🛎️ Notificações</li>
+                            <div id="notifications-list"></div>
+                        </ul>
+                    </li>
+
+                    <!-- Menu do Usuário -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                             👤 {{ user.first_name|default:user.username }}
                         </a>
                         <ul class="dropdown-menu bg-dark border-primary">
-                            <!-- LOGOUT COM POST (corrigido) -->
+                            <li><a class="dropdown-item" href="{% url 'accounts:perfil' %}">👤 Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:meus_pedidos' %}">📦 Meus Pedidos</a></li>
+                            <li><hr class="dropdown-divider bg-secondary"></li>
                             <li>
                                 <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
                                     {% csrf_token %}
@@ -62,10 +80,10 @@
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">Entrar</a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm px-4 me-2">Entrar</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Criar Conta</a>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm px-4">Criar Conta</a>
                     </li>
                 {% endif %}
             </ul>
@@ -73,10 +91,20 @@
     </div>
 </nav>
 
+<!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
 <div class="container mt-4">
     {% block content %}{% endblock %}
 </div>
 
+<!-- ==================== FOOTER ==================== -->
+<footer class="bg-black py-5 mt-5 border-top border-primary">
+    <div class="container text-center text-muted small">
+        <p class="mb-1">&copy; 2026 SuaLoja - Todos os direitos reservados.</p>
+        <p class="mb-0">Feito com ❤️ em La Paz • Pagamento seguro via Mercado Pago</p>
+    </div>
+</footer>
+
+<!-- ==================== SCRIPTS ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/main.js' %}" defer></script>
 
