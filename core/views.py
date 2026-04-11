@@ -1,13 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.conf import settings
+
 from .models import Produto, Variante, Pedido
 from accounts.models import OTPCode
 import mercadopago
 import random
 from datetime import timedelta
 from django.utils import timezone
-from django.conf import settings
 from core.utils.whatsapp import enviar_whatsapp
 
 # ==================== IMPORTS DO WEBHOOK ====================
@@ -78,9 +80,7 @@ def remover_do_carrinho(request, variante_id):
     return redirect('core:carrinho')
 
 
-# ==================== ATUALIZAR QUANTIDADE ====================
 def atualizar_quantidade(request, variante_id):
-    """Atualiza a quantidade de um item no carrinho"""
     carrinho = request.session.get('carrinho', {})
     
     if str(variante_id) in carrinho:
@@ -125,7 +125,6 @@ def aplicar_desconto(request):
     return redirect('core:carrinho')
 
 
-# ==================== CHECKOUT PROTEGIDO ====================
 @login_required(login_url='accounts:login')
 def checkout(request):
     carrinho = request.session.get('carrinho', {})
@@ -148,7 +147,6 @@ def checkout(request):
     })
 
 
-# ==================== MERCADO PAGO ====================
 def criar_preferencia_mercadopago(request):
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
@@ -200,7 +198,6 @@ def criar_preferencia_mercadopago(request):
         return redirect('core:carrinho')
 
 
-# ==================== CHECKOUT SUCESSO ====================
 def checkout_sucesso(request):
     carrinho = request.session.get('carrinho', {})
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
@@ -223,7 +220,6 @@ def checkout_sucesso(request):
         elif profile.total_pedidos >= 6:
             messages.success(request, '👑 Você é VIP!')
 
-    # Limpeza forçada do carrinho
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
@@ -247,7 +243,6 @@ def checkout_pendente(request):
     return render(request, 'core/checkout_pendente.html')
 
 
-# ==================== MEUS PEDIDOS ====================
 @login_required
 def meus_pedidos(request):
     pedidos = Pedido.objects.filter(user=request.user).order_by('-criado_em')
@@ -258,7 +253,6 @@ def meus_pedidos(request):
     return render(request, 'core/meus_pedidos.html', context)
 
 
-# ==================== OTP ====================
 def gerar_otp(request):
     if request.method == 'POST':
         phone = request.POST.get('phone')
@@ -309,7 +303,6 @@ def verificar_otp(request):
     return render(request, 'core/verificar_otp.html')
 
 
-# ==================== MARKETING POR WHATSAPP ====================
 def enviar_boas_vindas(user):
     if not hasattr(user, 'profile') or not user.profile.phone:
         return False
@@ -327,16 +320,39 @@ Aproveite!
 # ==================== PROTEÇÃO EXTRA DO ADMIN ====================
 def admin_gate(request):
     if request.method == 'POST':
-        senha_digitada = request.POST.get('master_password', '')
+        senha_digitada = request.POST.get('senha', '').strip()
         
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
             messages.success(request, '✅ Acesso ao Admin liberado!')
-            return redirect('admin:login')
+            return redirect('gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, '❌ Senha master incorreta!')
     
     return render(request, 'core/admin_gate.html')
+
+
+# ==================== CRIAR SUPERUSUÁRIO TEMPORÁRIO ====================
+def create_superuser_view(request):
+    """Página temporária para criar superusuário (protegida pela senha master)"""
+    if request.method == 'POST':
+        master_password = request.POST.get('master_password', '').strip()
+        
+        if master_password == settings.ADMIN_MASTER_PASSWORD:
+            username = request.POST.get('username', 'admin')
+            email = request.POST.get('email', '')
+            password = request.POST.get('password', '')
+            
+            if User.objects.filter(username=username).exists():
+                messages.warning(request, f"Usuário '{username}' já existe!")
+            else:
+                user = User.objects.create_superuser(username=username, email=email, password=password)
+                messages.success(request, f"Superusuário '{username}' criado com sucesso!")
+                return redirect('gestao-secreta-jaques-2026/admin/')
+        else:
+            messages.error(request, "Senha master incorreta!")
+   
+    return render(request, 'core/create_superuser.html')
 
 
 # ==================== WEBHOOK MERCADO PAGO ====================
