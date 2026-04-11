@@ -82,25 +82,27 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS ====================
+# ==================== BANCO DE DADOS (VERSÃO MAIS ROBUSTA) ====================
 import dj_database_url
 import os
 
-# Força a leitura da DATABASE_URL do Render
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
-}
-
-# Debug (remove depois que funcionar)
-if not DATABASE_URL:
-    print("⚠️ AVISO: DATABASE_URL não encontrada! Usando SQLite local.")
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
+    }
+    print("✅ DATABASE_URL encontrada e configurada com sucesso!")
 else:
-    print("✅ DATABASE_URL encontrada e configurada.")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print("⚠️ AVISO: DATABASE_URL não encontrada! Usando SQLite local.")
+
+DATABASES['default']['CONN_MAX_AGE'] = 600
 
 # ==================== IDIOMA E FUSO HORÁRIO ====================
 LANGUAGE_CODE = 'pt-br'
@@ -183,7 +185,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# ==================== SEGURANÇA EXTRA (apenas em produção) ====================
+# ==================== SEGURANÇA EXTRA ====================
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
