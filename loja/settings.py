@@ -84,6 +84,10 @@ TEMPLATES = [
 
 # ==================== BANCO DE DADOS ====================
 import dj_database_url
+import os
+
+# Força a leitura da DATABASE_URL do Render
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 DATABASES = {
     'default': dj_database_url.config(
@@ -91,6 +95,12 @@ DATABASES = {
         conn_max_age=600,
     )
 }
+
+# Debug (remove depois que funcionar)
+if not DATABASE_URL:
+    print("⚠️ AVISO: DATABASE_URL não encontrada! Usando SQLite local.")
+else:
+    print("✅ DATABASE_URL encontrada e configurada.")
 
 # ==================== IDIOMA E FUSO HORÁRIO ====================
 LANGUAGE_CODE = 'pt-br'
