@@ -4,21 +4,23 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    # ===================== PORTA SECRETA (ACESSO AO ADMIN) =====================
+    path('', views.admin_gate, name='admin_gate'),
+
+    # ===================== ROTAS NORMAIS DA LOJA =====================
+    path('home/', views.home, name='home'),
     path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'),
     path('adicionar/<int:variante_id>/', views.adicionar_ao_carrinho, name='adicionar_carrinho'),
-    
+
     # ==================== CARRINHO ====================
     path('carrinho/', views.ver_carrinho, name='carrinho'),
     path('carrinho/remover/<int:variante_id>/', views.remover_do_carrinho, name='remover_carrinho'),
-    
-    # ✅ NOVA ROTA PARA ATUALIZAR QUANTIDADE
     path('carrinho/atualizar/<int:variante_id>/', views.atualizar_quantidade, name='atualizar_quantidade'),
-    
     path('carrinho/aplicar-desconto/', views.aplicar_desconto, name='aplicar_desconto'),
 
+    # ==================== CHECKOUT ====================
     path('checkout/', views.checkout, name='checkout'),
-    
+
     # ==================== Mercado Pago ====================
     path('checkout/mercadopago/', views.criar_preferencia_mercadopago, name='mercadopago'),
     path('checkout/sucesso/', views.checkout_sucesso, name='checkout_sucesso'),
