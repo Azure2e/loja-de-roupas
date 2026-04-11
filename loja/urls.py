@@ -3,19 +3,22 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.views import admin_gate   # ← Import direto da view
+from core.views import admin_gate, create_superuser_view
 
-# Personalização do painel
+# Personalização do painel administrativo
 admin.site.site_header = "SuaLoja - Painel Administrativo"
 admin.site.site_title = "SuaLoja Admin"
 admin.site.index_title = "Gerenciamento da Loja"
 
 urlpatterns = [
-    # ===================== PORTA SECRETA (AGORA DIRETA) =====================
+    # ===================== PORTA SECRETA =====================
     path('gestao-secreta-jaques-2026/', admin_gate, name='admin_gate'),
+    path('gestao-secreta-jaques-2026/criar-superusuario/', create_superuser_view, name='create_superuser'),
+    
+    # ===================== PAINEL ADMIN DJANGO =====================
     path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
 
-    # ===================== ROTAS NORMAIS =====================
+    # ===================== ROTAS NORMAIS DA LOJA =====================
     path('', include('core.urls', namespace='core')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
 
@@ -23,6 +26,6 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 ]
 
-# ===================== MÍDIA (desenvolvimento) =====================
+# ===================== ARQUIVOS DE MÍDIA (desenvolvimento) =====================
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
