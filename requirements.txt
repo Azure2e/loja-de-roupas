@@ -11,6 +11,7 @@ charset-normalizer==3.4.7
 constantly==23.10.4
 cryptography==46.0.6
 daphne==4.2.1
+dj-database-url==2.2.0
 Django==6.0.3
 django-allauth==65.15.1
 django-appconf==1.2.0
@@ -27,6 +28,7 @@ msgpack==1.1.2
 packaging==26.0
 phonenumbers==9.0.27
 pillow==11.1.0
+psycopg2-binary==2.9.11
 py-ubjson==0.16.1
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
@@ -48,4 +50,3 @@ ujson==5.12.0
 urllib3==2.6.3
 whitenoise==6.8.2
 zope.interface==8.2
-dj-database-url==2.2.0
