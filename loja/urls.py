@@ -13,9 +13,11 @@ admin.site.index_title = "Gerenciamento da Loja"
 urlpatterns = [
     # ===================== PORTA SECRETA =====================
     path('gestao-secreta-jaques-2026/', admin_gate, name='admin_gate'),
-    path('gestao-secreta-jaques-2026/criar-superusuario/', create_superuser_view, name='create_superuser'),
     
-    # ===================== PAINEL ADMIN DJANGO =====================
+    # ===================== CRIAR SUPERUSUÁRIO =====================
+    path('gestao-secreta-jaques-2026/criar-superusuario/', create_superuser_view, name='create_superuser'),
+
+    # ===================== PAINEL ADMIN DO DJANGO =====================
     path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
 
     # ===================== ROTAS NORMAIS DA LOJA =====================
@@ -26,6 +28,6 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 ]
 
-# ===================== ARQUIVOS DE MÍDIA (desenvolvimento) =====================
+# ===================== ARQUIVOS DE MÍDIA =====================
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
