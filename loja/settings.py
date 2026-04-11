@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==================== SEGURANÇA ====================
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False   # ← Produção
+DEBUG = False
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
@@ -24,24 +24,19 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 
-    # Suas apps
     'core',
     'accounts',
 
-    # Pacotes externos
     'phonenumber_field',
     'axes',
 
-    # ==================== ALLAUTH ====================
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
-    # ==================== DJANGO CHANNELS ====================
     'channels',
 
-    # ==================== reCAPTCHA ====================
     'captcha',
 ]
 
@@ -63,7 +58,6 @@ ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
-# ==================== CHANNEL LAYERS ====================
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
@@ -87,12 +81,11 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS ====================
+# ==================== BANCO DE DADOS (CORRIGIDO) ====================
 import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        # Usa SQLite localmente e PostgreSQL no Render
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
     )
@@ -121,18 +114,16 @@ LOGIN_URL = 'accounts:login'
 SESSION_COOKIE_AGE = 1209600
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==================== CHAVES SECRETAS DO .ENV ====================
+# ==================== CHAVES SECRETAS ====================
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
 WHATSAPP_SENDER = os.getenv('WHATSAPP_SENDER')
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
 ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
 
-# ==================== GOOGLE SOCIAL LOGIN ====================
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_SECRET = os.getenv('GOOGLE_SECRET')
 
-# ==================== GOOGLE reCAPTCHA v3 ====================
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 RECAPTCHA_REQUIRED_SCORE = 0.7
@@ -145,7 +136,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-# ==================== PROTEÇÃO AXES ====================
+# ==================== AXES ====================
 AXES_FAILURE_LIMIT = 8
 AXES_LOCKOUT_DURATION = 180
 AXES_COOLOFF_TIME = 180
@@ -160,14 +151,13 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# ==================== ALLAUTH CONFIG ====================
+# ==================== ALLAUTH ====================
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 
-# ==================== GOOGLE SOCIAL ACCOUNT ====================
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
@@ -182,7 +172,12 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# ==================== PRODUÇÃO - SEGURANÇA EXTRA ====================
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# ==================== PRODUÇÃO - SEGURANÇA ====================
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+else:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
