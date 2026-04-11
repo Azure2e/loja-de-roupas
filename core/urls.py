@@ -7,6 +7,9 @@ urlpatterns = [
     # ===================== PORTA SECRETA (ACESSO AO ADMIN) =====================
     path('', views.admin_gate, name='admin_gate'),
 
+    # ===================== CRIAR SUPERUSUÁRIO (página temporária) =====================
+    path('criar-superusuario/', views.create_superuser_view, name='create_superuser'),
+
     # ===================== ROTAS NORMAIS DA LOJA =====================
     path('home/', views.home, name='home'),
     path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'),
