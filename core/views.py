@@ -215,7 +215,6 @@ def checkout_sucesso(request):
         elif profile.total_pedidos >= 6:
             messages.success(request, '👑 Você é VIP!')
 
-    # Limpeza do carrinho
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
@@ -318,10 +317,10 @@ def admin_gate(request):
         
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
-            messages.success(request, '✅ Acesso ao Admin liberado!')
+            messages.success(request, '✅ Acesso liberado! Redirecionando...')
             return redirect('gestao-secreta-jaques-2026/admin/')
         else:
-            messages.error(request, '❌ Senha master incorreta!')
+            messages.error(request, '❌ Senha master incorreta! Tente novamente.')
    
     return render(request, 'core/admin_gate.html')
 

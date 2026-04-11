@@ -1,27 +1,49 @@
 {% extends 'base.html' %}
-{% block title %}Senha do Admin - SuaLoja{% endblock %}
+{% block title %}Acesso Administrativo - SuaLoja{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card bg-dark border-primary">
+        <div class="col-md-6 col-lg-4">
+
+            <div class="card bg-dark border-primary shadow-lg">
                 <div class="card-body p-5 text-center">
-                    <h2 class="text-glow mb-4"><i class="fas fa-key"></i> Acesso Restrito</h2>
-                    <p class="text-muted">Digite a senha master para entrar no painel administrativo</p>
+
+                    <h3 class="mb-4 text-white">
+                        <i class="fas fa-lock me-2"></i> Acesso Restrito
+                    </h3>
                     
+                    <p class="text-light mb-4">
+                        Digite a senha mestre para acessar o painel administrativo
+                    </p>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-4 text-center">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
                     <form method="post">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <input type="password" name="master_password" class="form-control form-control-lg text-center" 
-                                   placeholder="Senha Master" autocomplete="off" required>
+                        
+                        <div class="mb-4">
+                            <input type="password" 
+                                   name="senha" 
+                                   class="form-control form-control-lg text-center" 
+                                   placeholder="Senha mestre" 
+                                   required autofocus>
                         </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100">
-                            <i class="fas fa-unlock"></i> Entrar no Admin
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 py-3">
+                            <i class="fas fa-arrow-right me-2"></i> Entrar no Painel
                         </button>
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>
