@@ -342,7 +342,7 @@ def create_superuser_view(request):
             else:
                 user = User.objects.create_superuser(username=username, email=email, password=password)
                 messages.success(request, f"Superusuário '{username}' criado com sucesso!")
-                return redirect('gestao-secreta-jaques-2026/admin/')
+                return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, "Senha master incorreta!")
    
