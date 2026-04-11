@@ -58,6 +58,7 @@ ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
+# ==================== CHANNEL LAYERS ====================
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
@@ -81,7 +82,7 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS (CORRIGIDO) ====================
+# ==================== BANCO DE DADOS ====================
 import dj_database_url
 
 DATABASES = {
@@ -172,7 +173,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# ==================== PRODUÇÃO - SEGURANÇA ====================
+# ==================== SEGURANÇA EXTRA (apenas em produção) ====================
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
