@@ -3,26 +3,26 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from core.views import admin_gate
+from core.views import admin_gate   # ← Import direto da view
 
-# Personalização do painel administrativo
+# Personalização do painel
 admin.site.site_header = "SuaLoja - Painel Administrativo"
 admin.site.site_title = "SuaLoja Admin"
 admin.site.index_title = "Gerenciamento da Loja"
 
 urlpatterns = [
-    # ===================== ADMIN PROTEGIDO (URL SECRETA) =====================
+    # ===================== PORTA SECRETA (AGORA DIRETA) =====================
     path('gestao-secreta-jaques-2026/', admin_gate, name='admin_gate'),
     path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
 
-    # ===================== SUAS APPS =====================
+    # ===================== ROTAS NORMAIS =====================
     path('', include('core.urls', namespace='core')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
 
-    # ===================== ALLAUTH (Google, login social, etc.) =====================
+    # ===================== ALLAUTH =====================
     path('accounts/', include('allauth.urls')),
 ]
 
-# ===================== ARQUIVOS DE MÍDIA (apenas em desenvolvimento) =====================
+# ===================== MÍDIA (desenvolvimento) =====================
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
