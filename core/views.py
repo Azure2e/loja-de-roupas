@@ -314,18 +314,15 @@ Aproveite!
 def admin_gate(request):
     if request.method == 'POST':
         senha_digitada = request.POST.get('senha', '').strip()
-        
-        # === DEBUG TEMPORÁRIO ===
-        expected = getattr(settings, 'ADMIN_MASTER_PASSWORD', 'NÃO DEFINIDA')
-        messages.info(request, f'DEBUG → Senha digitada: "{senha_digitada}" | Senha esperada: "{expected}"')
-        
+       
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
-            messages.success(request, '✅ Acesso liberado! Redirecionando para o painel...')
-            return redirect('gestao-secreta-jaques-2026/admin/')
+            request.session.save()                    # Força salvar a sessão
+            messages.success(request, '✅ Acesso liberado!')
+            return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, '❌ Senha master incorreta! Tente novamente.')
-   
+  
     return render(request, 'core/admin_gate.html')
 
 
