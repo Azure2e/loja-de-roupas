@@ -6,6 +6,7 @@ from django.conf import settings
 
 from .models import Produto, Variante, Pedido
 from accounts.models import OTPCode
+
 import mercadopago
 import random
 from datetime import timedelta
@@ -58,11 +59,11 @@ def ver_carrinho(request):
     carrinho = request.session.get('carrinho', {})
     for item in carrinho.values():
         item['subtotal'] = item['preco'] * item['quantidade']
-    
+
     subtotal_geral = sum(item['subtotal'] for item in carrinho.values())
     desconto = request.session.get('desconto', 0)
     total_final = max(subtotal_geral - desconto, 0)
-    
+
     return render(request, 'core/carrinho.html', {
         'carrinho': carrinho,
         'subtotal_geral': subtotal_geral,
@@ -86,11 +87,9 @@ def atualizar_quantidade(request, variante_id):
     if str(variante_id) in carrinho:
         try:
             nova_quantidade = int(request.POST.get('quantidade', 1))
-            
             if nova_quantidade > 0:
                 carrinho[str(variante_id)]['quantidade'] = nova_quantidade
                 carrinho[str(variante_id)]['subtotal'] = carrinho[str(variante_id)]['preco'] * nova_quantidade
-                
                 request.session['carrinho'] = carrinho
                 request.session.modified = True
                 messages.success(request, 'Quantidade atualizada com sucesso!')
@@ -131,11 +130,10 @@ def checkout(request):
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
-    
+
     subtotal_geral = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     desconto = request.session.get('desconto', 0)
     total_final = max(subtotal_geral - desconto, 0)
-
     profile = request.user.profile
 
     return render(request, 'core/checkout.html', {
@@ -183,7 +181,6 @@ def criar_preferencia_mercadopago(request):
 
     try:
         preference_response = sdk.preference().create(preference_data)
-
         if preference_response.get("status") == 201:
             init_point = preference_response["response"]["init_point"]
             return redirect(init_point)
@@ -191,7 +188,6 @@ def criar_preferencia_mercadopago(request):
             error_msg = preference_response.get("response", preference_response)
             messages.error(request, f'Erro do Mercado Pago: {error_msg}')
             return redirect('core:carrinho')
-
     except Exception as e:
         print("❌ Erro completo ao criar preferência:", str(e))
         messages.error(request, f'Erro ao gerar pagamento: {str(e)}')
@@ -208,7 +204,6 @@ def checkout_sucesso(request):
             total=total,
             status='pago'
         )
-
         profile = request.user.profile
         profile.total_pedidos += 1
         profile.pontos_fidelidade += 10
@@ -220,16 +215,15 @@ def checkout_sucesso(request):
         elif profile.total_pedidos >= 6:
             messages.success(request, '👑 Você é VIP!')
 
+    # Limpeza do carrinho
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
         del request.session['desconto']
-
     request.session.modified = True
     request.session.save()
 
     messages.success(request, '✅ Pagamento aprovado com sucesso! Seu carrinho foi limpo.')
-
     return render(request, 'core/checkout_sucesso.html')
 
 
@@ -328,7 +322,7 @@ def admin_gate(request):
             return redirect('gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, '❌ Senha master incorreta!')
-    
+   
     return render(request, 'core/admin_gate.html')
 
 
@@ -393,5 +387,5 @@ def webhook_mercadopago(request):
                                 print(f"Pedido não encontrado: {external_reference}")
         except Exception as e:
             print("Erro no webhook Mercado Pago:", str(e))
-    
+   
     return HttpResponse(status=200)
