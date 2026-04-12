@@ -14,12 +14,8 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Cria o perfil automaticamente
             UserProfile.objects.get_or_create(user=user)
-            messages.success(
-                request,
-                '✅ Conta criada com sucesso! Agora faça login.'
-            )
+            messages.success(request, '✅ Conta criada com sucesso! Agora faça login.')
             return redirect('accounts:login')
     else:
         form = UserCreationForm()
@@ -33,27 +29,31 @@ def perfil(request):
     profile = request.user.profile
 
     if request.method == 'POST':
+        # ==================== REMOVER FOTO ====================
+        if 'remove_picture' in request.POST:
+            if profile.picture:
+                profile.picture.delete()           # deleta do Cloudinary
+                profile.picture = None
+                profile.save()
+                messages.success(request, '🗑️ Foto removida com sucesso!')
+                return redirect('accounts:perfil')
+
+        # ==================== ATUALIZAR PERFIL ====================
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
-      
+        
         if form.is_valid():
-            try:
-                saved_profile = form.save()
-               
-                if saved_profile.picture:
-                    print("✅ FOTO SALVA COM SUCESSO NO CLOUDINARY:", saved_profile.picture.url)
-                    messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva.')
-                else:
-                    print("❌ Foto NÃO foi salva (Cloudinary retornou vazio)")
-                    messages.warning(request, '⚠️ Perfil salvo, mas a foto não foi enviada.')
-                   
-            except Exception as e:
-                print("❌ ERRO NO UPLOAD DO CLOUDINARY:", str(e))
-                messages.error(request, f'❌ Erro ao salvar foto: {e}')
-               
+            saved_profile = form.save()
+            
+            if saved_profile.picture and request.FILES.get('picture'):
+                print("✅ FOTO SALVA NO CLOUDINARY:", saved_profile.picture.url)
+                messages.success(request, '✅ Perfil atualizado! Foto salva com sucesso.')
+            else:
+                messages.success(request, '✅ Perfil atualizado com sucesso!')
+            
             return redirect('accounts:perfil')
         else:
-            print("❌ Erros no formulário:", form.errors)
-            messages.error(request, '❌ Erro ao salvar o perfil.')
+            messages.error(request, '❌ Erro ao salvar o perfil. Verifique os campos.')
+
     else:
         form = UserProfileForm(instance=profile)
 
@@ -65,12 +65,10 @@ def perfil(request):
     return render(request, 'accounts/perfil.html', context)
 
 
-# ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
+# ==================== NOTIFICAÇÕES ====================
 @login_required
 def get_notifications(request):
-    """Retorna notificações não lidas em formato JSON"""
     notifications = request.user.notifications.filter(is_read=False)
-   
     data = {
         'unread_count': notifications.count(),
         'notifications': [
