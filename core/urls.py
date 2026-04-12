@@ -12,7 +12,7 @@ urlpatterns = [
 
     # ===================== ROTAS NORMAIS DA LOJA =====================
     path('home/', views.home, name='home'),
-    path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'),
+    path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'), # type: ignore
     path('adicionar/<int:variante_id>/', views.adicionar_ao_carrinho, name='adicionar_carrinho'),
 
     # ==================== CARRINHO ====================

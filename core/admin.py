@@ -22,8 +22,8 @@ class ProdutoAdmin(admin.ModelAdmin):
                 obj.imagem.url
             )
         return "Sem imagem"
-    imagem_preview.short_description = 'Imagem'
-    imagem_preview.allow_tags = True
+    imagem_preview.short_description = 'Imagem' # pyright: ignore[reportFunctionMemberAccess]
+    imagem_preview.allow_tags = True # pyright: ignore[reportFunctionMemberAccess]
 
 @admin.register(Variante)
 class VarianteAdmin(admin.ModelAdmin):

@@ -82,9 +82,8 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS (VERSÃO MAIS ROBUSTA) ====================
+# ==================== BANCO DE DADOS ====================
 import dj_database_url
-import os
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -116,8 +115,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# ==================== ARQUIVOS DE MÍDIA (FOTOS DE PERFIL) ====================
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/app/media'          # ← Caminho correto para o Disco Persistente no Render
 
 # ==================== AUTHENTICATION ====================
 LOGIN_REDIRECT_URL = 'core:home'

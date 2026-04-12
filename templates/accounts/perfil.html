@@ -23,21 +23,19 @@
                         {% endfor %}
                     {% endif %}
 
-                    <!-- FOTO DE PERFIL - ESTILO LINKEDIN -->
+                    <!-- FOTO DE PERFIL -->
                     <div class="text-center mb-5">
-                        <label for="foto-upload" class="linkedin-photo-container d-inline-block position-relative cursor-pointer">
-                            <div class="linkedin-avatar mx-auto">
+                        <label for="foto-upload" class="d-inline-block position-relative cursor-pointer">
+                            <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
                                 <img id="preview-img" 
-                                     src="{% if profile.user.profile_picture %}{{ profile.user.profile_picture.url }}{% else %}https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤{% endif %}" 
-                                     alt="Foto de perfil" class="rounded-circle">
-                                <div class="linkedin-overlay">
-                                    <i class="fas fa-camera"></i>
-                                    <p class="small mb-0">Alterar foto</p>
+                                     src="{% if profile.picture %}{{ profile.picture.url }}{% else %}https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤{% endif %}" 
+                                     alt="Foto de perfil" class="rounded-circle img-fluid border border-4 border-primary" style="width: 160px; height: 160px; object-fit: cover;">
+                                <div class="position-absolute bottom-0 start-50 translate-middle-x bg-dark bg-opacity-75 text-white rounded-circle px-3 py-1 small">
+                                    <i class="fas fa-camera me-1"></i> Alterar foto
                                 </div>
                             </div>
                         </label>
-                        <input type="file" id="foto-upload" name="profile_picture" accept="image/*" class="d-none">
-                        <button type="button" id="btn-remover-foto" class="btn btn-outline-danger btn-sm mt-3">Remover foto</button>
+                        <input type="file" id="foto-upload" name="picture" accept="image/*" class="d-none">
                     </div>
 
                     <!-- FIDELIDADE -->
@@ -46,7 +44,7 @@
                             <strong>Nível de Fidelidade:</strong> 
                             <span class="text-white">{{ profile.nivel_fidelidade }}</span>
                         </p>
-                        <p class="text-light small opacity-75 mb-0">
+                        <p class="text-light small opacity-75">
                             {{ profile.total_pedidos }} pedidos • {{ profile.pontos_fidelidade }} pontos
                         </p>
                     </div>
@@ -55,35 +53,36 @@
                         {% csrf_token %}
 
                         <div class="row g-4">
+                            <!-- E-MAIL (corrigido para celular) -->
                             <div class="col-12">
-                                <label class="form-label text-light small fw-medium">E-mail</label>
-                                <input type="email" class="form-control bg-dark text-white border-secondary" 
-                                       value="{{ request.user.email }}" readonly>
+                                <label class="form-label text-light fw-medium">E-mail</label>
+                                {{ form.email|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
 
+                            <!-- NOME COMPLETO -->
                             <div class="col-12">
-                                <label class="form-label text-light small fw-medium">Nome Completo</label>
-                                {{ form.nome_completo }}
+                                <label class="form-label text-light fw-medium">Nome Completo</label>
+                                {{ form.nome_completo|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
 
                             <div class="col-12 col-sm-6">
-                                <label class="form-label text-light small fw-medium">Telefone / WhatsApp</label>
-                                {{ form.phone }}
+                                <label class="form-label text-light fw-medium">Telefone / WhatsApp</label>
+                                {{ form.phone|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
 
                             <div class="col-12 col-sm-6">
-                                <label class="form-label text-light small fw-medium">Sexo</label>
-                                {{ form.sexo }}
+                                <label class="form-label text-light fw-medium">Sexo</label>
+                                {{ form.sexo|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label text-light small fw-medium">Estado Civil</label>
-                                {{ form.estado_civil }}
+                                <label class="form-label text-light fw-medium">Estado Civil</label>
+                                {{ form.estado_civil|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label text-light small fw-medium">Endereço Completo</label>
-                                {{ form.address }}
+                                <label class="form-label text-light fw-medium">Endereço Completo</label>
+                                {{ form.address|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
                             </div>
                         </div>
 

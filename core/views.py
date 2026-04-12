@@ -27,6 +27,15 @@ def home(request):
 
 def detalhe_produto(request, slug):
     produto = get_object_or_404(Produto, slug=slug)
+
+@property
+def variantes(self):
+    raise NotImplementedError
+
+@variantes.setter
+def variantes(self, value):
+    raise NotImplementedError
+
     variantes = produto.variantes.all()
     return render(request, 'core/detalhe_produto.html', {
         'produto': produto,
