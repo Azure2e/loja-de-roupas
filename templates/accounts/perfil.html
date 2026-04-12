@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Meu Perfil - SuaLoja{% endblock %}
+{% block title %}Meu Perfil{% endblock %}
 
 {% block content %}
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient py-4 py-md-5">
@@ -9,7 +9,6 @@
         <div class="col-12 col-md-10 col-lg-8 col-xl-7">
 
             <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-4 overflow-hidden">
-
                 <div class="card-body p-4 p-sm-5">
 
                     <div class="text-center mb-5">
@@ -23,21 +22,17 @@
                         {% endfor %}
                     {% endif %}
 
-                    <!-- FOTO DE PERFIL COM PREVIEW (Cloudinary) -->
+                    <!-- FOTO DE PERFIL -->
                     <div class="text-center mb-5">
                         <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                             <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
                                 {% if user.profile.picture %}
-                                    <img id="preview-img" 
-                                         src="{{ user.profile.picture.url }}"
-                                         alt="Foto de perfil" 
-                                         class="rounded-circle img-fluid border border-4 border-primary" 
+                                    <img id="preview-img" src="{{ user.profile.picture.url }}"
+                                         class="rounded-circle img-fluid border border-4 border-primary"
                                          style="width: 160px; height: 160px; object-fit: cover;">
                                 {% else %}
-                                    <img id="preview-img" 
-                                         src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
-                                         alt="Foto de perfil" 
-                                         class="rounded-circle img-fluid border border-4 border-primary" 
+                                    <img id="preview-img" src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
+                                         class="rounded-circle img-fluid border border-4 border-primary"
                                          style="width: 160px; height: 160px; object-fit: cover;">
                                 {% endif %}
                                 <div class="position-absolute bottom-0 start-50 translate-middle-x bg-dark bg-opacity-75 text-white rounded-circle px-3 py-1 small">
@@ -45,9 +40,7 @@
                                 </div>
                             </div>
                         </label>
-                        <div class="mt-2">
-                            {{ form.picture }}
-                        </div>
+                        <div class="mt-2">{{ form.picture }}</div>
                     </div>
 
                     <!-- FIDELIDADE -->
@@ -65,30 +58,25 @@
                         {% csrf_token %}
 
                         <div class="row g-4">
-                            <!-- NOME COMPLETO -->
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Nome Completo</label>
-                                {{ form.nome_completo|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
+                                {{ form.nome_completo }}
                             </div>
-
                             <div class="col-12 col-sm-6">
                                 <label class="form-label text-light fw-medium">Telefone / WhatsApp</label>
-                                {{ form.phone|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
+                                {{ form.phone }}
                             </div>
-
                             <div class="col-12 col-sm-6">
                                 <label class="form-label text-light fw-medium">Sexo</label>
-                                {{ form.sexo|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
+                                {{ form.sexo }}
                             </div>
-
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Estado Civil</label>
-                                {{ form.estado_civil|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
+                                {{ form.estado_civil }}
                             </div>
-
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Endereço Completo</label>
-                                {{ form.address|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
+                                {{ form.address }}
                             </div>
                         </div>
 
@@ -106,10 +94,8 @@
 
 {% block extra_js %}
 <script>
-    // Preview da foto antes de salvar (Cloudinary)
     const pictureInput = document.getElementById('id_picture');
     const previewImg = document.getElementById('preview-img');
-
     if (pictureInput) {
         pictureInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
