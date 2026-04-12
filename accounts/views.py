@@ -3,29 +3,53 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
+from django import forms  # ← novo import
 from django.http import JsonResponse
+
+from django.contrib.auth.models import User  # ← necessário para o form customizado
 
 from .models import UserProfile
 from .forms import UserProfileForm
 
-logger = logging.getLogger(__name__)  # ← adicione isso no topo
+logger = logging.getLogger(__name__)
 
 
+# ====================== FORMULÁRIO CUSTOMIZADO ======================
+class CustomUserCreationForm(UserCreationForm):
+    email = forms.EmailField(
+        required=True,
+        label='E-mail',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'seu@email.com'})
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Deixa os campos mais bonitos (Bootstrap)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
+
+
+# ====================== VIEWS ======================
 def register(request):
-    """Cadastro de novo usuário"""
+    """Cadastro de novo usuário com E-MAIL (obrigatório para pagamento)"""
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            # Cria o perfil automaticamente (mesmo que já exista)
+            user = form.save()                    # salva username, password e email
+            # Cria o perfil automaticamente
             UserProfile.objects.get_or_create(user=user)
+
             messages.success(
                 request,
                 '✅ Conta criada com sucesso! Agora faça login.'
             )
             return redirect('accounts:login')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
 
     return render(request, 'accounts/register.html', {'form': form})
 
@@ -56,7 +80,6 @@ def perfil(request):
                 logger.error(f"❌ Erro no upload Cloudinary: {e}", exc_info=True)
                 messages.error(request, f'❌ Erro ao salvar foto: {e}')
         else:
-            # Mostra os erros do formulário (muito útil!)
             logger.warning(f"❌ Erros no formulário de perfil: {form.errors}")
             messages.error(request, '❌ Erro ao salvar o perfil. Verifique os campos.')
     else:
