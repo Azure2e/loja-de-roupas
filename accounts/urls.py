@@ -9,8 +9,8 @@ urlpatterns = [
     path('login/', 
          auth_views.LoginView.as_view(
              template_name='accounts/login.html',
-             redirect_authenticated_user=True,           # Se já estiver logado, não mostra o form
-             success_url=reverse_lazy('core:home')       # ← FORÇA redirecionamento para a página da loja
+             redirect_authenticated_user=True,
+             success_url=reverse_lazy('core:home')
          ), 
          name='login'),
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
 
     # ==================== PERFIL DO USUÁRIO ====================
-    path('perfil/', views.perfil_view, name='perfil'),
+    path('perfil/', views.perfil, name='perfil'),          # ← CORRIGIDO (agora usa a nova função perfil)
 
     # ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
     path('notifications/', views.get_notifications, name='get_notifications'),
