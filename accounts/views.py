@@ -36,11 +36,20 @@ def perfil(request):
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
        
         if form.is_valid():
-            form.save()  # ← Cloudinary faz o upload automático
-            messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva no Cloudinary.')
+            saved_profile = form.save()
+            
+            # ==================== DEBUG CLOUDINARY ====================
+            if saved_profile.picture:
+                print("✅ FOTO SALVA COM SUCESSO:", saved_profile.picture.url)
+            else:
+                print("❌ Foto NÃO foi salva (Cloudinary falhou)")
+            # ==========================================================
+
+            messages.success(request, '✅ Perfil atualizado com sucesso!')
             return redirect('accounts:perfil')
         else:
-            messages.error(request, '❌ Erro ao salvar. Verifique os campos.')
+            print("❌ Erros no formulário:", form.errors)
+            messages.error(request, '❌ Erro ao salvar o perfil.')
     else:
         form = UserProfileForm(instance=profile)
 
