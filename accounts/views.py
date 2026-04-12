@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 from django.http import JsonResponse
 
 from .models import UserProfile
@@ -15,15 +14,12 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            
             # Cria o perfil automaticamente
             UserProfile.objects.get_or_create(user=user)
-            
             messages.success(
-                request, 
-                '✅ Conta criada com sucesso! Agora faça login para entrar na loja.'
+                request,
+                '✅ Conta criada com sucesso! Agora faça login.'
             )
-            
             return redirect('accounts:login')
     else:
         form = UserCreationForm()
@@ -32,26 +28,26 @@ def register(request):
 
 
 @login_required
-def perfil_view(request):
-    """Página de edição do perfil do usuário"""
+def perfil(request):
+    """Página de edição do perfil do usuário (Cloudinary)"""
     profile = request.user.profile
 
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        
+       
         if form.is_valid():
-            form.save()   # Cloudinary faz o upload automaticamente
+            form.save()  # ← Cloudinary faz o upload automático
             messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva no Cloudinary.')
             return redirect('accounts:perfil')
         else:
-            messages.error(request, '❌ Erro ao salvar o perfil. Verifique os campos.')
+            messages.error(request, '❌ Erro ao salvar. Verifique os campos.')
     else:
         form = UserProfileForm(instance=profile)
 
     context = {
         'form': form,
-        'user': request.user,           # ← usado no template
-        'profile': profile,             # ← para compatibilidade extra
+        'user': request.user,
+        'profile': profile,
     }
     return render(request, 'accounts/perfil.html', context)
 
@@ -61,7 +57,7 @@ def perfil_view(request):
 def get_notifications(request):
     """Retorna notificações não lidas em formato JSON"""
     notifications = request.user.notifications.filter(is_read=False)
-    
+   
     data = {
         'unread_count': notifications.count(),
         'notifications': [
