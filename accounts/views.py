@@ -34,18 +34,22 @@ def perfil(request):
 
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
-       
+      
         if form.is_valid():
-            saved_profile = form.save()
-            
-            # ==================== DEBUG CLOUDINARY ====================
-            if saved_profile.picture:
-                print("✅ FOTO SALVA COM SUCESSO:", saved_profile.picture.url)
-            else:
-                print("❌ Foto NÃO foi salva (Cloudinary falhou)")
-            # ==========================================================
-
-            messages.success(request, '✅ Perfil atualizado com sucesso!')
+            try:
+                saved_profile = form.save()
+               
+                if saved_profile.picture:
+                    print("✅ FOTO SALVA COM SUCESSO NO CLOUDINARY:", saved_profile.picture.url)
+                    messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva.')
+                else:
+                    print("❌ Foto NÃO foi salva (Cloudinary retornou vazio)")
+                    messages.warning(request, '⚠️ Perfil salvo, mas a foto não foi enviada.')
+                   
+            except Exception as e:
+                print("❌ ERRO NO UPLOAD DO CLOUDINARY:", str(e))
+                messages.error(request, f'❌ Erro ao salvar foto: {e}')
+               
             return redirect('accounts:perfil')
         else:
             print("❌ Erros no formulário:", form.errors)
