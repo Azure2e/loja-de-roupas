@@ -23,29 +23,41 @@
                         {% endfor %}
                     {% endif %}
 
-                    <!-- FOTO DE PERFIL -->
+                    <!-- FOTO DE PERFIL COM PREVIEW (Cloudinary) -->
                     <div class="text-center mb-5">
-                        <label for="foto-upload" class="d-inline-block position-relative cursor-pointer">
+                        <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                             <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
-                                <img id="preview-img" 
-                                     src="{% if profile.picture %}{{ profile.picture.url }}{% else %}https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤{% endif %}" 
-                                     alt="Foto de perfil" class="rounded-circle img-fluid border border-4 border-primary" style="width: 160px; height: 160px; object-fit: cover;">
+                                {% if user.profile.picture %}
+                                    <img id="preview-img" 
+                                         src="{{ user.profile.picture.url }}"
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle img-fluid border border-4 border-primary" 
+                                         style="width: 160px; height: 160px; object-fit: cover;">
+                                {% else %}
+                                    <img id="preview-img" 
+                                         src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle img-fluid border border-4 border-primary" 
+                                         style="width: 160px; height: 160px; object-fit: cover;">
+                                {% endif %}
                                 <div class="position-absolute bottom-0 start-50 translate-middle-x bg-dark bg-opacity-75 text-white rounded-circle px-3 py-1 small">
                                     <i class="fas fa-camera me-1"></i> Alterar foto
                                 </div>
                             </div>
                         </label>
-                        <input type="file" id="foto-upload" name="picture" accept="image/*" class="d-none">
+                        <div class="mt-2">
+                            {{ form.picture }}
+                        </div>
                     </div>
 
                     <!-- FIDELIDADE -->
                     <div class="text-center mb-4">
                         <p class="mb-1 text-light">
                             <strong>Nível de Fidelidade:</strong> 
-                            <span class="text-white">{{ profile.nivel_fidelidade }}</span>
+                            <span class="text-white">{{ user.profile.nivel_fidelidade }}</span>
                         </p>
                         <p class="text-light small opacity-75">
-                            {{ profile.total_pedidos }} pedidos • {{ profile.pontos_fidelidade }} pontos
+                            {{ user.profile.total_pedidos }} pedidos • {{ user.profile.pontos_fidelidade }} pontos
                         </p>
                     </div>
 
@@ -53,12 +65,6 @@
                         {% csrf_token %}
 
                         <div class="row g-4">
-                            <!-- E-MAIL (corrigido para celular) -->
-                            <div class="col-12">
-                                <label class="form-label text-light fw-medium">E-mail</label>
-                                {{ form.email|add_class:"form-control bg-dark text-white border-secondary fs-6 py-3" }}
-                            </div>
-
                             <!-- NOME COMPLETO -->
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Nome Completo</label>
@@ -96,4 +102,25 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview da foto antes de salvar (Cloudinary)
+    const pictureInput = document.getElementById('id_picture');
+    const previewImg = document.getElementById('preview-img');
+
+    if (pictureInput) {
+        pictureInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImg.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+</script>
 {% endblock %}
