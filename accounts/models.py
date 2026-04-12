@@ -13,6 +13,14 @@ class UserProfile(models.Model):
         related_name='profile'
     )
 
+    # ==================== FOTO DE PERFIL ====================
+    picture = models.ImageField(
+        upload_to='profile_pictures/',
+        blank=True,
+        null=True,
+        verbose_name="Foto de Perfil"
+    )
+
     # Dados básicos
     nome_completo = models.CharField(
         max_length=150,
@@ -72,9 +80,9 @@ class UserProfile(models.Model):
     @property
     def nivel_fidelidade(self):
         if self.total_pedidos >= 6:
-            return "VIP"
+            return "VIP 👑"
         elif self.total_pedidos >= 3:
-            return "Fiel"
+            return "Fiel ⭐"
         else:
             return "Iniciante"
 
@@ -108,7 +116,7 @@ class OTPCode(models.Model):
         verbose_name_plural = "Códigos OTP"
 
 
-# ==================== NOTIFICAÇÕES REAIS (NOVO) ====================
+# ==================== NOTIFICAÇÕES REAIS ====================
 class Notification(models.Model):
     user = models.ForeignKey(
         User, 
@@ -117,14 +125,11 @@ class Notification(models.Model):
     )
     title = models.CharField(max_length=100, verbose_name="Título")
     message = models.TextField(verbose_name="Mensagem")
-    
-    # Ícones Font Awesome (bell, gift, truck, star, etc.)
     icon = models.CharField(
         max_length=50, 
         default='bell', 
         verbose_name="Ícone"
     )
-    
     is_read = models.BooleanField(default=False, verbose_name="Lida")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Data")
 
@@ -144,4 +149,7 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
         UserProfile.objects.create(user=instance)
     else:
         # Atualiza o perfil caso o usuário já exista
-        instance.profile.save()
+        try:
+            instance.profile.save()
+        except UserProfile.DoesNotExist:
+            UserProfile.objects.create(user=instance)
