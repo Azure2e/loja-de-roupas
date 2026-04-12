@@ -46,6 +46,9 @@
                         </label>
                         <div class="mt-2">
                             {{ form.picture }}
+                            {% if form.picture.errors %}
+                                <div class="text-danger small mt-1">{{ form.picture.errors }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -67,22 +70,37 @@
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Nome Completo</label>
                                 {{ form.nome_completo }}
+                                {% if form.nome_completo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.nome_completo.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-12 col-sm-6">
                                 <label class="form-label text-light fw-medium">Telefone / WhatsApp</label>
                                 {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-12 col-sm-6">
                                 <label class="form-label text-light fw-medium">Sexo</label>
                                 {{ form.sexo }}
+                                {% if form.sexo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.sexo.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Estado Civil</label>
                                 {{ form.estado_civil }}
+                                {% if form.estado_civil.errors %}
+                                    <div class="text-danger small mt-1">{{ form.estado_civil.errors }}</div>
+                                {% endif %}
                             </div>
                             <div class="col-12">
                                 <label class="form-label text-light fw-medium">Endereço Completo</label>
                                 {{ form.address }}
+                                {% if form.address.errors %}
+                                    <div class="text-danger small mt-1">{{ form.address.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -103,14 +121,14 @@
     // Preview da foto
     const pictureInput = document.getElementById('id_picture');
     const previewImg = document.getElementById('preview-img');
-    if (pictureInput) {
+    if (pictureInput && previewImg) {
         pictureInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
+            if (file && window.FileReader) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     previewImg.src = event.target.result;
-                }
+                };
                 reader.readAsDataURL(file);
             }
         });
