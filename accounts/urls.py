@@ -5,7 +5,7 @@ from . import views
 app_name = 'accounts'
 
 urlpatterns = [
-    # ==================== LOGIN (REDIRECIONAMENTO CORRIGIDO) ====================
+    # ==================== LOGIN ====================
     path('login/', 
          auth_views.LoginView.as_view(
              template_name='accounts/login.html',
@@ -21,9 +21,9 @@ urlpatterns = [
     path('register/', views.register, name='register'),
 
     # ==================== PERFIL DO USUÁRIO ====================
-    path('perfil/', views.perfil, name='perfil'),          # ← CORRIGIDO (agora usa a nova função perfil)
+    path('perfil/', views.perfil, name='perfil'),   # ← CORRIGIDO (agora usa a função perfil)
 
-    # ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
+    # ==================== NOTIFICAÇÕES ====================
     path('notifications/', views.get_notifications, name='get_notifications'),
 
     # ==================== RESET DE SENHA ====================
