@@ -25,8 +25,17 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 
-# ==================== FORMULÁRIO DE PERFIL DO USUÁRIO ====================
+# ==================== FORMULÁRIO DE PERFIL DO USUÁRIO (com E-mail) ====================
 class UserProfileForm(forms.ModelForm):
+    # E-mail (somente leitura)
+    email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control bg-dark text-white border-secondary',
+            'readonly': True
+        })
+    )
+
     class Meta:
         model = UserProfile
         fields = [
@@ -66,3 +75,9 @@ class UserProfileForm(forms.ModelForm):
             'sexo': 'Sexo',
             'estado_civil': 'Estado Civil',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Preenche o e-mail atual do usuário
+        if self.instance and self.instance.user:
+            self.fields['email'].initial = self.instance.user.email
