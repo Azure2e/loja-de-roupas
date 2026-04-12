@@ -27,12 +27,16 @@
                         <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                             <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
                                 {% if user.profile.picture %}
-                                    <img id="preview-img" src="{{ user.profile.picture.url }}"
-                                         class="rounded-circle img-fluid border border-4 border-primary"
+                                    <img id="preview-img" 
+                                         src="{{ user.profile.picture.url }}"
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle img-fluid border border-4 border-primary" 
                                          style="width: 160px; height: 160px; object-fit: cover;">
                                 {% else %}
-                                    <img id="preview-img" src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
-                                         class="rounded-circle img-fluid border border-4 border-primary"
+                                    <img id="preview-img" 
+                                         src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
+                                         alt="Foto de perfil" 
+                                         class="rounded-circle img-fluid border border-4 border-primary" 
                                          style="width: 160px; height: 160px; object-fit: cover;">
                                 {% endif %}
                                 <div class="position-absolute bottom-0 start-50 translate-middle-x bg-dark bg-opacity-75 text-white rounded-circle px-3 py-1 small">
@@ -40,7 +44,9 @@
                                 </div>
                             </div>
                         </label>
-                        <div class="mt-2">{{ form.picture }}</div>
+                        <div class="mt-2">
+                            {{ form.picture }}
+                        </div>
                     </div>
 
                     <!-- FIDELIDADE -->
@@ -94,6 +100,7 @@
 
 {% block extra_js %}
 <script>
+    // Preview da foto
     const pictureInput = document.getElementById('id_picture');
     const previewImg = document.getElementById('preview-img');
     if (pictureInput) {
