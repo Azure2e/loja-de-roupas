@@ -26,12 +26,20 @@
                     <div class="text-center mb-5">
                         <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                             <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
-                                {% if user.profile and user.profile.picture %}
-                                    <img id="preview-img" 
-                                         src="{{ user.profile.picture.url }}"
-                                         alt="Foto de perfil" 
-                                         class="rounded-circle img-fluid border border-4 border-primary" 
-                                         style="width: 160px; height: 160px; object-fit: cover;">
+                                {% if user.profile %}
+                                    {% if user.profile.picture %}
+                                        <img id="preview-img" 
+                                             src="{{ user.profile.picture.url }}"
+                                             alt="Foto de perfil" 
+                                             class="rounded-circle img-fluid border border-4 border-primary" 
+                                             style="width: 160px; height: 160px; object-fit: cover;">
+                                    {% else %}
+                                        <img id="preview-img" 
+                                             src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
+                                             alt="Foto de perfil" 
+                                             class="rounded-circle img-fluid border border-4 border-primary" 
+                                             style="width: 160px; height: 160px; object-fit: cover;">
+                                    {% endif %}
                                 {% else %}
                                     <img id="preview-img" 
                                          src="https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤"
