@@ -30,54 +30,29 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = [
-            'picture',          # ← Campo de foto de perfil
+            'picture',
             'nome_completo',
             'phone',
-            'sexo',
-            'estado_civil',
             'address',
+            'sexo',
+            'estado_civil'
         ]
         widgets = {
             'picture': forms.ClearableFileInput(attrs={
                 'class': 'form-control',
-                'accept': 'image/*',
+                'accept': 'image/*'
             }),
-            'nome_completo': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Digite seu nome completo'
-            }),
-            'phone': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': '+55 11 99999-9999'
-            }),
+            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'sexo': forms.Select(attrs={'class': 'form-control'}),
             'estado_civil': forms.Select(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Rua, número, bairro, cidade...'
-            }),
         }
         labels = {
             'picture': 'Foto de Perfil',
             'nome_completo': 'Nome Completo',
             'phone': 'Telefone / WhatsApp',
+            'address': 'Endereço Completo',
             'sexo': 'Sexo',
             'estado_civil': 'Estado Civil',
-            'address': 'Endereço Completo',
         }
-
-    # Campo de e-mail (somente leitura)
-    email = forms.EmailField(
-        required=False,
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'readonly': True
-        })
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Preenche o e-mail atual do usuário
-        if self.instance and self.instance.user:
-            self.fields['email'].initial = self.instance.user.email
