@@ -75,7 +75,7 @@
                         {% endif %}
                     </div>
 
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="profile-form">
                         {% csrf_token %}
 
                         <div class="row g-4">
@@ -116,7 +116,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 rounded-4 mt-5">
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 rounded-4 mt-5" id="submit-btn">
                             💾 SALVAR ALTERAÇÕES
                         </button>
                     </form>
@@ -143,6 +143,16 @@
                 };
                 reader.readAsDataURL(file);
             }
+        });
+    }
+
+    // Loading state on form submit
+    const form = document.getElementById('profile-form');
+    const submitBtn = document.getElementById('submit-btn');
+    if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Salvando...';
         });
     }
 </script>
