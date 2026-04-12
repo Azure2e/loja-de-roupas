@@ -28,6 +28,6 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 ]
 
-# ===================== ARQUIVOS DE MÍDIA =====================
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# ===================== ARQUIVOS DE MÍDIA (FOTOS DE PERFIL) =====================
+# Sempre servir mídia (importante no Render com disco persistente)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
