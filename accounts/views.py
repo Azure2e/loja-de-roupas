@@ -37,12 +37,11 @@ def perfil_view(request):
     profile = request.user.profile
 
     if request.method == 'POST':
-        # ✅ CORRIGIDO: Agora estamos enviando os arquivos da foto
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         
         if form.is_valid():
-            form.save()
-            messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva.')
+            form.save()   # Cloudinary faz o upload automaticamente
+            messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva no Cloudinary.')
             return redirect('accounts:perfil')
         else:
             messages.error(request, '❌ Erro ao salvar o perfil. Verifique os campos.')
@@ -51,7 +50,8 @@ def perfil_view(request):
 
     context = {
         'form': form,
-        'profile': profile,
+        'user': request.user,           # ← usado no template
+        'profile': profile,             # ← para compatibilidade extra
     }
     return render(request, 'accounts/perfil.html', context)
 
