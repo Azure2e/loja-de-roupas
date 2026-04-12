@@ -21,7 +21,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
 
     # ==================== PERFIL DO USUÁRIO ====================
-    path('perfil/', views.perfil, name='perfil'),   # ← CORRIGIDO (agora usa a função perfil)
+    path('perfil/', views.perfil, name='perfil'),
 
     # ==================== NOTIFICAÇÕES ====================
     path('notifications/', views.get_notifications, name='get_notifications'),
