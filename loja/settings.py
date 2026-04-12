@@ -115,9 +115,20 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ==================== ARQUIVOS DE MÍDIA (FOTOS DE PERFIL) ====================
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/app/media'          # ← Caminho correto para o Disco Persistente no Render
+# ==================== CLOUDINARY (ARMAZENAMENTO DE FOTOS) ====================
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key = os.getenv('CLOUDINARY_API_KEY'),
+    api_secret = os.getenv('CLOUDINARY_API_SECRET'),
+    secure = True
+)
+
+# URL base do Cloudinary (CDN)
+MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
 
 # ==================== AUTHENTICATION ====================
 LOGIN_REDIRECT_URL = 'core:home'
