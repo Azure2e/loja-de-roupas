@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
+import cloudinary
 
+# Novo formulário simples que você pediu
+from django import forms
 from .models import UserProfile
-from .forms import UserProfileForm
 
 
 def register(request):
@@ -29,31 +31,34 @@ def perfil(request):
     profile = request.user.profile
 
     if request.method == 'POST':
-        # ==================== REMOVER FOTO ====================
-        if 'remove_picture' in request.POST:
-            if profile.picture:
-                profile.picture.delete()           # deleta do Cloudinary
-                profile.picture = None
-                profile.save()
-                messages.success(request, '🗑️ Foto removida com sucesso!')
-                return redirect('accounts:perfil')
-
-        # ==================== ATUALIZAR PERFIL ====================
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
-        
+      
         if form.is_valid():
-            saved_profile = form.save()
-            
-            if saved_profile.picture and request.FILES.get('picture'):
-                print("✅ FOTO SALVA NO CLOUDINARY:", saved_profile.picture.url)
-                messages.success(request, '✅ Perfil atualizado! Foto salva com sucesso.')
-            else:
-                messages.success(request, '✅ Perfil atualizado com sucesso!')
-            
+            try:
+                # Debug completo antes de salvar
+                print("📸 Arquivo enviado?", bool(request.FILES.get('picture')))
+                if request.FILES.get('picture'):
+                    print("📸 Nome do arquivo:", request.FILES['picture'].name)
+                    print("📸 Tamanho:", request.FILES['picture'].size, "bytes")
+
+                saved_profile = form.save()
+
+                if saved_profile.picture:
+                    print("✅ FOTO SALVA COM SUCESSO NO CLOUDINARY:", saved_profile.picture.url)
+                    messages.success(request, '✅ Perfil atualizado com sucesso! Foto salva.')
+                else:
+                    print("❌ Foto NÃO foi salva (Cloudinary retornou vazio)")
+                    print("   Cloud Name carregado:", cloudinary.config().cloud_name or "NENHUM")
+                    messages.warning(request, '⚠️ Perfil salvo, mas a foto não foi enviada para o Cloudinary.')
+                   
+            except Exception as e:
+                print("❌ ERRO NO UPLOAD DO CLOUDINARY:", str(e))
+                messages.error(request, f'❌ Erro ao salvar foto: {e}')
+               
             return redirect('accounts:perfil')
         else:
-            messages.error(request, '❌ Erro ao salvar o perfil. Verifique os campos.')
-
+            print("❌ Erros no formulário:", form.errors)
+            messages.error(request, '❌ Erro ao salvar o perfil.')
     else:
         form = UserProfileForm(instance=profile)
 
@@ -65,10 +70,25 @@ def perfil(request):
     return render(request, 'accounts/perfil.html', context)
 
 
-# ==================== NOTIFICAÇÕES ====================
+# ==================== NOVO FORMULÁRIO SIMPLES (como você pediu) ====================
+class PerfilForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['nome_completo', 'phone', 'address', 'picture']   # campos corrigidos
+        labels = {
+            'nome_completo': 'Nome Completo',
+            'phone': 'Contato / WhatsApp',
+            'address': 'Endereço',
+            'picture': 'Foto de Perfil',
+        }
+
+
+# ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
 @login_required
 def get_notifications(request):
+    """Retorna notificações não lidas em formato JSON"""
     notifications = request.user.notifications.filter(is_read=False)
+   
     data = {
         'unread_count': notifications.count(),
         'notifications': [
