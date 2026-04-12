@@ -4,17 +4,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==================== reCAPTCHA v3 (invisível) ====================
     const RECAPTCHA_SITE_KEY = '6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x';
 
-    // Carrega o reCAPTCHA apenas uma vez
     function loadRecaptcha() {
         if (window.grecaptcha) return;
-
         const script = document.createElement('script');
         script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
     }
-
     loadRecaptcha();
 
     // ==================== LÓGICA DE PRODUTOS (tamanho / cor) ====================
@@ -81,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (loginForm) {
         loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();   // impede envio imediato
+            e.preventDefault();
 
             if (!window.grecaptcha) {
                 alert('reCAPTCHA não carregou. Recarregue a página e tente novamente.');
@@ -90,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'login' })
                 .then(function (token) {
-                    // Adiciona o token ao formulário
                     let tokenInput = document.getElementById('recaptcha-token');
                     if (!tokenInput) {
                         tokenInput = document.createElement('input');
@@ -100,8 +96,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         loginForm.appendChild(tokenInput);
                     }
                     tokenInput.value = token;
-
-                    // Envia o formulário
                     loginForm.submit();
                 })
                 .catch(function (error) {
@@ -109,6 +103,45 @@ document.addEventListener('DOMContentLoaded', function () {
                     alert('Erro ao verificar reCAPTCHA. Tente novamente.');
                 });
         });
+    }
+
+    // ==================== UPLOAD E PREVIEW DE FOTO NO PERFIL ====================
+    const fileInput  = document.getElementById('foto-upload');
+    const previewImg = document.getElementById('preview-img');
+    const btnRemover = document.getElementById('btn-remover-foto');
+
+    if (fileInput && previewImg) {
+        // Clique na foto abre o seletor
+        previewImg.parentElement.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // Preview em tempo real
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Botão Remover Foto
+        if (btnRemover) {
+            btnRemover.addEventListener('click', function () {
+                fileInput.value = '';
+                previewImg.src = 'https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤';
+
+                // Feedback visual
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-info rounded-4 text-center mt-3';
+                alertDiv.textContent = 'Foto removida. Salve as alterações para confirmar.';
+                document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+                setTimeout(() => alertDiv.remove(), 4000);
+            });
+        }
     }
 
 });
