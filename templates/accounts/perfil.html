@@ -26,7 +26,7 @@
                     <div class="text-center mb-5">
                         <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                             <div class="mx-auto position-relative" style="width: 160px; height: 160px;">
-                                {% if user.profile.picture %}
+                                {% if user.profile and user.profile.picture %}
                                     <img id="preview-img" 
                                          src="{{ user.profile.picture.url }}"
                                          alt="Foto de perfil" 
@@ -54,13 +54,17 @@
 
                     <!-- FIDELIDADE -->
                     <div class="text-center mb-4">
-                        <p class="mb-1 text-light">
-                            <strong>Nível de Fidelidade:</strong> 
-                            <span class="text-white">{{ user.profile.nivel_fidelidade }}</span>
-                        </p>
-                        <p class="text-light small opacity-75">
-                            {{ user.profile.total_pedidos }} pedidos • {{ user.profile.pontos_fidelidade }} pontos
-                        </p>
+                        {% if user.profile %}
+                            <p class="mb-1 text-light">
+                                <strong>Nível de Fidelidade:</strong> 
+                                <span class="text-white">{{ user.profile.nivel_fidelidade }}</span>
+                            </p>
+                            <p class="text-light small opacity-75">
+                                {{ user.profile.total_pedidos }} pedidos • {{ user.profile.pontos_fidelidade }} pontos
+                            </p>
+                        {% else %}
+                            <p class="text-light small opacity-75">Perfil não configurado. Salve suas informações para ver fidelidade.</p>
+                        {% endif %}
                     </div>
 
                     <form method="post" enctype="multipart/form-data">
