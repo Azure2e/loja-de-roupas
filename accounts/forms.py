@@ -42,9 +42,19 @@ class UserProfileForm(forms.ModelForm):
                 'class': 'form-control',
                 'accept': 'image/*'
             }),
-            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'nome_completo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Digite seu nome completo'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+591 71234567'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Rua, número, bairro, cidade...'
+            }),
             'sexo': forms.Select(attrs={'class': 'form-control'}),
             'estado_civil': forms.Select(attrs={'class': 'form-control'}),
         }
