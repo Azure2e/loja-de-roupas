@@ -58,7 +58,8 @@
                         </a>
                         
                         {% if produto.variantes.exists %}
-                        <a href="{% url 'core:adicionar_carrinho' produto.variantes.first.id %}" 
+                        <!-- ✅ URL CORRIGIDA -->
+                        <a href="{% url 'core:adicionar_ao_carrinho' produto.variantes.first.id %}" 
                            class="btn btn-primary">
                             <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
                         </a>
