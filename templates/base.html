@@ -1,159 +1,108 @@
-{% extends 'base.html' %}
 {% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SuaLoja{% endblock %}</title>
+   
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+   
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+   
+    <!-- Seu CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+   
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-dark text-white">
 
-{% block title %}Meu Perfil{% endblock %}
-
-{% block content %}
-<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient py-4 py-md-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
-
-            <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-4 overflow-hidden">
-                <div class="card-body p-4 p-sm-5">
-
-                    <div class="text-center mb-5">
-                        <!-- TÍTULO "MEU PERFIL" COM BRANCO FORÇADO -->
-                        <h1 class="display-5 fw-bold mb-1 text-white"
-                            style="color: #ffffff !important; 
-                                   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);">
-                            Meu Perfil
-                        </h1>
-                        <p class="lead text-light opacity-75">Olá, <strong>{{ user.username }}</strong>!</p>
-                    </div>
-
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post" enctype="multipart/form-data" id="profile-form">
-                        {% csrf_token %}
-
-                        <div class="row g-4">
-
-                            <!-- FOTO DE PERFIL - ESTILO LINKEDIN -->
-                            <div class="col-12 text-center mb-4">
-                                <div class="position-relative mx-auto" style="width: 180px; height: 180px;">
-                                    {% if user.profile.picture %}
-                                        <img id="preview-img" src="{{ user.profile.picture.url }}"
-                                             alt="Foto de perfil" 
-                                             class="rounded-circle img-fluid border border-4 border-primary shadow"
-                                             style="width: 180px; height: 180px; object-fit: cover;">
-                                    {% else %}
-                                        <img id="preview-img" src="https://via.placeholder.com/180x180/1a0033/00d4ff?text=👤"
-                                             alt="Foto de perfil" 
-                                             class="rounded-circle img-fluid border border-4 border-primary shadow"
-                                             style="width: 180px; height: 180px; object-fit: cover;">
-                                    {% endif %}
-
-                                    <!-- Ícone de câmera estilo LinkedIn -->
-                                    <label for="id_picture" 
-                                           class="position-absolute bottom-0 end-0 translate-middle-x bg-dark border border-2 border-primary rounded-circle d-flex align-items-center justify-content-center shadow"
-                                           style="width: 48px; height: 48px; cursor: pointer; z-index: 10;">
-                                        <i class="fas fa-camera text-white" style="font-size: 1.3rem;"></i>
-                                    </label>
-                                </div>
-
-                                <div class="mt-3">
-                                    {{ form.picture }}
-                                    <small class="text-muted d-block">Tamanho recomendado: 500x500 px (máx. 2MB)</small>
-                                </div>
-
-                                <!-- Botão Remover Foto -->
-                                {% if user.profile.picture %}
-                                    <button type="submit" name="remove_picture" value="1" 
-                                            class="btn btn-outline-danger btn-sm mt-3"
-                                            onclick="return confirm('Tem certeza que deseja remover a foto de perfil?')">
-                                        🗑️ Remover Foto
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-glow" href="{% url 'core:home' %}">
+            🛍️ SuaLoja
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Carrinho -->
+                <li class="nav-item position-relative me-4">
+                    <a class="nav-link" href="{% url 'core:carrinho' %}">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                        {% if cart_items_count and cart_items_count > 0 %}
+                            <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle fs-6 px-2 py-1">
+                                {{ cart_items_count }}
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                    <!-- Notificações -->
+                    <li class="nav-item dropdown me-3">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-2x"></i>
+                            <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                0
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-primary" id="notification-list" style="width: 320px; max-height: 420px; overflow-y: auto;">
+                            <!-- Preenchido via JavaScript -->
+                        </ul>
+                    </li>
+                    <!-- Menu do Usuário -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            👤 {{ user.first_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu bg-dark border-primary">
+                            <li><a class="dropdown-item" href="{% url 'accounts:perfil' %}">👤 Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:meus_pedidos' %}">📦 Meus Pedidos</a></li>
+                            <li><hr class="dropdown-divider bg-secondary"></li>
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-white border-0 bg-transparent text-start w-100">
+                                        <i class="fas fa-sign-out-alt"></i> Sair
                                     </button>
-                                {% endif %}
-                            </div>
-
-                            <!-- FIDELIDADE -->
-                            <div class="col-12 text-center mb-4">
-                                <p class="mb-1 text-light">
-                                    <strong>Nível de Fidelidade:</strong> 
-                                    <span class="text-white">{{ user.profile.nivel_fidelidade }}</span>
-                                </p>
-                                <p class="text-light small opacity-75">
-                                    {{ user.profile.total_pedidos }} pedidos • {{ user.profile.pontos_fidelidade }} pontos
-                                </p>
-                            </div>
-
-                            <!-- E-MAIL -->
-                            <div class="col-12 mt-4 mb-5">
-                                <label class="form-label text-light fw-medium">E-mail</label>
-                                {{ form.email }}
-                            </div>
-
-                            <!-- Demais campos -->
-                            <div class="col-12">
-                                <label class="form-label text-light fw-medium">Nome Completo</label>
-                                {{ form.nome_completo }}
-                            </div>
-
-                            <div class="col-12 col-sm-6">
-                                <label class="form-label text-light fw-medium">Telefone / WhatsApp</label>
-                                {{ form.phone }}
-                            </div>
-
-                            <div class="col-12 col-sm-6">
-                                <label class="form-label text-light fw-medium">Sexo</label>
-                                {{ form.sexo }}
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label text-light fw-medium">Estado Civil</label>
-                                {{ form.estado_civil }}
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label text-light fw-medium">Endereço Completo</label>
-                                {{ form.address }}
-                            </div>
-
-                        </div>
-
-                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 rounded-4 mt-5" id="submit-btn">
-                            💾 SALVAR ALTERAÇÕES
-                        </button>
-                    </form>
-
-                </div>
-            </div>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm px-4 me-2">Entrar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm px-4">Criar Conta</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
     </div>
+</nav>
+
+<!-- ==================== CONTEÚDO PRINCIPAL ==================== -->
+<div class="container mt-4">
+    {% block content %}{% endblock %}
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    // Preview da foto
-    const pictureInput = document.getElementById('id_picture');
-    const previewImg = document.getElementById('preview-img');
+<!-- ==================== FOOTER ==================== -->
+<footer class="bg-black py-5 mt-5 border-top border-primary">
+    <div class="container text-center text-muted small">
+        <p class="mb-1">&copy; 2026 SuaLoja - Todos os direitos reservados.</p>
+        <p class="mb-0">Feito com ❤️ em La Paz • Pagamento seguro via Mercado Pago</p>
+    </div>
+</footer>
 
-    if (pictureInput && previewImg) {
-        pictureInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewImg.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+<!-- ==================== SCRIPTS ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}" defer></script>
 
-    // Loading no botão salvar
-    const form = document.getElementById('profile-form');
-    const submitBtn = document.getElementById('submit-btn');
-    if (form && submitBtn) {
-        form.addEventListener('submit', function() {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = 'Salvando... <span class="spinner-border spinner-border-sm"></span>';
-        });
-    }
-</script>
-{% endblock %}
+{% block extra_js %}{% endblock %}
+</body>
+</html>
