@@ -27,7 +27,7 @@
 
                         <div class="row g-4">
 
-                            <!-- FOTO DE PERFIL + E-MAIL ABAIXO -->
+                            <!-- FOTO DE PERFIL -->
                             <div class="col-12 text-center mb-4">
                                 <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                                     <div class="mx-auto position-relative" style="width: 180px; height: 180px;">
@@ -61,12 +61,6 @@
                                         🗑️ Remover Foto
                                     </button>
                                 {% endif %}
-
-                                <!-- E-MAIL (abaixo da foto) -->
-                                <div class="mt-4">
-                                    <label class="form-label text-light fw-medium">E-mail</label>
-                                    {{ form.email }}
-                                </div>
                             </div>
 
                             <!-- FIDELIDADE -->
@@ -78,6 +72,12 @@
                                 <p class="text-light small opacity-75">
                                     {{ user.profile.total_pedidos }} pedidos • {{ user.profile.pontos_fidelidade }} pontos
                                 </p>
+                            </div>
+
+                            <!-- E-MAIL (agora abaixo da fidelidade e acima do Nome Completo) -->
+                            <div class="col-12">
+                                <label class="form-label text-light fw-medium">E-mail</label>
+                                {{ form.email }}
                             </div>
 
                             <!-- Demais campos -->
