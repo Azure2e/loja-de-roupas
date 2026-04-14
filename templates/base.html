@@ -30,6 +30,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
+
                 <!-- Carrinho -->
                 <li class="nav-item position-relative me-4">
                     <a class="nav-link" href="{% url 'core:carrinho' %}">
@@ -41,6 +42,7 @@
                         {% endif %}
                     </a>
                 </li>
+
                 {% if user.is_authenticated %}
                     <!-- Notificações -->
                     <li class="nav-item dropdown me-3">
@@ -54,10 +56,21 @@
                             <!-- Preenchido via JavaScript -->
                         </ul>
                     </li>
-                    <!-- Menu do Usuário -->
+
+                    <!-- Foto de Perfil do Cliente Online (real) -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                            👤 {{ user.first_name|default:user.username }}
+                        <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" role="button" data-bs-toggle="dropdown">
+                            {% if user.profile.picture %}
+                                <img src="{{ user.profile.picture.url }}" 
+                                     alt="Foto de perfil" 
+                                     class="rounded-circle border border-primary shadow-sm"
+                                     style="width: 38px; height: 38px; object-fit: cover;">
+                            {% else %}
+                                <img src="https://via.placeholder.com/38x38/1a0033/00d4ff?text=👤" 
+                                     alt="Foto de perfil" 
+                                     class="rounded-circle border border-primary shadow-sm"
+                                     style="width: 38px; height: 38px; object-fit: cover;">
+                            {% endif %}
                         </a>
                         <ul class="dropdown-menu bg-dark border-primary">
                             <li><a class="dropdown-item" href="{% url 'accounts:perfil' %}">👤 Meu Perfil</a></li>
