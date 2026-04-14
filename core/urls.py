@@ -4,36 +4,34 @@ from . import views
 app_name = 'core'
 
 urlpatterns = [
-    # ===================== PORTA SECRETA (ACESSO AO ADMIN) =====================
-    path('', views.admin_gate, name='admin_gate'),
-
-    # ===================== CRIAR SUPERUSUÁRIO (página temporária) =====================
-    path('criar-superusuario/', views.create_superuser_view, name='create_superuser'),
-
-    # ===================== ROTAS NORMAIS DA LOJA =====================
-    path('home/', views.home, name='home'),
-    path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'), # type: ignore
-    path('adicionar/<int:variante_id>/', views.adicionar_ao_carrinho, name='adicionar_carrinho'),
+    # ==================== PÁGINAS PRINCIPAIS ====================
+    path('', views.home, name='home'),
+    path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'),
 
     # ==================== CARRINHO ====================
+    path('adicionar/<int:variante_id>/', views.adicionar_ao_carrinho, name='adicionar_ao_carrinho'),
     path('carrinho/', views.ver_carrinho, name='carrinho'),
-    path('carrinho/remover/<int:variante_id>/', views.remover_do_carrinho, name='remover_carrinho'),
-    path('carrinho/atualizar/<int:variante_id>/', views.atualizar_quantidade, name='atualizar_quantidade'),
-    path('carrinho/aplicar-desconto/', views.aplicar_desconto, name='aplicar_desconto'),
+    path('remover/<int:variante_id>/', views.remover_do_carrinho, name='remover_do_carrinho'),
+    path('atualizar/<int:variante_id>/', views.atualizar_quantidade, name='atualizar_quantidade'),
+    path('aplicar-desconto/', views.aplicar_desconto, name='aplicar_desconto'),
 
     # ==================== CHECKOUT ====================
     path('checkout/', views.checkout, name='checkout'),
+    path('criar-preferencia/', views.criar_preferencia_mercadopago, name='criar_preferencia_mercadopago'),
 
-    # ==================== Mercado Pago ====================
-    path('checkout/mercadopago/', views.criar_preferencia_mercadopago, name='mercadopago'),
+    # ==================== RETORNO DO MERCADO PAGO ====================
     path('checkout/sucesso/', views.checkout_sucesso, name='checkout_sucesso'),
     path('checkout/falha/', views.checkout_falha, name='checkout_falha'),
     path('checkout/pendente/', views.checkout_pendente, name='checkout_pendente'),
 
-    # ==================== MEUS PEDIDOS ====================
-    path('meus-pedidos/', views.meus_pedidos, name='meus_pedidos'),
+    # ==================== CONFIRMAÇÃO DE PEDIDO ====================
+    path('confirmacao/<int:pedido_id>/', views.confirmacao_pedido, name='confirmacao_pedido'),
 
-    # ==================== OTP ====================
+    # ==================== OUTRAS PÁGINAS ====================
+    path('meus-pedidos/', views.meus_pedidos, name='meus_pedidos'),
     path('gerar-otp/', views.gerar_otp, name='gerar_otp'),
     path('verificar-otp/', views.verificar_otp, name='verificar_otp'),
+
+    # ==================== WEBHOOK MERCADO PAGO ====================
+    path('webhook/mercadopago/', views.webhook_mercadopago, name='webhook_mercadopago'),
 ]
