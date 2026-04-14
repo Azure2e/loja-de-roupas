@@ -144,4 +144,36 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ==================== NOTIFICAÇÕES (Bell) ====================
+    function carregarNotificacoes() {
+        fetch('/accounts/notifications/')
+            .then(response => response.json())
+            .then(data => {
+                const countEl = document.getElementById('notification-count');
+                const listEl = document.getElementById('notification-list');
+
+                if (countEl) countEl.textContent = data.unread_count || 0;
+
+                let html = '';
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notif => {
+                        html += `
+                            <li class="dropdown-item border-bottom border-secondary py-2">
+                                <strong>${notif.title}</strong><br>
+                                <small class="text-light">${notif.message}</small><br>
+                                <small class="text-muted">${notif.time}</small>
+                            </li>`;
+                    });
+                } else {
+                    html = '<li class="dropdown-item text-center text-muted py-3">Nenhuma notificação</li>';
+                }
+                listEl.innerHTML = html;
+            })
+            .catch(() => {});
+    }
+
+    // Atualiza notificações a cada 8 segundos
+    setInterval(carregarNotificacoes, 8000);
+    carregarNotificacoes();   // Carrega imediatamente
+
 });

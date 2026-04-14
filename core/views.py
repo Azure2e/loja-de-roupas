@@ -27,15 +27,6 @@ def home(request):
 
 def detalhe_produto(request, slug):
     produto = get_object_or_404(Produto, slug=slug)
-
-@property
-def variantes(self):
-    raise NotImplementedError
-
-@variantes.setter
-def variantes(self, value):
-    raise NotImplementedError
-
     variantes = produto.variantes.all()
     return render(request, 'core/detalhe_produto.html', {
         'produto': produto,
@@ -207,12 +198,14 @@ def checkout_sucesso(request):
     carrinho = request.session.get('carrinho', {})
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
 
+    pedido = None
     if request.user.is_authenticated and carrinho:
         pedido = Pedido.objects.create(
             user=request.user,
             total=total,
             status='pago'
         )
+        # Atualiza perfil
         profile = request.user.profile
         profile.total_pedidos += 1
         profile.pontos_fidelidade += 10
@@ -224,6 +217,7 @@ def checkout_sucesso(request):
         elif profile.total_pedidos >= 6:
             messages.success(request, '👑 Você é VIP!')
 
+    # Limpa carrinho
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
@@ -231,7 +225,11 @@ def checkout_sucesso(request):
     request.session.modified = True
     request.session.save()
 
-    messages.success(request, '✅ Pagamento aprovado com sucesso! Seu carrinho foi limpo.')
+    # Se criou o pedido, redireciona para a página de confirmação
+    if pedido:
+        return redirect('core:confirmacao_pedido', pedido_id=pedido.id)
+
+    messages.success(request, '✅ Pagamento aprovado com sucesso!')
     return render(request, 'core/checkout_sucesso.html')
 
 
@@ -243,6 +241,20 @@ def checkout_falha(request):
 def checkout_pendente(request):
     messages.warning(request, 'Pagamento pendente. Aguarde a confirmação.')
     return render(request, 'core/checkout_pendente.html')
+
+
+# ==================== CONFIRMAÇÃO DE PEDIDO ====================
+@login_required
+def confirmacao_pedido(request, pedido_id):
+    """Página de confirmação mostrada após o pagamento ser aprovado"""
+    pedido = Pedido.objects.get(id=pedido_id, user=request.user)   # ← conforme você pediu
+
+    context = {
+        'pedido': pedido,
+        'pedido_numero': f"20260413-{pedido.id:04d}",   # ← número formatado que o template usa
+        'user': request.user,
+    }
+    return render(request, 'core/confirmacao_pedido.html', context)
 
 
 @login_required
@@ -326,7 +338,7 @@ def admin_gate(request):
        
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
-            request.session.save()                    # Força salvar a sessão
+            request.session.save()
             messages.success(request, '✅ Acesso liberado!')
             return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
@@ -335,9 +347,7 @@ def admin_gate(request):
     return render(request, 'core/admin_gate.html')
 
 
-# ==================== CRIAR SUPERUSUÁRIO TEMPORÁRIO ====================
 def create_superuser_view(request):
-    """Página temporária para criar superusuário (protegida pela senha master)"""
     if request.method == 'POST':
         master_password = request.POST.get('master_password', '').strip()
         

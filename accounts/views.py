@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from django import forms  # ← novo import
+from django import forms
 from django.http import JsonResponse
 
-from django.contrib.auth.models import User  # ← necessário para o form customizado
+from django.contrib.auth.models import User
 
 from .models import UserProfile
 from .forms import UserProfileForm
@@ -28,7 +28,6 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Deixa os campos mais bonitos (Bootstrap)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
 
@@ -39,8 +38,7 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()                    # salva username, password e email
-            # Cria o perfil automaticamente
+            user = form.save()
             UserProfile.objects.get_or_create(user=user)
 
             messages.success(
@@ -57,7 +55,6 @@ def register(request):
 @login_required
 def perfil(request):
     """Página de edição do perfil do usuário (Cloudinary)"""
-    # Segurança extra: garante que o perfil sempre existe
     profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
@@ -112,3 +109,38 @@ def get_notifications(request):
         ]
     }
     return JsonResponse(data)
+
+
+# ==================== CHECKOUT (Nova view adicionada) ====================
+@login_required
+def checkout(request):
+    """Página de Checkout Seguro com resumo do carrinho"""
+    
+    # Garante que o perfil existe
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+
+    # Pega o carrinho da sessão
+    carrinho = request.session.get('carrinho', {})
+
+    # Calcula os totais
+    subtotal_geral = 0
+    for item in carrinho.values():
+        subtotal_geral += float(item.get('subtotal', 0))
+
+    # Desconto (você pode mudar a lógica depois)
+    desconto = float(request.session.get('desconto', 0))
+
+    total_final = subtotal_geral - desconto
+
+    context = {
+        'user': request.user,
+        'profile': profile,           # ← usado no template como "profile"
+        'carrinho': carrinho,
+        'subtotal_geral': subtotal_geral,
+        'desconto': desconto,
+        'total_final': total_final,
+        # Endereço completo (opcional - já temos no profile)
+        'endereco_completo': getattr(profile, 'address', 'Nenhum endereço cadastrado'),
+    }
+
+    return render(request, 'core/checkout.html', context)

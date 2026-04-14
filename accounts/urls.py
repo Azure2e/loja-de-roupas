@@ -1,50 +1,36 @@
-from django.urls import path, reverse_lazy
-from django.contrib.auth import views as auth_views
+from django.urls import path
 from . import views
 
-app_name = 'accounts'
+app_name = 'core'
 
 urlpatterns = [
-    # ==================== LOGIN ====================
-    path('login/', 
-         auth_views.LoginView.as_view(
-             template_name='accounts/login.html',
-             redirect_authenticated_user=True,
-             success_url=reverse_lazy('core:home')
-         ), 
-         name='login'),
+    path('', views.home, name='home'),
+    path('produto/<slug:slug>/', views.detalhe_produto, name='detalhe_produto'),
+    
+    # ==================== CARRINHO ====================
+    path('adicionar/<int:variante_id>/', views.adicionar_ao_carrinho, name='adicionar_ao_carrinho'),
+    path('carrinho/', views.ver_carrinho, name='carrinho'),
+    path('remover/<int:variante_id>/', views.remover_do_carrinho, name='remover_do_carrinho'),
+    path('atualizar/<int:variante_id>/', views.atualizar_quantidade, name='atualizar_quantidade'),
+    path('aplicar-desconto/', views.aplicar_desconto, name='aplicar_desconto'),
 
-    # ==================== LOGOUT ====================
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    # ==================== CHECKOUT ====================
+    path('checkout/', views.checkout, name='checkout'),
+    path('criar-preferencia/', views.criar_preferencia_mercadopago, name='criar_preferencia_mercadopago'),
 
-    # ==================== CADASTRO ====================
-    path('register/', views.register, name='register'),
+    # ==================== PÁGINAS DE RETORNO DO MERCADO PAGO ====================
+    path('checkout/sucesso/', views.checkout_sucesso, name='checkout_sucesso'),
+    path('checkout/falha/', views.checkout_falha, name='checkout_falha'),
+    path('checkout/pendente/', views.checkout_pendente, name='checkout_pendente'),
 
-    # ==================== PERFIL DO USUÁRIO ====================
-    path('perfil/', views.perfil, name='perfil'),
+    # ==================== CONFIRMAÇÃO DE PEDIDO ====================
+    path('confirmacao/<int:pedido_id>/', views.confirmacao_pedido, name='confirmacao_pedido'),
 
-    # ==================== NOTIFICAÇÕES ====================
-    path('notifications/', views.get_notifications, name='get_notifications'),
+    # ==================== OUTRAS PÁGINAS ====================
+    path('meus-pedidos/', views.meus_pedidos, name='meus_pedidos'),
+    path('gerar-otp/', views.gerar_otp, name='gerar_otp'),
+    path('verificar-otp/', views.verificar_otp, name='verificar_otp'),
 
-    # ==================== RESET DE SENHA ====================
-    path('password-reset/', 
-         auth_views.PasswordResetView.as_view(
-             template_name='accounts/password_reset.html',
-             email_template_name='accounts/password_reset_email.html',
-             subject_template_name='accounts/password_reset_subject.txt',
-             success_url=reverse_lazy('accounts:password_reset_done')
-         ), 
-         name='password_reset'),
-
-    path('password-reset/done/', 
-         auth_views.PasswordResetDoneView.as_view(template_name='accounts/password_reset_done.html'), 
-         name='password_reset_done'),
-
-    path('password-reset/<uidb64>/<token>/', 
-         auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html'), 
-         name='password_reset_confirm'),
-
-    path('password-reset/complete/', 
-         auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'), 
-         name='password_reset_complete'),
+    # ==================== WEBHOOK MERCADO PAGO ====================
+    path('webhook/mercadopago/', views.webhook_mercadopago, name='webhook_mercadopago'),
 ]

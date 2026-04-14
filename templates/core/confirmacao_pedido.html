@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pedido Confirmado - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-7">
+
+            <!-- ==================== SUCESSO PRINCIPAL ==================== -->
+            <div class="text-center mb-5">
+                <div class="mx-auto mb-4 d-flex align-items-center justify-content-center bg-success rounded-circle" 
+                     style="width: 110px; height: 110px;">
+                    <i class="fas fa-check-circle fa-5x text-white"></i>
+                </div>
+                
+                <h1 class="display-4 fw-bold text-success mb-2">
+                    Pedido Confirmado!
+                </h1>
+                <p class="lead text-white-50 fs-4">
+                    Obrigado, <strong>{{ pedido.user.first_name|default:user.first_name|default:'Cliente' }}</strong>! 🎉
+                </p>
+                <p class="text-muted">
+                    Seu pedido foi recebido e está sendo processado.
+                </p>
+            </div>
+
+            <!-- ==================== NÚMERO DO PEDIDO ==================== -->
+            <div class="card bg-dark border-success shadow-sm mb-5 text-center">
+                <div class="card-body py-4">
+                    <small class="text-success fw-bold text-uppercase">Número do pedido</small>
+                    <h2 class="text-white mb-0">#ORD-{{ pedido.numero|default:pedido.id|default:'20260413-7482' }}</h2>
+                    <small class="text-muted">
+                        Realizado em {{ pedido.criado_em|date:"d 'de' F 'de' Y" }} às {{ pedido.criado_em|time:"H:i" }}
+                    </small>
+                </div>
+            </div>
+
+            <div class="row g-5">
+
+                <!-- ==================== RESUMO DO PEDIDO ==================== -->
+                <div class="col-lg-7">
+                    <div class="card bg-dark border-primary shadow-sm">
+                        <div class="card-header bg-black border-primary py-3">
+                            <h5 class="mb-0">🛒 Resumo do seu Pedido</h5>
+                        </div>
+                        <div class="card-body">
+
+                            {% for item in pedido.itens.all %}
+                            <div class="d-flex gap-3 mb-4">
+                                {% if item.variante and item.variante.imagem %}
+                                    <img src="{{ item.variante.imagem.url }}" alt="{{ item.nome }}" 
+                                         class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                {% else %}
+                                    <img src="{% static 'img/produtos/bermuda-de-praia-estampada.jpg' %}" 
+                                         alt="{{ item.nome }}" 
+                                         class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                {% endif %}
+                                
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ item.nome }}</h6>
+                                    <div class="text-light small">
+                                        Tamanho: <strong>{{ item.tamanho }}</strong> • 
+                                        Cor: <strong>{{ item.cor }}</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-3">
+                                        <span class="text-muted">{{ item.quantidade }} unidade{{ item.quantidade|pluralize:"s" }}</span>
+                                        <span class="fw-bold">R$ {{ item.subtotal|floatformat:2 }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <hr class="border-secondary">
+
+                            <!-- Totais -->
+                            <div class="d-flex justify-content-between py-2">
+                                <span>Subtotal</span>
+                                <span>R$ {{ pedido.subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2">
+                                <span>Frete</span>
+                                <span class="text-success">Grátis</span>
+                            </div>
+                            <hr class="border-secondary">
+                            <div class="d-flex justify-content-between fs-4">
+                                <strong>Total pago</strong>
+                                <strong class="text-success">R$ {{ pedido.total|floatformat:2 }}</strong>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top border-secondary text-center">
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="fas fa-credit-card me-1"></i>
+                                    Pago via Mercado Pago
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================== INFORMAÇÕES DO CLIENTE E ENTREGA ==================== -->
+                <div class="col-lg-5">
+                    <div class="card bg-dark border-primary shadow-sm h-100">
+                        <div class="card-header bg-black border-primary py-3">
+                            <h5 class="mb-0">👤 Informações do Pedido</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-4">
+                                <strong>Nome:</strong><br>
+                                <span class="fs-5">{{ pedido.user.get_full_name|default:pedido.user.first_name }}</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <strong>E-mail:</strong><br>
+                                <span>{{ pedido.user.email }}</span>
+                            </div>
+
+                            <div class="mb-4">
+                                <strong>Telefone / WhatsApp:</strong><br>
+                                <span>{{ pedido.telefone|default:'+55 68 99923-6863' }}</span>
+                            </div>
+
+                            <hr class="border-secondary">
+
+                            <strong>Endereço de Entrega:</strong><br>
+                            <span class="text-light">
+                                {{ pedido.endereco|default:'BR-317 km 81 - Estrada do Pacífico, La Paz - BO' }}
+                            </span>
+
+                            <div class="alert alert-info border-info rounded-4 small mt-4">
+                                <i class="fas fa-truck me-2"></i>
+                                <strong>Previsão de entrega:</strong><br>
+                                {{ pedido.previsao_entrega|default:'18 a 22 de abril de 2026' }}
+                            </div>
+
+                            <p class="text-muted small mt-4">
+                                Você receberá um e-mail com todos os detalhes do pedido e o link para acompanhar o status.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== BOTÕES DE AÇÃO ==================== -->
+            <div class="d-grid d-md-flex justify-content-md-center gap-3 mt-5">
+                <a href="{% url 'core:meus_pedidos' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-4">
+                    📦 Acompanhar meu pedido
+                </a>
+                
+                <a href="{% url 'core:home' %}" class="btn btn-outline-light btn-lg px-5 py-3 rounded-4">
+                    🛍️ Continuar comprando
+                </a>
+            </div>
+
+            <div class="text-center mt-4 text-muted small">
+                Qualquer dúvida? Entre em contato pelo WhatsApp <strong>+55 68 99923-6863</strong>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animação de confetes ao carregar a página
+    function confettiEffect() {
+        const colors = ['#00d4ff', '#00ff88', '#ffd700'];
+        for (let i = 0; i < 80; i++) {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.opacity = Math.random();
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            confetti.style.zIndex = '9999';
+            document.body.appendChild(confetti);
+
+            const duration = Math.random() * 3000 + 2000;
+            confetti.animate([
+                { transform: `translateY(0) rotate(0deg)` },
+                { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)` }
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            });
+
+            setTimeout(() => confetti.remove(), duration);
+        }
+    }
+    window.onload = confettiEffect;
+</script>
+{% endblock %}
