@@ -27,13 +27,7 @@
 
                         <div class="row g-4">
 
-                            <!-- E-MAIL (somente leitura) -->
-                            <div class="col-12">
-                                <label class="form-label text-light fw-medium">E-mail</label>
-                                {{ form.email }}
-                            </div>
-
-                            <!-- FOTO DE PERFIL -->
+                            <!-- FOTO DE PERFIL + E-MAIL ABAIXO -->
                             <div class="col-12 text-center mb-4">
                                 <label for="id_picture" class="d-inline-block position-relative cursor-pointer">
                                     <div class="mx-auto position-relative" style="width: 180px; height: 180px;">
@@ -67,6 +61,12 @@
                                         🗑️ Remover Foto
                                     </button>
                                 {% endif %}
+
+                                <!-- E-MAIL (abaixo da foto) -->
+                                <div class="mt-4">
+                                    <label class="form-label text-light fw-medium">E-mail</label>
+                                    {{ form.email }}
+                                </div>
                             </div>
 
                             <!-- FIDELIDADE -->
