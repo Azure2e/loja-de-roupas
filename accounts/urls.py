@@ -23,6 +23,9 @@ urlpatterns = [
     # ==================== PERFIL DO USUÁRIO ====================
     path('perfil/', views.perfil, name='perfil'),
 
+    # ==================== NOVO: PAINEL DE SUPORTE (Chat da Loja) ====================
+    path('suporte/', views.support_chat, name='support_chat'),
+
     # ==================== NOTIFICAÇÕES ====================
     path('notifications/', views.get_notifications, name='get_notifications'),
 
