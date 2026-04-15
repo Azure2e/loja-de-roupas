@@ -380,7 +380,7 @@ def painel_suporte(request):
         is_active=True
     ).order_by('-last_login')
 
-    # Template está dentro do app accounts
+    # Template correto (está dentro do app accounts)
     return render(request, 'accounts/suporte.html', {
         'customers': customers,
     })
