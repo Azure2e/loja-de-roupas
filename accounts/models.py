@@ -14,14 +14,14 @@ class UserProfile(models.Model):
         related_name='profile'
     )
 
-    # ==================== FOTO DE PERFIL (Cloudinary) ====================
+    # Foto de Perfil
     picture = CloudinaryField(
         blank=True,
         null=True,
         verbose_name="Foto de Perfil"
     )
 
-    # ==================== DADOS DO PERFIL ====================
+    # Dados Pessoais
     nome_completo = models.CharField(
         max_length=150,
         blank=True,
@@ -32,7 +32,7 @@ class UserProfile(models.Model):
         blank=True,
         null=True,
         verbose_name="Telefone / WhatsApp",
-        help_text="Exemplo: +5511999999999 (Brasil) ou +59171234567 (Bolívia)"
+        help_text="Exemplo: +59171234567"
     )
 
     address = models.TextField(
@@ -71,7 +71,7 @@ class UserProfile(models.Model):
         verbose_name="Estado Civil"
     )
 
-    # ==================== FIDELIDADE ====================
+    # Fidelidade
     total_pedidos = models.PositiveIntegerField(default=0, verbose_name="Total de Pedidos")
     pontos_fidelidade = models.PositiveIntegerField(default=0, verbose_name="Pontos de Fidelidade")
     ultima_compra = models.DateTimeField(null=True, blank=True, verbose_name="Última Compra")
@@ -91,6 +91,22 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = "Perfil do Usuário"
         verbose_name_plural = "Perfis dos Usuários"
+
+
+# ==================== CHAT ONLINE (Cliente ↔ Loja) ====================
+class ChatMessage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chat_messages")
+    message = models.TextField()
+    is_from_store = models.BooleanField(default=False)   # True = resposta da loja
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Mensagem do Chat"
+        verbose_name_plural = "Mensagens do Chat"
+
+    def __str__(self):
+        return f"{self.user.username}: {self.message[:30]}"
 
 
 # ==================== OTP ====================
