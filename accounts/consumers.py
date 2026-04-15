@@ -2,13 +2,13 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
-from .models import Notification, ChatMessage
 from django.core.cache import cache
+from .models import Notification, ChatMessage
 
 
 # ===================== NOTIFICAÇÕES =====================
 class NotificationConsumer(AsyncWebsocketConsumer):
-    """Consumer para notificações em tempo real"""
+    """Consumer para notificações em tempo real (sino)"""
 
     async def connect(self):
         self.user = self.scope.get("user")
@@ -27,7 +27,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.send_unread_notifications()
 
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -87,11 +87,10 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-
         await self.set_user_online(True)
 
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -102,12 +101,12 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_user_online(self, is_online):
-        cache.set(f"user_online_{self.user.id}", is_online, timeout=300)  # 5 minutos
+        cache.set(f"user_online_{self.user.id}", is_online, timeout=300) # type: ignore
 
 
-# ===================== CHAT ONLINE CLIENTE → LOJA =====================
+# ===================== CHAT ONLINE + INTEGRAÇÃO COM NOTIFICAÇÕES =====================
 class SupportChatConsumer(AsyncWebsocketConsumer):
-    """Chat em tempo real direto com a loja"""
+    """Chat em tempo real direto com a loja (integrado com notificações)"""
 
     async def connect(self):
         self.user = self.scope.get("user")
@@ -126,7 +125,7 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         await self.send_chat_history()
 
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
 
@@ -142,24 +141,22 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
     def get_chat_history(self):
         messages = ChatMessage.objects.filter(user=self.user).order_by('created_at')
         return [{
-            'id': m.id,
+            'id': m.id, # type: ignore
             'message': m.message,
             'is_from_store': m.is_from_store,
             'time': m.created_at.strftime('%H:%M')
         } for m in messages]
 
 
-    async def receive(self, text_data):
+    async def receive(self, text_data): # type: ignore
+        """Cliente enviou mensagem"""
         data = json.loads(text_data)
         message_text = data.get('message', '').strip()
-
         if not message_text:
             return
 
-        # Salva a mensagem do cliente
         message = await self.save_message(message_text, is_from_store=False)
 
-        # Envia para o cliente (e para a loja no futuro)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -181,9 +178,39 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
 
 
     async def chat_message(self, event):
+        """Recebe mensagem (cliente ou loja)"""
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': event['message'],
             'is_from_store': event['is_from_store'],
             'time': event['time']
         }))
+
+        # INTEGRAÇÃO: Se a loja respondeu, cria notificação automática no sino
+        if event.get('is_from_store'):
+            await self.create_notification(event['message'])
+
+
+    @database_sync_to_async
+    def create_notification(self, message_text):
+        """Cria notificação automática para o cliente quando a loja responde"""
+        Notification.objects.create(
+            user=self.user,
+            title="💬 Resposta da Loja",
+            message=message_text,
+            icon="comment-dots"
+        )
+
+
+    # Permite que a loja envie mensagens pelo painel admin
+    async def store_message(self, event):
+        message = await self.save_message(event['message'], is_from_store=True)
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'chat_message',
+                'message': message.message,
+                'is_from_store': True,
+                'time': message.created_at.strftime('%H:%M')
+            }
+        )
