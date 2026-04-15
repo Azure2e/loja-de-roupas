@@ -8,7 +8,7 @@ from django.http import JsonResponse
 
 from django.contrib.auth.models import User
 
-from .models import UserProfile
+from .models import UserProfile, ChatMessage
 from .forms import UserProfileForm
 
 logger = logging.getLogger(__name__)
@@ -111,36 +111,46 @@ def get_notifications(request):
     return JsonResponse(data)
 
 
-# ==================== CHECKOUT (Nova view adicionada) ====================
+# ==================== CHECKOUT ====================
 @login_required
 def checkout(request):
     """Página de Checkout Seguro com resumo do carrinho"""
-    
-    # Garante que o perfil existe
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
-
-    # Pega o carrinho da sessão
     carrinho = request.session.get('carrinho', {})
 
-    # Calcula os totais
     subtotal_geral = 0
     for item in carrinho.values():
         subtotal_geral += float(item.get('subtotal', 0))
 
-    # Desconto (você pode mudar a lógica depois)
     desconto = float(request.session.get('desconto', 0))
-
     total_final = subtotal_geral - desconto
 
     context = {
         'user': request.user,
-        'profile': profile,           # ← usado no template como "profile"
+        'profile': profile,
         'carrinho': carrinho,
         'subtotal_geral': subtotal_geral,
         'desconto': desconto,
         'total_final': total_final,
-        # Endereço completo (opcional - já temos no profile)
         'endereco_completo': getattr(profile, 'address', 'Nenhum endereço cadastrado'),
     }
 
     return render(request, 'core/checkout.html', context)
+
+
+# ==================== SUPORTE - CHAT COM CLIENTES ====================
+@login_required
+def support_chat(request):
+    """Painel de Suporte da Loja - onde você responde os clientes"""
+    if not request.user.is_staff:
+        messages.error(request, "Você não tem permissão para acessar o painel de suporte.")
+        return redirect('core:home')
+
+    # Lista de clientes que já enviaram mensagem
+    customers = User.objects.filter(chat_messages__isnull=False).distinct().order_by('-chat_messages__created_at')
+
+    context = {
+        'customers': customers,
+        'title': 'Suporte - Chat com Clientes'
+    }
+    return render(request, 'accounts/support_chat.html', context)
