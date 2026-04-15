@@ -205,7 +205,6 @@ def checkout_sucesso(request):
             total=total,
             status='pago'
         )
-        # Atualiza perfil
         profile = request.user.profile
         profile.total_pedidos += 1
         profile.pontos_fidelidade += 10
@@ -217,7 +216,6 @@ def checkout_sucesso(request):
         elif profile.total_pedidos >= 6:
             messages.success(request, '👑 Você é VIP!')
 
-    # Limpa carrinho
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
@@ -242,7 +240,6 @@ def checkout_pendente(request):
     return render(request, 'core/checkout_pendente.html')
 
 
-# ==================== CONFIRMAÇÃO DE PEDIDO ====================
 @login_required
 def confirmacao_pedido(request, pedido_id):
     pedido = Pedido.objects.get(id=pedido_id, user=request.user)
@@ -383,7 +380,8 @@ def painel_suporte(request):
         is_active=True
     ).order_by('-last_login')
 
-    return render(request, 'core/suporte.html', {
+    # Template está dentro do app accounts
+    return render(request, 'accounts/suporte.html', {
         'customers': customers,
     })
 
