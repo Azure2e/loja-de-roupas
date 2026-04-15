@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    <!-- ==================== RESUMO DO PEDIDO (dentro da mesma coluna) ==================== -->
+                    <!-- ==================== RESUMO DO PEDIDO ==================== -->
                     <div class="card bg-dark border-primary shadow-sm">
                         <div class="card-header bg-black border-primary py-3">
                             <h5 class="mb-0">🛒 Resumo do Pedido</h5>
@@ -140,8 +140,8 @@
                                 {% endfor %}
                             {% endif %}
 
-                            <!-- Botão Mercado Pago -->
-                            <a href="{% url 'core:mercadopago' %}" 
+                            <!-- ✅ BOTÃO CORRIGIDO -->
+                            <a href="{% url 'core:criar_preferencia_mercadopago' %}" 
                                class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-4 shadow mb-4">
                                 <i class="fas fa-credit-card me-2"></i> 
                                 PAGAR COM MERCADO PAGO
