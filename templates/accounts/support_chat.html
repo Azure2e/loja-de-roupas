@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suporte - Chat com Clientes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">💬 Painel de Suporte da Loja</h1>
+
+    <div class="row">
+        <!-- Lista de clientes -->
+        <div class="col-md-4">
+            <h5 class="mb-3">Clientes que enviaram mensagem</h5>
+            <div class="list-group">
+                {% for customer in customers %}
+                <a href="#" onclick="openChatWith({{ customer.id }}, '{{ customer.username }}')" 
+                   class="list-group-item list-group-item-action">
+                    👤 {{ customer.username }}
+                    <small class="text-muted d-block">
+                        Última mensagem: {{ customer.chat_messages.last.created_at|date:"d/m H:i" }}
+                    </small>
+                </a>
+                {% empty %}
+                <p class="text-muted">Nenhum cliente enviou mensagem ainda.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Área do Chat -->
+        <div class="col-md-8">
+            <div id="chat-area" class="border border-primary rounded-4 p-3 bg-dark" style="min-height: 500px;">
+                <p class="text-center text-muted mt-5">Selecione um cliente ao lado para iniciar o chat</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openChatWith(userId, username) {
+        // Aqui você pode carregar o chat em tempo real com o cliente selecionado
+        // Por enquanto mostramos um placeholder
+        document.getElementById('chat-area').innerHTML = `
+            <div class="chat-header bg-primary text-white p-3 rounded-top-4">
+                <strong>Chat com ${username}</strong>
+            </div>
+            <div id="support-chat-body" class="p-3 overflow-auto" style="height: 400px;">
+                <!-- Mensagens aparecerão aqui -->
+            </div>
+            <div class="p-3 border-top">
+                <div class="input-group">
+                    <input id="support-message-input" type="text" class="form-control" placeholder="Responda o cliente...">
+                    <button onclick="sendStoreMessage(${userId})" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function sendStoreMessage(userId) {
+        const input = document.getElementById('support-message-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Aqui enviaremos a mensagem para o WebSocket do cliente
+        alert("Mensagem enviada para o cliente " + userId + ": " + message);
+        input.value = '';
+    }
+</script>
+{% endblock %}
