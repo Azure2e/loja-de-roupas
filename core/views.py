@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.conf import settings
 
 from .models import Produto, Variante, Pedido
@@ -225,7 +225,6 @@ def checkout_sucesso(request):
     request.session.modified = True
     request.session.save()
 
-    # Se criou o pedido, redireciona para a página de confirmação
     if pedido:
         return redirect('core:confirmacao_pedido', pedido_id=pedido.id)
 
@@ -246,12 +245,11 @@ def checkout_pendente(request):
 # ==================== CONFIRMAÇÃO DE PEDIDO ====================
 @login_required
 def confirmacao_pedido(request, pedido_id):
-    """Página de confirmação mostrada após o pagamento ser aprovado"""
-    pedido = Pedido.objects.get(id=pedido_id, user=request.user)   # ← conforme você pediu
+    pedido = Pedido.objects.get(id=pedido_id, user=request.user)
 
     context = {
         'pedido': pedido,
-        'pedido_numero': f"20260413-{pedido.id:04d}",   # ← número formatado que o template usa
+        'pedido_numero': f"20260413-{pedido.id:04d}",
         'user': request.user,
     }
     return render(request, 'core/confirmacao_pedido.html', context)
@@ -366,6 +364,28 @@ def create_superuser_view(request):
             messages.error(request, "Senha master incorreta!")
    
     return render(request, 'core/create_superuser.html')
+
+
+# ==================== PAINEL DE SUPORTE DA LOJA ====================
+@login_required(login_url='accounts:login')
+def painel_suporte(request):
+    """Painel de Suporte - Chat entre Loja e Clientes"""
+    
+    # Só permite acesso da equipe da loja
+    if not request.user.is_staff:
+        messages.error(request, '❌ Acesso negado! Apenas a loja pode acessar o painel de suporte.')
+        return redirect('core:home')
+
+    # Lista os clientes (usuários normais)
+    User = get_user_model()
+    customers = User.objects.filter(
+        is_staff=False,
+        is_active=True
+    ).order_by('-last_login')
+
+    return render(request, 'core/suporte.html', {
+        'customers': customers,
+    })
 
 
 # ==================== WEBHOOK MERCADO PAGO ====================
