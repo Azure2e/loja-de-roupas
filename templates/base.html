@@ -57,10 +57,10 @@
                         </ul>
                     </li>
 
-                    <!-- Foto de Perfil + Status Online -->
+                    <!-- Foto de Perfil + Status Online REAL -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="position-relative">
+                            <div class="position-relative" id="profile-pic-container">
                                 {% if user.profile.picture %}
                                     <img src="{{ user.profile.picture.url }}" 
                                          alt="Foto de perfil" 
@@ -73,9 +73,9 @@
                                          style="width: 38px; height: 38px; object-fit: cover;">
                                 {% endif %}
                                 
-                                <!-- Bolinha verde de Online -->
-                                <span class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle"
-                                      style="width: 12px; height: 12px; z-index: 11;"></span>
+                                <!-- Bolinha de Status Online (REAL) -->
+                                <span id="online-dot" class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle"
+                                      style="width: 12px; height: 12px; z-index: 11; display: none;"></span>
                             </div>
                         </a>
                         <ul class="dropdown-menu bg-dark border-primary">
@@ -123,5 +123,30 @@
 <script src="{% static 'js/main.js' %}" defer></script>
 
 {% block extra_js %}{% endblock %}
+
+<!-- ==================== STATUS ONLINE REAL (WebSocket) ==================== -->
+<script>
+    function connectOnlineStatus() {
+        const userId = "{{ user.id }}";
+        if (!userId) return;
+
+        const socket = new WebSocket('wss://' + window.location.host + '/ws/online/');
+
+        socket.onopen = function() {
+            console.log("✅ Status Online conectado");
+            document.getElementById('online-dot').style.display = 'block';
+        };
+
+        socket.onclose = function() {
+            console.log("❌ Status Online desconectado");
+            document.getElementById('online-dot').style.display = 'none';
+            // Tenta reconectar
+            setTimeout(connectOnlineStatus, 2000);
+        };
+    }
+
+    // Inicia quando a página carregar
+    window.addEventListener('load', connectOnlineStatus);
+</script>
 </body>
 </html>
