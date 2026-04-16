@@ -14,14 +14,14 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'loja.settings')
 
 django_asgi_app = get_asgi_application()
 
-# Importa o routing das notificações WebSocket
+# Importa o routing dos WebSockets (notificações + chat + status online)
 import accounts.routing
 
 application = ProtocolTypeRouter({
     # Rotas HTTP normais (páginas, admin, etc.)
     "http": django_asgi_app,
 
-    # Rotas WebSocket (notificações em tempo real)
+    # Rotas WebSocket com proteção de segurança
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
