@@ -13,7 +13,6 @@ from datetime import timedelta
 from django.utils import timezone
 from core.utils.whatsapp import enviar_whatsapp
 
-# ==================== IMPORTS DO WEBHOOK ====================
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -151,6 +150,19 @@ def criar_preferencia_mercadopago(request):
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
 
+    if request.method != 'POST':
+        messages.error(request, 'Acesso inválido. Use o formulário do checkout.')
+        return redirect('core:checkout')
+
+    email = request.POST.get('email', '').strip()
+    if not email:
+        messages.error(request, '⚠️ O e-mail é obrigatório para prosseguir com o pagamento.')
+        return redirect('core:checkout')
+
+    if '@' not in email or '.' not in email:
+        messages.error(request, '⚠️ Por favor, insira um e-mail válido.')
+        return redirect('core:checkout')
+
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     if total <= 0:
         messages.error(request, 'Valor inválido para pagamento.')
@@ -170,6 +182,9 @@ def criar_preferencia_mercadopago(request):
 
     preference_data = {
         "items": items,
+        "payer": {
+            "email": email
+        },
         "back_urls": {
             "success": "http://127.0.0.1:8000/checkout/sucesso/",
             "failure": "http://127.0.0.1:8000/checkout/falha/",
@@ -351,6 +366,7 @@ def create_superuser_view(request):
             email = request.POST.get('email', '')
             password = request.POST.get('password', '')
             
+            User = get_user_model()
             if User.objects.filter(username=username).exists():
                 messages.warning(request, f"Usuário '{username}' já existe!")
             else:
@@ -363,30 +379,23 @@ def create_superuser_view(request):
     return render(request, 'core/create_superuser.html')
 
 
-# ==================== PAINEL DE SUPORTE DA LOJA ====================
 @login_required(login_url='accounts:login')
 def painel_suporte(request):
-    """Painel de Suporte - Chat entre Loja e Clientes"""
-    
-    # Só permite acesso da equipe da loja
     if not request.user.is_staff:
         messages.error(request, '❌ Acesso negado! Apenas a loja pode acessar o painel de suporte.')
         return redirect('core:home')
 
-    # Lista os clientes (usuários normais)
     User = get_user_model()
     customers = User.objects.filter(
         is_staff=False,
         is_active=True
     ).order_by('-last_login')
 
-    # Template correto (está dentro do app accounts)
     return render(request, 'accounts/suporte.html', {
         'customers': customers,
     })
 
 
-# ==================== WEBHOOK MERCADO PAGO ====================
 @csrf_exempt
 def webhook_mercadopago(request):
     if request.method == 'POST':
