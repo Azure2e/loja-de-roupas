@@ -6,14 +6,14 @@
 {% block content %}
 <div class="container-fluid mt-3 mt-md-4">
 
-    <!-- Cabeçalho com Notificações -->
+    <!-- Cabeçalho com Notificações em Tempo Real -->
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 gap-3">
         <div class="d-flex align-items-center">
             <img src="{% static 'img/logo.png' %}" alt="SuaLoja" style="max-height: 42px; width: auto;" class="me-3">
             <h1 class="h4 fw-bold text-white mb-0">💬 Suporte da Loja</h1>
         </div>
 
-        <!-- Notificações -->
+        <!-- Notificações ao vivo -->
         <div class="d-flex align-items-center gap-3">
             <div class="position-relative" onclick="toggleNotifications()">
                 <i class="fas fa-bell fa-2x text-white" style="cursor: pointer;"></i>
@@ -55,7 +55,6 @@
                 <div class="card-header bg-black border-primary text-white d-flex justify-content-between align-items-center py-3" id="chat-header">
                     <strong id="chat-with" class="fs-5">Selecione um cliente para conversar</strong>
                     
-                    <!-- Botão Fechar Chat (somente mobile) -->
                     <button onclick="closeChat()" class="btn btn-outline-danger btn-sm d-lg-none">
                         <i class="fas fa-times"></i> Fechar
                     </button>
@@ -63,7 +62,6 @@
 
                 <div id="chat-body" class="card-body overflow-auto p-3" 
                      style="height: 55vh; background: #1a1a1a; max-height: 60vh;">
-                    <!-- Mensagens e histórico aparecem aqui -->
                 </div>
 
                 <div class="card-footer bg-dark border-primary p-3">
@@ -88,13 +86,23 @@
     let currentCustomerId = null;
     let chatSocket = null;
     let allMessages = [];
+    let unreadCount = 0;
 
-    // ==================== NOTIFICAÇÕES ====================
-    function toggleNotifications() {
-        alert("🛎️ Notificações completas em breve (dropdown com lista)");
+    // ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
+    function updateNotificationCount() {
+        const countEl = document.getElementById('notification-count');
+        if (unreadCount > 0) {
+            countEl.textContent = unreadCount;
+            countEl.classList.remove('d-none');
+        } else {
+            countEl.classList.add('d-none');
+        }
     }
 
     function showNewMessageNotification(username, message) {
+        unreadCount++;
+        updateNotificationCount();
+
         const toast = document.createElement('div');
         toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:#28a745; color:white; padding:15px 20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:9999; max-width:300px;`;
         toast.innerHTML = `
@@ -108,6 +116,11 @@
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 500);
         }, 4000);
+    }
+
+    function toggleNotifications() {
+        alert("🛎️ Notificações completas (dropdown) em breve!");
+        // Podemos expandir aqui no futuro
     }
 
     function openChat(userId, username) {
@@ -132,7 +145,6 @@
                 allMessages.push(data);
                 renderMessages(allMessages);
 
-                // Notificação se for mensagem do cliente
                 if (!data.is_from_store) {
                     showNewMessageNotification(username, data.message);
                 }
