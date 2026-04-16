@@ -25,7 +25,7 @@
 
     <div class="row g-3">
 
-        <!-- LISTA DE CLIENTES COM STATUS ONLINE -->
+        <!-- LISTA DE CLIENTES COM STATUS -->
         <div class="col-lg-4 col-xl-3">
             <div class="card h-100 bg-dark border-primary">
                 <div class="card-header bg-black border-primary text-white py-3">
@@ -90,7 +90,7 @@
     let allMessages = [];
     let unreadCount = 0;
 
-    // ==================== STATUS ONLINE (WebSocket) ====================
+    // ==================== STATUS ONLINE / AUSENTE / OFFLINE (WebSocket) ====================
     function connectOnlineStatus() {
         if (onlineSocket) onlineSocket.close();
         
@@ -101,13 +101,20 @@
             if (data.type === 'online_status') {
                 const statusEl = document.getElementById(`status-${data.user_id}`);
                 if (statusEl) {
-                    if (data.is_online) {
-                        statusEl.className = 'badge bg-success rounded-pill';
-                        statusEl.textContent = 'Online';
-                    } else {
-                        statusEl.className = 'badge bg-secondary rounded-pill';
-                        statusEl.textContent = 'Offline';
+                    let badgeClass = 'badge bg-secondary rounded-pill';
+                    let text = 'Offline';
+
+                    if (data.status === 'online') {
+                        badgeClass = 'badge bg-success rounded-pill';
+                        text = 'Online';
+                    } else if (data.status === 'ausente') {
+                        badgeClass = 'badge bg-warning text-dark rounded-pill';
+                        text = 'Ausente';
                     }
+                    // else = Offline (cinza)
+
+                    statusEl.className = badgeClass;
+                    statusEl.textContent = text;
                 }
             }
         };
@@ -215,7 +222,7 @@
         input.value = '';
     }
 
-    // Inicia o WebSocket de status online ao carregar a página
+    // Inicia o WebSocket ao carregar a página
     window.onload = function() {
         connectOnlineStatus();
     };
