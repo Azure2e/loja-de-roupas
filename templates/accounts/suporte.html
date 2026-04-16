@@ -25,7 +25,7 @@
 
     <div class="row g-3">
 
-        <!-- LISTA DE CLIENTES -->
+        <!-- LISTA DE CLIENTES COM STATUS ONLINE -->
         <div class="col-lg-4 col-xl-3">
             <div class="card h-100 bg-dark border-primary">
                 <div class="card-header bg-black border-primary text-white py-3">
@@ -35,9 +35,10 @@
                     <div class="list-group list-group-flush" id="customer-list">
                         {% for customer in customers %}
                         <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.get_full_name|default:customer.username }}')" 
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary py-3">
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary py-3"
+                           id="customer-{{ customer.id }}">
                             👤 {{ customer.get_full_name|default:customer.username }}
-                            <span class="badge bg-success rounded-pill">Online</span>
+                            <span id="status-{{ customer.id }}" class="badge bg-success rounded-pill">Online</span>
                         </a>
                         {% empty %}
                         <div class="p-5 text-center text-muted">
@@ -85,8 +86,32 @@
 <script>
     let currentCustomerId = null;
     let chatSocket = null;
+    let onlineSocket = null;
     let allMessages = [];
     let unreadCount = 0;
+
+    // ==================== STATUS ONLINE (WebSocket) ====================
+    function connectOnlineStatus() {
+        if (onlineSocket) onlineSocket.close();
+        
+        onlineSocket = new WebSocket(`ws://${window.location.host}/ws/online/`);
+
+        onlineSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'online_status') {
+                const statusEl = document.getElementById(`status-${data.user_id}`);
+                if (statusEl) {
+                    if (data.is_online) {
+                        statusEl.className = 'badge bg-success rounded-pill';
+                        statusEl.textContent = 'Online';
+                    } else {
+                        statusEl.className = 'badge bg-secondary rounded-pill';
+                        statusEl.textContent = 'Offline';
+                    }
+                }
+            }
+        };
+    }
 
     // ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
     function updateNotificationCount() {
@@ -120,9 +145,9 @@
 
     function toggleNotifications() {
         alert("🛎️ Notificações completas (dropdown) em breve!");
-        // Podemos expandir aqui no futuro
     }
 
+    // ==================== CHAT ====================
     function openChat(userId, username) {
         currentCustomerId = userId;
         document.getElementById('chat-with').textContent = `Conversando com ${username}`;
@@ -189,5 +214,10 @@
         }));
         input.value = '';
     }
+
+    // Inicia o WebSocket de status online ao carregar a página
+    window.onload = function() {
+        connectOnlineStatus();
+    };
 </script>
 {% endblock %}
