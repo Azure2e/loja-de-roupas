@@ -58,10 +58,10 @@ ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
-# ==================== CHANNEL LAYERS ====================
+# ===================== DJANGO CHANNELS =====================
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': 'channels.layers.InMemoryChannelLayer', # Para produção use Redis
     },
 }
 
