@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suporte - Chat com Clientes{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5 fw-bold text-white">
+            💬 Painel de Suporte da Loja
+        </h1>
+        <a href="{% url 'core:home' %}" class="btn btn-outline-light">
+            ← Voltar para a Loja
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- LISTA DE CLIENTES -->
+        <div class="col-lg-4 col-xl-3">
+            <div class="card h-100 bg-dark border-primary">
+                <div class="card-header bg-black border-primary text-white">
+                    <strong>👥 Clientes em Atendimento ({{ customers|length }})</strong>
+                </div>
+                <div class="card-body p-0" style="max-height: 650px; overflow-y: auto;">
+                    <div class="list-group list-group-flush" id="customer-list">
+                        {% for customer in customers %}
+                        <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.username }}')" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary">
+                            👤 {{ customer.get_full_name|default:customer.username }}
+                            <span class="badge bg-success rounded-pill">Online</span>
+                        </a>
+                        {% empty %}
+                        <div class="p-4 text-center text-muted">
+                            Nenhum cliente enviou mensagem ainda.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÁREA DO CHAT -->
+        <div class="col-lg-8 col-xl-9">
+            <div class="card h-100 bg-dark border-primary">
+                <div class="card-header bg-black border-primary text-white d-flex justify-content-between align-items-center" id="chat-header">
+                    <strong id="chat-with">Selecione um cliente para conversar</strong>
+                    <span id="chat-status" class="badge bg-success">Online</span>
+                </div>
+
+                <div id="chat-body" class="card-body overflow-auto" style="height: 500px; background: #1a1a1a;">
+                    <!-- Mensagens aparecem aqui via JavaScript -->
+                </div>
+
+                <div class="card-footer bg-dark border-primary">
+                    <div class="input-group">
+                        <input id="store-message-input" type="text" class="form-control bg-dark text-white border-primary" 
+                               placeholder="Digite sua resposta..." 
+                               onkeypress="if(event.key === 'Enter') sendStoreMessage()">
+                        <button onclick="sendStoreMessage()" class="btn btn-success">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentCustomerId = null;
+    let chatSocket = null;
+
+    function openChat(userId, username) {
+        currentCustomerId = userId;
+        document.getElementById('chat-with').textContent = `Conversando com ${username}`;
+
+        // Fecha socket antigo se existir
+        if (chatSocket) chatSocket.close();
+        
+        // Conecta no WebSocket (ajuste a URL se necessário)
+        chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/`);
+
+        chatSocket.onopen = () => console.log(`✅ Chat com cliente ${userId} conectado`);
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'chat_history' || data.type === 'chat_message') {
+                renderChatMessages(data.messages || [data]);
+            }
+        };
+
+        chatSocket.onclose = () => console.log("Chat fechado");
+    }
+
+    function renderChatMessages(messages) {
+        const body = document.getElementById('chat-body');
+        body.innerHTML = '';
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = msg.is_from_store ? 'text-end mb-3' : 'text-start mb-3';
+            div.innerHTML = `
+                <div class="d-inline-block px-4 py-2 rounded-3 ${msg.is_from_store ? 'bg-success text-white' : 'bg-secondary text-white'}">
+                    ${msg.message}
+                    <small class="d-block text-light opacity-75">${msg.time}</small>
+                </div>`;
+            body.appendChild(div);
+        });
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function sendStoreMessage() {
+        if (!currentCustomerId || !chatSocket) return;
+        const input = document.getElementById('store-message-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'target_user': currentCustomerId
+        }));
+        input.value = '';
+    }
+</script>
+{% endblock %}
