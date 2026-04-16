@@ -4,43 +4,44 @@
 {% block title %}Suporte - Chat com Clientes{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-3 mt-md-4">
 
-    <!-- ==================== CABEÇALHO MENOR E RESPONSIVO ==================== -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+    <!-- Cabeçalho com Notificações -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 gap-3">
         <div class="d-flex align-items-center">
-            <!-- Logo menor e responsivo -->
-            <img src="{% static 'img/logo.png' %}" alt="SuaLoja" 
-                 style="max-height: 45px; width: auto;" class="me-3">
-            
-            <h1 class="h3 fw-bold text-white mb-0">
-                💬 Suporte da Loja
-            </h1>
+            <img src="{% static 'img/logo.png' %}" alt="SuaLoja" style="max-height: 42px; width: auto;" class="me-3">
+            <h1 class="h4 fw-bold text-white mb-0">💬 Suporte da Loja</h1>
         </div>
 
-        <a href="{% url 'core:home' %}" class="btn btn-outline-light btn-sm">
-            ← Voltar para a Loja
-        </a>
+        <!-- Notificações -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="position-relative" onclick="toggleNotifications()">
+                <i class="fas fa-bell fa-2x text-white" style="cursor: pointer;"></i>
+                <span id="notification-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+            </div>
+            <a href="{% url 'core:home' %}" class="btn btn-outline-light btn-sm">← Voltar para a Loja</a>
+        </div>
     </div>
 
-    <div class="row">
+    <div class="row g-3">
+
         <!-- LISTA DE CLIENTES -->
         <div class="col-lg-4 col-xl-3">
             <div class="card h-100 bg-dark border-primary">
-                <div class="card-header bg-black border-primary text-white">
+                <div class="card-header bg-black border-primary text-white py-3">
                     <strong>👥 Clientes em Atendimento ({{ customers|length }})</strong>
                 </div>
-                <div class="card-body p-0" style="max-height: 650px; overflow-y: auto;">
+                <div class="card-body p-0" style="max-height: 65vh; overflow-y: auto;">
                     <div class="list-group list-group-flush" id="customer-list">
                         {% for customer in customers %}
-                        <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.username }}')" 
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary">
+                        <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.get_full_name|default:customer.username }}')" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary py-3">
                             👤 {{ customer.get_full_name|default:customer.username }}
                             <span class="badge bg-success rounded-pill">Online</span>
                         </a>
                         {% empty %}
-                        <div class="p-4 text-center text-muted">
-                            Nenhum cliente enviou mensagem ainda.
+                        <div class="p-5 text-center text-muted">
+                            Nenhum cliente online no momento.
                         </div>
                         {% endfor %}
                     </div>
@@ -51,21 +52,27 @@
         <!-- ÁREA DO CHAT -->
         <div class="col-lg-8 col-xl-9">
             <div class="card h-100 bg-dark border-primary">
-                <div class="card-header bg-black border-primary text-white d-flex justify-content-between align-items-center" id="chat-header">
-                    <strong id="chat-with">Selecione um cliente para conversar</strong>
-                    <span id="chat-status" class="badge bg-success">Online</span>
+                <div class="card-header bg-black border-primary text-white d-flex justify-content-between align-items-center py-3" id="chat-header">
+                    <strong id="chat-with" class="fs-5">Selecione um cliente para conversar</strong>
+                    
+                    <!-- Botão Fechar Chat (somente mobile) -->
+                    <button onclick="closeChat()" class="btn btn-outline-danger btn-sm d-lg-none">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
                 </div>
 
-                <div id="chat-body" class="card-body overflow-auto" style="height: 500px; background: #1a1a1a;">
-                    <!-- Mensagens aparecem aqui via JavaScript -->
+                <div id="chat-body" class="card-body overflow-auto p-3" 
+                     style="height: 55vh; background: #1a1a1a; max-height: 60vh;">
+                    <!-- Mensagens e histórico aparecem aqui -->
                 </div>
 
-                <div class="card-footer bg-dark border-primary">
+                <div class="card-footer bg-dark border-primary p-3">
                     <div class="input-group">
-                        <input id="store-message-input" type="text" class="form-control bg-dark text-white border-primary" 
-                               placeholder="Digite sua resposta..." 
+                        <input id="store-message-input" type="text" 
+                               class="form-control bg-dark text-white border-primary" 
+                               placeholder="Digite sua mensagem..." 
                                onkeypress="if(event.key === 'Enter') sendStoreMessage()">
-                        <button onclick="sendStoreMessage()" class="btn btn-success">
+                        <button onclick="sendStoreMessage()" class="btn btn-success px-4">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
@@ -80,34 +87,82 @@
 <script>
     let currentCustomerId = null;
     let chatSocket = null;
+    let allMessages = [];
+
+    // ==================== NOTIFICAÇÕES ====================
+    function toggleNotifications() {
+        alert("🛎️ Notificações completas em breve (dropdown com lista)");
+    }
+
+    function showNewMessageNotification(username, message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:#28a745; color:white; padding:15px 20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:9999; max-width:300px;`;
+        toast.innerHTML = `
+            <strong>Nova mensagem de ${username}</strong><br>
+            <small>${message.substring(0, 60)}${message.length > 60 ? '...' : ''}</small>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.5s';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 4000);
+    }
 
     function openChat(userId, username) {
         currentCustomerId = userId;
         document.getElementById('chat-with').textContent = `Conversando com ${username}`;
+        document.getElementById('chat-body').innerHTML = '<div class="text-center text-muted py-4">Carregando histórico...</div>';
 
         if (chatSocket) chatSocket.close();
         
-        chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/`);
+        chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/`);
 
-        chatSocket.onopen = () => console.log(`✅ Chat com cliente ${userId} aberto`);
+        chatSocket.onopen = () => console.log(`✅ Chat aberto com cliente ${userId}`);
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            if (data.type === 'chat_message') {
-                const body = document.getElementById('chat-body');
-                const div = document.createElement('div');
-                div.className = data.is_from_store ? 'text-end mb-3' : 'text-start mb-3';
-                div.innerHTML = `
-                    <div class="d-inline-block px-4 py-2 rounded-3 ${data.is_from_store ? 'bg-success text-white' : 'bg-secondary text-white'}">
-                        ${data.message}
-                        <small class="d-block text-light opacity-75">${data.time}</small>
-                    </div>`;
-                body.appendChild(div);
-                body.scrollTop = body.scrollHeight;
+
+            if (data.type === 'chat_history') {
+                allMessages = data.messages || [];
+                renderMessages(allMessages);
+            } 
+            else if (data.type === 'chat_message') {
+                allMessages.push(data);
+                renderMessages(allMessages);
+
+                // Notificação se for mensagem do cliente
+                if (!data.is_from_store) {
+                    showNewMessageNotification(username, data.message);
+                }
             }
         };
+    }
 
-        chatSocket.onclose = () => console.log("Chat fechado");
+    function renderMessages(messages) {
+        const body = document.getElementById('chat-body');
+        body.innerHTML = '';
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = msg.is_from_store ? 'text-end mb-3' : 'text-start mb-3';
+            div.innerHTML = `
+                <div class="d-inline-block px-4 py-2 rounded-3 ${msg.is_from_store ? 'bg-success text-white' : 'bg-secondary text-white'}">
+                    ${msg.message}
+                    <small class="d-block text-light opacity-75">${msg.time}</small>
+                </div>`;
+            body.appendChild(div);
+        });
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function closeChat() {
+        if (chatSocket) chatSocket.close();
+        chatSocket = null;
+        currentCustomerId = null;
+        allMessages = [];
+        document.getElementById('chat-with').textContent = 'Selecione um cliente para conversar';
+        document.getElementById('chat-body').innerHTML = '';
     }
 
     function sendStoreMessage() {
