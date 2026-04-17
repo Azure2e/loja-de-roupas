@@ -146,11 +146,29 @@ def support_chat(request):
         messages.error(request, "Você não tem permissão para acessar o painel de suporte.")
         return redirect('core:home')
 
-    # Lista de clientes que já enviaram mensagem
-    customers = User.objects.filter(chat_messages__isnull=False).distinct().order_by('-chat_messages__created_at')
+    from django.core.cache import cache
+
+    # Busca TODOS os usuários que NÃO são staff e não são você
+    potential_customers = User.objects.filter(
+        is_staff=False
+    ).exclude(id=request.user.id)
+
+    final_customers = []
+    for user in potential_customers:
+        # Tem mensagem ou está online/ausente?
+        has_messages = ChatMessage.objects.filter(user=user).exists()
+        status = cache.get(f'user_status_{user.id}', 'offline')
+
+        if has_messages or status in ['online', 'ausente']:
+            user.current_status = status          # ← usado no template
+            final_customers.append(user)
+
+    # Ordena: Online → Ausente → Offline
+    status_order = {'online': 0, 'ausente': 1, 'offline': 2}
+    final_customers.sort(key=lambda u: status_order.get(u.current_status, 3))
 
     context = {
-        'customers': customers,
+        'customers': final_customers,
         'title': 'Suporte - Chat com Clientes'
     }
-    return render(request, 'accounts/support_chat.html', context)
+    return render(request, 'accounts/suporte.html', context)
