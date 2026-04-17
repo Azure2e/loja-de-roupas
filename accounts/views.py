@@ -160,6 +160,7 @@ def support_chat(request):
 
     final_customers = []
     for user in potential_customers:
+        # Filtro extra de segurança
         if user.id == request.user.id or user.is_staff:
             print(f"   ❌ Ignorando (staff ou próprio usuário): {user.username}")
             continue
