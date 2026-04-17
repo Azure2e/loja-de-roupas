@@ -148,24 +148,37 @@ def support_chat(request):
 
     from django.core.cache import cache
 
-    # Busca TODOS os usuários que NÃO são staff e não são você
+    print("🔥 DEBUG SUPORTE - Iniciando support_chat")
+    print(f"   Usuário logado: {request.user.username} (ID: {request.user.id}) - is_staff: {request.user.is_staff}")
+
+    # Busca TODOS os usuários que NÃO são staff e NÃO são você
     potential_customers = User.objects.filter(
         is_staff=False
     ).exclude(id=request.user.id)
 
+    print(f"   Total de usuários não-staff encontrados: {potential_customers.count()}")
+
     final_customers = []
     for user in potential_customers:
-        # Tem mensagem ou está online/ausente?
+        if user.id == request.user.id or user.is_staff:
+            print(f"   ❌ Ignorando (staff ou próprio usuário): {user.username}")
+            continue
+
         has_messages = ChatMessage.objects.filter(user=user).exists()
         status = cache.get(f'user_status_{user.id}', 'offline')
 
-        if has_messages or status in ['online', 'ausente']:
-            user.current_status = status          # ← usado no template
-            final_customers.append(user)
+        print(f"   → Usuário: {user.username} | ID: {user.id} | Status: {status} | Tem mensagens: {has_messages}")
 
-    # Ordena: Online → Ausente → Offline
+        if has_messages or status in ['online', 'ausente']:
+            user.current_status = status
+            final_customers.append(user)
+            print(f"   ✅ ADICIONADO: {user.username}")
+
+    # Ordenação
     status_order = {'online': 0, 'ausente': 1, 'offline': 2}
-    final_customers.sort(key=lambda u: status_order.get(u.current_status, 3))
+    final_customers.sort(key=lambda u: status_order.get(getattr(u, 'current_status', 'offline'), 3))
+
+    print(f"✅ FINAL - Total de clientes reais mostrados: {len(final_customers)}")
 
     context = {
         'customers': final_customers,
