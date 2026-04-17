@@ -146,43 +146,11 @@ def support_chat(request):
         messages.error(request, "Você não tem permissão para acessar o painel de suporte.")
         return redirect('core:home')
 
-    from django.core.cache import cache
-
-    print("🔥 DEBUG SUPORTE - Iniciando support_chat")
-    print(f"   Usuário logado: {request.user.username} (ID: {request.user.id}) - is_staff: {request.user.is_staff}")
-
-    # Busca TODOS os usuários que NÃO são staff e NÃO são você
-    potential_customers = User.objects.filter(
-        is_staff=False
-    ).exclude(id=request.user.id)
-
-    print(f"   Total de usuários não-staff encontrados: {potential_customers.count()}")
-
-    final_customers = []
-    for user in potential_customers:
-        # Filtro extra de segurança
-        if user.id == request.user.id or user.is_staff:
-            print(f"   ❌ Ignorando (staff ou próprio usuário): {user.username}")
-            continue
-
-        has_messages = ChatMessage.objects.filter(user=user).exists()
-        status = cache.get(f'user_status_{user.id}', 'offline')
-
-        print(f"   → Usuário: {user.username} | ID: {user.id} | Status: {status} | Tem mensagens: {has_messages}")
-
-        if has_messages or status in ['online', 'ausente']:
-            user.current_status = status
-            final_customers.append(user)
-            print(f"   ✅ ADICIONADO: {user.username}")
-
-    # Ordenação
-    status_order = {'online': 0, 'ausente': 1, 'offline': 2}
-    final_customers.sort(key=lambda u: status_order.get(getattr(u, 'current_status', 'offline'), 3))
-
-    print(f"✅ FINAL - Total de clientes reais mostrados: {len(final_customers)}")
+    # Versão SIMPLIFICADA para teste: mostra TODOS os usuários não-staff
+    customers = User.objects.filter(is_staff=False).exclude(id=request.user.id)
 
     context = {
-        'customers': final_customers,
+        'customers': customers,
         'title': 'Suporte - Chat com Clientes'
     }
     return render(request, 'accounts/suporte.html', context)
