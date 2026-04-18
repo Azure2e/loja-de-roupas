@@ -26,14 +26,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_unread_notifications()
 
-
     async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
-
 
     async def send_unread_notifications(self):
         notifications = await self.get_unread_notifications()
@@ -42,7 +40,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'unread_count': len(notifications),
             'notifications': notifications
         }))
-
 
     @database_sync_to_async
     def get_unread_notifications(self):
@@ -58,7 +55,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'icon': n.icon,
             'time': n.created_at.strftime('%d/%m %H:%M')
         } for n in notifications]
-
 
     async def notification_message(self, event):
         await self.send(text_data=json.dumps({
@@ -87,9 +83,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-        # Define como Online ao conectar
         await self.set_user_status('online')
-
 
     async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
@@ -97,27 +91,20 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 self.channel_name
             )
-            # Define como Offline ao desconectar
             await self.set_user_status('offline')
 
-
     async def receive(self, text_data):
-        """Recebe atualização de status enviada pelo cliente (ex: ficar ausente)"""
         data = json.loads(text_data)
         status = data.get('status')
 
         if status in ['online', 'ausente', 'offline']:
             await self.set_user_status(status)
 
-
     async def set_user_status(self, status: str):
-        """Salva no cache e envia broadcast para todos"""
-        # Salva no cache (dura 5 minutos)
         await database_sync_to_async(cache.set)(
             f"user_status_{self.user.id}", status, timeout=300
         )
 
-        # Broadcast para todos os usuários conectados
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -127,9 +114,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             }
         )
 
-
     async def online_status_message(self, event):
-        """Recebe o broadcast e envia para o cliente (painel de suporte)"""
         await self.send(text_data=json.dumps({
             'type': 'online_status',
             'user_id': event['user_id'],
@@ -137,9 +122,9 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         }))
 
 
-# ===================== CHAT SUPORTE =====================
+# ===================== CHAT CLIENTE =====================
 class SupportChatConsumer(AsyncWebsocketConsumer):
-    """Chat em tempo real direto com a loja (integrado com notificações)"""
+    """Chat em tempo real — lado do CLIENTE"""
 
     async def connect(self):
         self.user = self.scope.get("user")
@@ -157,10 +142,12 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_chat_history()
 
-
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-
+        if hasattr(self, 'room_group_name'):
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
 
     async def send_chat_history(self):
         messages = await self.get_chat_history()
@@ -169,17 +156,17 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
             'messages': messages
         }))
 
-
     @database_sync_to_async
     def get_chat_history(self):
-        messages = ChatMessage.objects.filter(user=self.user).order_by('created_at')
+        messages = ChatMessage.objects.filter(
+            user=self.user
+        ).order_by('created_at')
         return [{
             'id': m.id,
             'message': m.message,
             'is_from_store': m.is_from_store,
             'time': m.created_at.strftime('%H:%M')
         } for m in messages]
-
 
     async def receive(self, text_data):
         """Cliente enviou mensagem"""
@@ -188,7 +175,7 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         if not message_text:
             return
 
-        message = await self.save_message(message_text, is_from_store=False)
+        message = await self.save_message(self.user, message_text, is_from_store=False)
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -200,18 +187,15 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-
     @database_sync_to_async
-    def save_message(self, message_text, is_from_store=False):
+    def save_message(self, user, message_text, is_from_store=False):
         return ChatMessage.objects.create(
-            user=self.user,
+            user=user,
             message=message_text,
             is_from_store=is_from_store
         )
 
-
     async def chat_message(self, event):
-        """Recebe mensagem (cliente ou loja)"""
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': event['message'],
@@ -223,10 +207,8 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         if event.get('is_from_store'):
             await self.create_notification(event['message'])
 
-
     @database_sync_to_async
     def create_notification(self, message_text):
-        """Cria notificação automática para o cliente quando a loja responde"""
         Notification.objects.create(
             user=self.user,
             title="💬 Resposta da Loja",
@@ -235,11 +217,65 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         )
 
 
-    # Permite que a loja envie mensagens pelo painel de suporte
-    async def store_message(self, event):
-        message = await self.save_message(event['message'], is_from_store=True)
+# ===================== CHAT PAINEL DE SUPORTE (LOJA) =====================
+class StoreSupportConsumer(AsyncWebsocketConsumer):
+    """Chat em tempo real — lado da LOJA (painel de suporte)"""
+
+    async def connect(self):
+        self.user = self.scope.get("user")
+        if self.user is None or self.user.is_anonymous:
+            await self.close()
+            return
+
+        self.customer_id = None
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if self.customer_id:
+            await self.channel_layer.group_discard(
+                f"support_chat_{self.customer_id}",
+                self.channel_name
+            )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+
+        # Loja clicou em um cliente → entra na sala dele
+        if data.get('type') == 'join_room':
+            customer_id = data.get('customer_id')
+            if not customer_id:
+                return
+
+            # Sai da sala anterior
+            if self.customer_id:
+                await self.channel_layer.group_discard(
+                    f"support_chat_{self.customer_id}",
+                    self.channel_name
+                )
+
+            self.customer_id = customer_id
+
+            await self.channel_layer.group_add(
+                f"support_chat_{self.customer_id}",
+                self.channel_name
+            )
+
+            await self.send_chat_history()
+            return
+
+        # Loja enviou mensagem
+        message_text = data.get('message', '').strip()
+        if not message_text or not self.customer_id:
+            return
+
+        customer = await self.get_customer()
+        if not customer:
+            return
+
+        message = await self.save_message(customer, message_text)
+
         await self.channel_layer.group_send(
-            self.room_group_name,
+            f"support_chat_{self.customer_id}",
             {
                 'type': 'chat_message',
                 'message': message.message,
@@ -247,3 +283,46 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
                 'time': message.created_at.strftime('%H:%M')
             }
         )
+
+    async def send_chat_history(self):
+        messages = await self.get_chat_history()
+        await self.send(text_data=json.dumps({
+            'type': 'chat_history',
+            'messages': messages
+        }))
+
+    @database_sync_to_async
+    def get_customer(self):
+        try:
+            return User.objects.get(id=self.customer_id)
+        except User.DoesNotExist:
+            return None
+
+    @database_sync_to_async
+    def get_chat_history(self):
+        messages = ChatMessage.objects.filter(
+            user_id=self.customer_id
+        ).order_by('created_at')
+        return [{
+            'id': m.id,
+            'message': m.message,
+            'is_from_store': m.is_from_store,
+            'time': m.created_at.strftime('%H:%M')
+        } for m in messages]
+
+    @database_sync_to_async
+    def save_message(self, customer, message_text):
+        return ChatMessage.objects.create(
+            user=customer,
+            message=message_text,
+            is_from_store=True
+        )
+
+    async def chat_message(self, event):
+        """Recebe broadcast da sala e envia para o painel"""
+        await self.send(text_data=json.dumps({
+            'type': 'chat_message',
+            'message': event['message'],
+            'is_from_store': event['is_from_store'],
+            'time': event['time']
+        }))
