@@ -34,7 +34,7 @@
                 <div class="card-body p-0" style="max-height: 65vh; overflow-y: auto;">
                     <div class="list-group list-group-flush" id="customer-list">
                         {% for customer in customers %}
-                        <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.get_full_name|default:customer.username }}')" 
+                        <a href="#" onclick="openChat({{ customer.id }}, '{{ customer.get_full_name|default:customer.username }}')"
                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-dark text-white border-primary py-3"
                            id="customer-{{ customer.id }}">
                             👤 {{ customer.get_full_name|default:customer.username }}
@@ -55,21 +55,20 @@
             <div class="card h-100 bg-dark border-primary">
                 <div class="card-header bg-black border-primary text-white d-flex justify-content-between align-items-center py-3" id="chat-header">
                     <strong id="chat-with" class="fs-5">Selecione um cliente para conversar</strong>
-                    
                     <button onclick="closeChat()" class="btn btn-outline-danger btn-sm d-lg-none">
                         <i class="fas fa-times"></i> Fechar
                     </button>
                 </div>
 
-                <div id="chat-body" class="card-body overflow-auto p-3" 
+                <div id="chat-body" class="card-body overflow-auto p-3"
                      style="height: 55vh; background: #1a1a1a; max-height: 60vh;">
                 </div>
 
                 <div class="card-footer bg-dark border-primary p-3">
                     <div class="input-group">
-                        <input id="store-message-input" type="text" 
-                               class="form-control bg-dark text-white border-primary" 
-                               placeholder="Digite sua mensagem..." 
+                        <input id="store-message-input" type="text"
+                               class="form-control bg-dark text-white border-primary"
+                               placeholder="Digite sua mensagem..."
                                onkeypress="if(event.key === 'Enter') sendStoreMessage()">
                         <button onclick="sendStoreMessage()" class="btn btn-success px-4">
                             <i class="fas fa-paper-plane"></i>
@@ -90,10 +89,10 @@
     let allMessages = [];
     let unreadCount = 0;
 
-    // ==================== STATUS ONLINE / AUSENTE / OFFLINE (WebSocket) ====================
+    // ==================== STATUS ONLINE / AUSENTE / OFFLINE ====================
     function connectOnlineStatus() {
         if (onlineSocket) onlineSocket.close();
-        
+
         onlineSocket = new WebSocket(`ws://${window.location.host}/ws/online/`);
 
         onlineSocket.onmessage = function(e) {
@@ -111,16 +110,18 @@
                         badgeClass = 'badge bg-warning text-dark rounded-pill';
                         text = 'Ausente';
                     }
-                    // else = Offline (cinza)
 
                     statusEl.className = badgeClass;
                     statusEl.textContent = text;
                 }
             }
         };
+
+        onlineSocket.onerror = (e) => console.error('Erro no status online:', e);
+        onlineSocket.onclose = () => console.log('Status online desconectado');
     }
 
-    // ==================== NOTIFICAÇÕES EM TEMPO REAL ====================
+    // ==================== NOTIFICAÇÕES ====================
     function updateNotificationCount() {
         const countEl = document.getElementById('notification-count');
         if (unreadCount > 0) {
@@ -161,10 +162,18 @@
         document.getElementById('chat-body').innerHTML = '<div class="text-center text-muted py-4">Carregando histórico...</div>';
 
         if (chatSocket) chatSocket.close();
-        
-        chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/`);
 
-        chatSocket.onopen = () => console.log(`✅ Chat aberto com cliente ${userId}`);
+        // 👇 URL corrigida para o consumer da loja
+        chatSocket = new WebSocket(`ws://${window.location.host}/ws/support/`);
+
+        // 👇 Entra na sala do cliente ao abrir
+        chatSocket.onopen = () => {
+            console.log(`✅ Chat aberto com cliente ${userId}`);
+            chatSocket.send(JSON.stringify({
+                'type': 'join_room',
+                'customer_id': userId
+            }));
+        };
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
@@ -172,7 +181,7 @@
             if (data.type === 'chat_history') {
                 allMessages = data.messages || [];
                 renderMessages(allMessages);
-            } 
+            }
             else if (data.type === 'chat_message') {
                 allMessages.push(data);
                 renderMessages(allMessages);
@@ -182,6 +191,9 @@
                 }
             }
         };
+
+        chatSocket.onerror = (e) => console.error('Erro no chat:', e);
+        chatSocket.onclose = () => console.log('Chat desconectado');
     }
 
     function renderMessages(messages) {
@@ -211,6 +223,7 @@
 
     function sendStoreMessage() {
         if (!currentCustomerId || !chatSocket) return;
+        if (chatSocket.readyState !== WebSocket.OPEN) return; // 👇 garante socket aberto
         const input = document.getElementById('store-message-input');
         const message = input.value.trim();
         if (!message) return;
@@ -222,7 +235,7 @@
         input.value = '';
     }
 
-    // Inicia o WebSocket ao carregar a página
+    // Inicia o WebSocket de status ao carregar a página
     window.onload = function() {
         connectOnlineStatus();
     };
