@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.urls import reverse
 
 from .models import Produto, Variante, Pedido
 from accounts.models import OTPCode
@@ -186,9 +187,9 @@ def criar_preferencia_mercadopago(request):
             "email": email
         },
         "back_urls": {
-            "success": "http://127.0.0.1:8000/checkout/sucesso/",
-            "failure": "http://127.0.0.1:8000/checkout/falha/",
-            "pending": "http://127.0.0.1:8000/checkout/pendente/",
+            "success": request.build_absolute_uri(reverse('core:checkout_sucesso')),
+            "failure": request.build_absolute_uri(reverse('core:checkout_falha')),
+            "pending": request.build_absolute_uri(reverse('core:checkout_pendente')),
         },
         "statement_descriptor": "SUALOJA",
         "external_reference": f"pedido-{request.user.id if request.user.is_authenticated else 'guest'}",
@@ -209,39 +210,15 @@ def criar_preferencia_mercadopago(request):
         return redirect('core:carrinho')
 
 
+# ==================== CHECKOUT SUCESSO ====================
 def checkout_sucesso(request):
-    carrinho = request.session.get('carrinho', {})
-    total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
-
-    pedido = None
-    if request.user.is_authenticated and carrinho:
-        pedido = Pedido.objects.create(
-            user=request.user,
-            total=total,
-            status='pago'
-        )
-        profile = request.user.profile
-        profile.total_pedidos += 1
-        profile.pontos_fidelidade += 10
-        profile.ultima_compra = timezone.now()
-        profile.save()
-
-        if profile.total_pedidos == 3:
-            messages.success(request, '🎉 Parabéns! Você agora é cliente Fiel!')
-        elif profile.total_pedidos >= 6:
-            messages.success(request, '👑 Você é VIP!')
-
     if 'carrinho' in request.session:
         del request.session['carrinho']
     if 'desconto' in request.session:
         del request.session['desconto']
     request.session.modified = True
     request.session.save()
-
-    if pedido:
-        return redirect('core:confirmacao_pedido', pedido_id=pedido.id)
-
-    messages.success(request, '✅ Pagamento aprovado com sucesso!')
+    messages.success(request, '✅ Pagamento recebido! Aguardando confirmação.')
     return render(request, 'core/checkout_sucesso.html')
 
 
@@ -257,8 +234,7 @@ def checkout_pendente(request):
 
 @login_required
 def confirmacao_pedido(request, pedido_id):
-    pedido = Pedido.objects.get(id=pedido_id, user=request.user)
-
+    pedido = get_object_or_404(Pedido, id=pedido_id, user=request.user)
     context = {
         'pedido': pedido,
         'pedido_numero': f"20260413-{pedido.id:04d}",
@@ -353,19 +329,23 @@ def admin_gate(request):
             return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, '❌ Senha master incorreta! Tente novamente.')
-  
+ 
     return render(request, 'core/admin_gate.html')
 
 
+# ==================== CREATE SUPERUSER (AGORA RESTRITO AO DEBUG) ====================
 def create_superuser_view(request):
+    if not settings.DEBUG:
+        return HttpResponse(status=404)   # Bloqueado em produção
+
     if request.method == 'POST':
         master_password = request.POST.get('master_password', '').strip()
-        
+       
         if master_password == settings.ADMIN_MASTER_PASSWORD:
             username = request.POST.get('username', 'admin')
             email = request.POST.get('email', '')
             password = request.POST.get('password', '')
-            
+           
             User = get_user_model()
             if User.objects.filter(username=username).exists():
                 messages.warning(request, f"Usuário '{username}' já existe!")
@@ -375,7 +355,7 @@ def create_superuser_view(request):
                 return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, "Senha master incorreta!")
-   
+ 
     return render(request, 'core/create_superuser.html')
 
 
@@ -396,42 +376,52 @@ def painel_suporte(request):
     })
 
 
+# ==================== WEBHOOK MERCADO PAGO ====================
 @csrf_exempt
 def webhook_mercadopago(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
             if data.get('type') == 'payment':
                 payment_id = data.get('data', {}).get('id')
-                
                 if payment_id:
                     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
                     payment_info = sdk.payment().get(payment_id)
-                    
                     if payment_info['status'] == 200:
                         payment = payment_info['response']
-                        external_reference = payment.get('external_reference')
-                        
+                        external_reference = payment.get('external_reference', '')
+                        status_mp = payment.get('status')
                         if external_reference and 'pedido-' in external_reference:
                             try:
-                                pedido_id = external_reference.split('-')[1]
-                                pedido = Pedido.objects.get(id=pedido_id)
-                                
-                                status_mp = payment['status']
-                                
+                                user_id = external_reference.split('-')[1]
+                                User = get_user_model()
+                                user = User.objects.get(id=user_id)
+                                pedido, created = Pedido.objects.get_or_create(
+                                    external_reference=external_reference,
+                                    defaults={
+                                        'user': user,
+                                        'total': payment.get('transaction_amount', 0),
+                                        'status': 'pendente'
+                                    }
+                                )
                                 if status_mp == 'approved':
                                     pedido.status = 'pago'
                                     pedido.save()
+                                    if created:
+                                        profile = user.profile
+                                        profile.total_pedidos += 1
+                                        profile.pontos_fidelidade += 10
+                                        profile.ultima_compra = timezone.now()
+                                        profile.save()
                                 elif status_mp in ['in_process', 'pending']:
                                     pedido.status = 'pendente'
                                     pedido.save()
                                 elif status_mp in ['rejected', 'cancelled']:
-                                    pedido.status = 'pendente'
+                                    pedido.status = 'cancelado'
                                     pedido.save()
-                            except Pedido.DoesNotExist:
-                                print(f"Pedido não encontrado: {external_reference}")
+                            except (User.DoesNotExist, Exception) as e:
+                                print(f"Erro ao processar pedido no webhook: {e}")
         except Exception as e:
             print("Erro no webhook Mercado Pago:", str(e))
-   
+  
     return HttpResponse(status=200)
