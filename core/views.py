@@ -79,6 +79,7 @@ def remover_do_carrinho(request, variante_id):
     if str(variante_id) in carrinho:
         del carrinho[str(variante_id)]
         request.session['carrinho'] = carrinho
+        request.session.modified = True
 
     return redirect('core:carrinho')
 
@@ -121,7 +122,7 @@ def aplicar_desconto(request):
             valor = descontos[codigo]
             desconto = subtotal * valor if valor < 1 else valor
             request.session['desconto'] = round(desconto, 2)
-            messages.success(request, "Cupom aplicado!")
+            messages.success(request, f"Cupom {codigo} aplicado!")
         else:
             messages.error(request, "Cupom inválido!")
 
@@ -149,7 +150,7 @@ def checkout(request):
     })
 
 
-# ==================== MERCADO PAGO ====================
+# ==================== MERCADO PAGO (CORRIGIDO HTTPS) ====================
 def criar_preferencia_mercadopago(request):
     if request.method != "POST":
         return redirect('core:checkout')
@@ -159,7 +160,7 @@ def criar_preferencia_mercadopago(request):
         return redirect('core:home')
 
     email = request.POST.get("email")
-    base_url = request.build_absolute_uri('/')[:-1]
+    base_url = request.build_absolute_uri('/').replace("http://", "https://").rstrip('/')
 
     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
 
@@ -181,7 +182,7 @@ def criar_preferencia_mercadopago(request):
             "failure": f"{base_url}/checkout/falha/",
             "pending": f"{base_url}/checkout/pendente/",
         },
-        "external_reference": f"pedido-{request.user.id}"
+        "external_reference": f"pedido-{request.user.id if request.user.is_authenticated else 'guest'}"
     }
 
     response = sdk.preference().create(preference)
@@ -206,17 +207,19 @@ def checkout_sucesso(request):
         profile.pontos_fidelidade += 10
         profile.save()
 
+        request.session.flush()
         return redirect('core:confirmacao_pedido', pedido_id=pedido.id)
 
-    request.session.flush()
     return render(request, 'core/checkout_sucesso.html')
 
 
 def checkout_falha(request):
+    messages.error(request, "Pagamento falhou!")
     return render(request, 'core/checkout_falha.html')
 
 
 def checkout_pendente(request):
+    messages.warning(request, "Pagamento pendente!")
     return render(request, 'core/checkout_pendente.html')
 
 
@@ -244,10 +247,11 @@ def meus_pedidos(request):
 @login_required
 def painel_suporte(request):
     if not request.user.is_staff:
+        messages.error(request, "Acesso negado")
         return redirect('core:home')
 
     User = get_user_model()
-    customers = User.objects.filter(is_staff=False, is_active=True)
+    customers = User.objects.filter(is_staff=False, is_active=True).order_by('-last_login')
 
     return render(request, 'accounts/suporte.html', {
         'customers': customers
@@ -260,7 +264,18 @@ def webhook_mercadopago(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            print("Pagamento recebido:", data)
+
+            if data.get("type") == "payment":
+                payment_id = data.get("data", {}).get("id")
+
+                if payment_id:
+                    sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
+                    payment_info = sdk.payment().get(payment_id)
+
+                    if payment_info["status"] == 200:
+                        payment = payment_info["response"]
+                        print("Pagamento confirmado:", payment)
+
         except Exception as e:
             print("Erro webhook:", e)
 
