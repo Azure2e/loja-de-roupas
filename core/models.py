@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from decimal import Decimal   # ← Adicionado para corrigir os DecimalField
+from decimal import Decimal
+from django.conf import settings   # ← Adicionado para usar AUTH_USER_MODEL
 
 
 # ==================== CATEGORIAS ====================
@@ -24,7 +25,7 @@ class Produto(models.Model):
     preco = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
-        default=Decimal('0.00')      # ← Corrigido
+        default=Decimal('0.00')
     )
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, related_name='produtos')
     
@@ -57,7 +58,7 @@ class Variante(models.Model):
     preco_extra = models.DecimalField(
         max_digits=8, 
         decimal_places=2, 
-        default=Decimal('0.00')      # ← Corrigido
+        default=Decimal('0.00')
     )
 
     def __str__(self):
@@ -87,36 +88,42 @@ class Cupom(models.Model):
     minimo_compra = models.DecimalField(
         max_digits=8, 
         decimal_places=2, 
-        default=Decimal('0.00')      # ← Corrigido
+        default=Decimal('0.00')
     )
 
     def __str__(self):
         return self.codigo
 
 
-# ==================== PEDIDOS ====================
+# ==================== PEDIDO (ATUALIZADO) ====================
 class Pedido(models.Model):
     STATUS_CHOICES = [
         ('pendente', 'Pendente'),
         ('pago', 'Pago'),
-        ('enviado', 'Enviado'),
-        ('entregue', 'Entregue'),
+        ('cancelado', 'Cancelado'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    total = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=Decimal('0.00')      # ← Corrigido
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
+    
+    # ✅ Campo novo para integração com Mercado Pago
+    external_reference = models.CharField(
+        max_length=100, 
+        blank=True, 
+        null=True, 
+        unique=True
+    )
+    
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Pedido #{self.pk} - {self.user.username}"   # ← Alterado de .id para .pk
+        return f"Pedido #{self.id} - {self.user} - {self.status}"
 
     class Meta:
         ordering = ['-criado_em']
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedidos"
 
 
 # ==================== PERFIL DO USUÁRIO (Fidelidade) ====================
