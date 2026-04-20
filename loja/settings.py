@@ -1,4 +1,5 @@
-# loja/settings.py
+loja/settings.py
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -8,13 +9,27 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==================== SEGURANÇA ====================
-SECRET_KEY = os.getenv('SECRET_KEY') or 'django-insecure-teste-local-2026-1234567890abcdef1234567890'
 
-DEBUG = True   # ← Alterado para True (para ver o erro completo)
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# ==================== INSTALLED APPS ====================
+ALLOWED_HOSTS = [
+    "loja-de-roupas-452l.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+# ✅ CSRF corrigido para Render (obrigatório)
+CSRF_TRUSTED_ORIGINS = [
+    'https://loja-de-roupas-452l.onrender.com',
+    'https://*.onrender.com',           # wildcard para futuros deploys
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ==================== APPS ====================
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -27,20 +42,19 @@ INSTALLED_APPS = [
     'core',
     'accounts',
 
+    'channels',
     'phonenumber_field',
     'axes',
+    'captcha',
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-
-    'channels',
-
-    'captcha',
 ]
 
 # ==================== MIDDLEWARE ====================
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -50,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
     'axes.middleware.AxesMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
@@ -58,14 +73,19 @@ ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
-# ===================== DJANGO CHANNELS =====================
+# ==================== CHANNELS (CHAT) ====================
+
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer', # Para produção use Redis
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.getenv("REDIS_URL")],
+        },
     },
 }
 
 # ==================== TEMPLATES ====================
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,77 +102,76 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS ====================
+# ==================== DATABASE ====================
+
 import dj_database_url
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True,
+    )
+}
 
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
-    }
-    print("✅ DATABASE_URL encontrada e configurada com sucesso!")
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-    print("⚠️ AVISO: DATABASE_URL não encontrada! Usando SQLite local.")
+# ==================== INTERNACIONAL ====================
 
-DATABASES['default']['CONN_MAX_AGE'] = 600
-
-# ==================== IDIOMA E FUSO HORÁRIO ====================
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/La_Paz'
 USE_I18N = True
 USE_TZ = True
 
-# ==================== STATIC FILES ====================
+# ==================== STATIC ====================
+
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ==================== CLOUDINARY (ARMAZENAMENTO DE FOTOS) ====================
+# ==================== MEDIA (Cloudinary) ====================
+
 import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
 cloudinary.config(
-    cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key    = os.getenv('CLOUDINARY_API_KEY'),
-    api_secret = os.getenv('CLOUDINARY_API_SECRET'),
-    secure     = True
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    secure=True
 )
 
-# URL base do Cloudinary (CDN)
 MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
 
-# ==================== AUTHENTICATION ====================
+# ==================== AUTH ====================
+
 LOGIN_REDIRECT_URL = 'core:home'
 LOGOUT_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'accounts:login'
 
-SESSION_COOKIE_AGE = 1209600
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
-# ==================== CHAVES SECRETAS ====================
-BREVO_API_KEY = os.getenv('BREVO_API_KEY')
-WHATSAPP_SENDER = os.getenv('WHATSAPP_SENDER')
-MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
-ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
+# ==================== ALLAUTH ====================
 
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-GOOGLE_SECRET = os.getenv('GOOGLE_SECRET')
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
-RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
-RECAPTCHA_REQUIRED_SCORE = 0.7
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+            'secret': os.getenv('GOOGLE_SECRET'),
+            'key': ''
+        }
+    }
+}
 
 # ==================== EMAIL ====================
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
@@ -161,47 +180,19 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # ==================== AXES ====================
+
 AXES_FAILURE_LIMIT = 8
-AXES_LOCKOUT_DURATION = 180
 AXES_COOLOFF_TIME = 180
 AXES_RESET_ON_SUCCESS = True
-AXES_VERBOSE = True
-AXES_LOCKOUT_TEMPLATE = 'axes/lockout.html'
 
-# ==================== AUTHENTICATION BACKENDS ====================
-AUTHENTICATION_BACKENDS = [
-    'axes.backends.AxesStandaloneBackend',
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
+# ==================== RECAPTCHA ====================
 
-# ==================== ALLAUTH ====================
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_SECRET'),
-            'key': ''
-        },
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
-    }
-}
+# ==================== SEGURANÇA PRODUÇÃO ====================
 
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
-# ==================== SEGURANÇA EXTRA ====================
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-else:
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
