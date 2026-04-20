@@ -1,5 +1,3 @@
-loja/settings.py
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -20,10 +18,10 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
 ]
 
-# ✅ CSRF corrigido para Render (obrigatório)
+# ✅ CSRF CORRIGIDO PARA RENDER
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-452l.onrender.com',
-    'https://*.onrender.com',           # wildcard para futuros deploys
+    'https://*.onrender.com',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
