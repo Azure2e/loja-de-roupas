@@ -145,6 +145,7 @@ def checkout(request):
     })
 
 
+# ==================== FUNÇÃO ATUALIZADA ====================
 def criar_preferencia_mercadopago(request):
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
@@ -157,8 +158,8 @@ def criar_preferencia_mercadopago(request):
 
     email = request.POST.get('email', '').strip()
     if not email:
-        messages.error(request, '⚠️ O e-mail é obrigatório para prosseguir com o pagamento.')
-        return redirect('core:checkout')
+        # Se o usuário não digitou, usa o e-mail cadastrado na conta
+        email = request.user.email if request.user.is_authenticated and request.user.email else 'contato@sualoja.com'
 
     if '@' not in email or '.' not in email:
         messages.error(request, '⚠️ Por favor, insira um e-mail válido.')
@@ -181,10 +182,18 @@ def criar_preferencia_mercadopago(request):
             "currency_id": "BRL",
         })
 
+    # ✅ MELHORIA: Envia nome + sobrenome + e-mail completo
+    # Isso faz o Mercado Pago preencher automaticamente o e-mail na tela do Pix
+    payer_name = request.user.get_full_name() or request.user.username
+    first_name = payer_name.split()[0] if payer_name else "Cliente"
+    last_name = " ".join(payer_name.split()[1:]) if len(payer_name.split()) > 1 else "Silva"
+
     preference_data = {
         "items": items,
         "payer": {
-            "email": email
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,                    # ← principal correção
         },
         "back_urls": {
             "success": request.build_absolute_uri(reverse('core:checkout_sucesso')),
@@ -333,7 +342,7 @@ def admin_gate(request):
     return render(request, 'core/admin_gate.html')
 
 
-# ==================== CREATE SUPERUSER (AGORA RESTRITO AO DEBUG) ====================
+# ==================== CREATE SUPERUSER (RESTRITO AO DEBUG) ====================
 def create_superuser_view(request):
     if not settings.DEBUG:
         return HttpResponse(status=404)   # Bloqueado em produção
