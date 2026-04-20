@@ -30,6 +30,9 @@ urlpatterns = [
 
     # ===================== ALLAUTH =====================
     path('accounts/', include('allauth.urls')),
+
+    # ===================== STRIPE =====================
+    path('criar-sessao-stripe/', core_views.criar_sessao_stripe, name='criar_sessao_stripe'),
 ]
 
 # ===================== ARQUIVOS DE MÍDIA =====================
