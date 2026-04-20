@@ -6,97 +6,72 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
+        <div class="col-lg-11">
 
-            <!-- TÍTULO PRINCIPAL -->
+            <!-- Cabeçalho -->
             <div class="text-center mb-5">
                 <h1 class="display-5 fw-bold text-white">
                     <i class="fas fa-lock me-2"></i> Checkout Seguro
                 </h1>
-                <p class="lead text-success">
+                <p class="lead text-success mb-0">
                     Pagamento 100% protegido pelo Mercado Pago
                 </p>
             </div>
 
             <div class="row g-5">
 
-                <!-- INFORMAÇÕES DO CLIENTE -->
+                <!-- COLUNA ESQUERDA: Dados do Cliente + Resumo -->
                 <div class="col-lg-7">
-                    <div class="card bg-dark border-primary shadow-sm mb-4">
-                        <div class="card-header bg-black border-primary py-3">
+
+                    <!-- Informações do Cliente -->
+                    <div class="card bg-dark border-primary mb-4">
+                        <div class="card-header bg-black py-3">
                             <h5 class="mb-0">👤 Informações do Cliente</h5>
                         </div>
                         <div class="card-body">
-
-                            <div class="row g-4">
+                            <div class="row g-3">
                                 <div class="col-12">
                                     <strong>Nome Completo:</strong><br>
-                                    <span class="fs-5">
-                                        {{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}
-                                    </span>
+                                    <span class="fs-5">{{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}</span>
                                 </div>
-
                                 <div class="col-md-6">
                                     <strong>E-mail:</strong><br>
                                     <span>{{ request.user.email|default:"Não cadastrado" }}</span>
                                 </div>
-
                                 <div class="col-md-6">
                                     <strong>Telefone / WhatsApp:</strong><br>
-                                    <span>
-                                        {{ profile.phone|default:"Não cadastrado" }}
-                                    </span>
+                                    <span>{{ profile.phone|default:"Não cadastrado" }}</span>
                                     {% if not profile.phone %}
                                         <a href="{% url 'accounts:perfil' %}" class="text-info small ms-2">Cadastrar →</a>
                                     {% endif %}
                                 </div>
-
                                 <div class="col-12">
                                     <hr class="border-secondary">
                                     <strong>Endereço de Entrega:</strong><br>
-                                    <span class="text-light">
-                                        {{ profile.address|default:"Nenhum endereço cadastrado" }}
-                                    </span>
+                                    <span>{{ profile.address|default:"Nenhum endereço cadastrado" }}</span>
                                     <br>
-                                    <a href="{% url 'accounts:perfil' %}" class="text-primary text-decoration-underline small">
+                                    <a href="{% url 'accounts:perfil' %}" class="text-primary small">
                                         ✏️ Editar endereço no perfil →
                                     </a>
                                 </div>
                             </div>
-
-                            {% if not profile.address or not profile.phone %}
-                                <div class="alert alert-warning mt-4 small">
-                                    ⚠️ Complete seu endereço e telefone no <strong>Perfil</strong> para finalizar a compra mais rápido.
-                                </div>
-                            {% endif %}
-
                         </div>
                     </div>
 
-                    <!-- RESUMO DO PEDIDO -->
-                    <div class="card bg-dark border-primary shadow-sm">
-                        <div class="card-header bg-black border-primary py-3">
+                    <!-- Resumo do Pedido -->
+                    <div class="card bg-dark border-primary">
+                        <div class="card-header bg-black py-3">
                             <h5 class="mb-0">🛒 Resumo do Pedido</h5>
                         </div>
                         <div class="card-body">
-
                             {% for item in carrinho.values %}
-                            <div class="d-flex gap-3 mb-4">
-                                {% if item.imagem %}
-                                    <img src="{{ item.imagem.url }}" alt="{{ item.nome }}" 
-                                         class="rounded" style="width: 70px; height: 70px; object-fit: cover;">
-                                {% else %}
-                                    <img src="{% static 'img/produtos/bermuda-de-praia-estampada.jpg' %}" 
-                                         alt="{{ item.nome }}" 
-                                         class="rounded" style="width: 70px; height: 70px; object-fit: cover;">
-                                {% endif %}
-                                
+                            <div class="d-flex gap-3 mb-4 align-items-center">
+                                <img src="{% static 'img/produtos/bermuda-de-praia-estampada.jpg' %}" 
+                                     alt="{{ item.nome }}" class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1">{{ item.nome }}</h6>
-                                    <small class="text-light">
-                                        {{ item.tamanho }} - {{ item.cor }}
-                                    </small>
-                                    <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-light">{{ item.tamanho }} • {{ item.cor }}</small>
+                                    <div class="mt-2 d-flex justify-content-between">
                                         <span>× {{ item.quantidade }}</span>
                                         <span class="fw-bold">R$ {{ item.subtotal|floatformat:2 }}</span>
                                     </div>
@@ -118,18 +93,17 @@
                             </div>
                             {% endif %}
 
-                            <hr class="border-secondary">
-                            <div class="d-flex justify-content-between fs-5 fw-bold">
-                                <strong>Total a pagar</strong>
-                                <strong class="text-white">R$ {{ total_final|floatformat:2 }}</strong>
+                            <div class="d-flex justify-content-between fs-4 fw-bold text-white">
+                                <span>Total a pagar</span>
+                                <span>R$ {{ total_final|floatformat:2 }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- FORMA DE PAGAMENTO COM E-MAIL -->
+                <!-- COLUNA DIREITA: Pagamento -->
                 <div class="col-lg-5">
-                    <div class="card bg-dark border-primary shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card bg-dark border-primary sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
 
                             <h4 class="mb-4 text-center">💳 Como você quer pagar?</h4>
@@ -140,7 +114,7 @@
                                 {% endfor %}
                             {% endif %}
 
-                            <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" id="payment-form">
+                            <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}">
                                 {% csrf_token %}
 
                                 <div class="mb-4">
@@ -156,20 +130,19 @@
                                     </small>
                                 </div>
 
-                                <button type="submit" 
-                                        class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-4 shadow mb-4">
+                                <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-4 shadow">
                                     <i class="fas fa-credit-card me-2"></i> 
                                     PAGAR COM MERCADO PAGO
                                 </button>
                             </form>
 
-                            <div class="text-center mb-4">
+                            <div class="text-center my-4">
                                 <img src="https://www.mercadopago.com.br/wp-content/themes/mercadopago/images/logo-mercadopago.png" 
                                      alt="Mercado Pago" style="height: 45px;">
                             </div>
 
-                            <p class="lead mb-3 text-center">
-                                <strong>Cartão • PIX • Boleto • Parcelamento em até 12x</strong>
+                            <p class="text-center mb-4">
+                                Cartão • PIX • Boleto • Parcelamento em até 12x
                             </p>
 
                             <div class="d-flex align-items-center justify-content-center gap-2 text-muted small">
@@ -177,7 +150,7 @@
                                 <span>Pagamento 100% seguro • Protegido pelo Mercado Pago</span>
                             </div>
 
-                            <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light mt-4 w-100">
+                            <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light w-100 mt-4">
                                 ← Voltar ao Carrinho
                             </a>
                         </div>
