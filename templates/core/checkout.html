@@ -29,43 +29,30 @@
                             <h5 class="mb-0 text-white">👤 Informações do Cliente</h5>
                         </div>
                         <div class="card-body text-light">
-
                             <div class="row g-3">
                                 <div class="col-12">
                                     <strong class="text-white">Nome Completo:</strong><br>
-                                    <span class="fs-5 text-white">
-                                        {{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}
-                                    </span>
+                                    <span class="fs-5 text-white">{{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}</span>
                                 </div>
-
                                 <div class="col-md-6">
                                     <strong class="text-white">E-mail:</strong><br>
                                     <span class="text-white">{{ request.user.email|default:"Não cadastrado" }}</span>
                                 </div>
-
                                 <div class="col-md-6">
                                     <strong class="text-white">Telefone / WhatsApp:</strong><br>
-                                    <span class="text-white">
-                                        {{ profile.phone|default:"Não cadastrado" }}
-                                    </span>
+                                    <span class="text-white">{{ profile.phone|default:"Não cadastrado" }}</span>
                                     {% if not profile.phone %}
                                         <a href="{% url 'accounts:perfil' %}" class="text-info small ms-2">Cadastrar →</a>
                                     {% endif %}
                                 </div>
-
                                 <div class="col-12">
                                     <hr class="border-secondary">
                                     <strong class="text-white">Endereço de Entrega:</strong><br>
-                                    <span class="text-white">
-                                        {{ profile.address|default:"Nenhum endereço cadastrado" }}
-                                    </span>
+                                    <span class="text-white">{{ profile.address|default:"Nenhum endereço cadastrado" }}</span>
                                     <br>
-                                    <a href="{% url 'accounts:perfil' %}" class="text-primary text-decoration-underline small">
-                                        ✏️ Editar endereço no perfil →
-                                    </a>
+                                    <a href="{% url 'accounts:perfil' %}" class="text-primary text-decoration-underline small">✏️ Editar endereço no perfil →</a>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -75,7 +62,6 @@
                             <h5 class="mb-0 text-white">🛒 Resumo do Pedido</h5>
                         </div>
                         <div class="card-body text-light">
-
                             {% for item in carrinho.values %}
                             <div class="d-flex gap-3 mb-4 align-items-center">
                                 <img src="{% static 'img/produtos/bermuda-de-praia-estampada.jpg' %}" 
@@ -92,19 +78,16 @@
                             {% endfor %}
 
                             <hr class="border-secondary">
-
                             <div class="d-flex justify-content-between mb-2 text-light">
                                 <span>Subtotal</span>
                                 <span class="fw-bold text-white">R$ {{ subtotal_geral|floatformat:2 }}</span>
                             </div>
-
                             {% if desconto > 0 %}
                             <div class="d-flex justify-content-between mb-2 text-success">
                                 <span>Cupom aplicado</span>
                                 <span>- R$ {{ desconto|floatformat:2 }}</span>
                             </div>
                             {% endif %}
-
                             <div class="d-flex justify-content-between fs-4 fw-bold text-white">
                                 <span>Total a pagar</span>
                                 <span>R$ {{ total_final|floatformat:2 }}</span>
@@ -113,7 +96,7 @@
                     </div>
                 </div>
 
-                <!-- COLUNA DIREITA: Escolha de Pagamento -->
+                <!-- COLUNA DIREITA - ESCOLHA DE PAGAMENTO -->
                 <div class="col-lg-5">
                     <div class="card bg-dark border-primary sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
@@ -131,25 +114,22 @@
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label class="form-label fw-bold text-white">📧 E-mail para o pagamento</label>
-                                    <input type="email" 
-                                           name="email" 
-                                           class="form-control form-control-lg bg-dark text-white border-primary"
-                                           value="{{ request.user.email|default:'' }}"
-                                           placeholder="seuemail@exemplo.com"
-                                           required>
+                                    <input type="email" name="email" class="form-control form-control-lg bg-dark text-white border-primary"
+                                           value="{{ request.user.email|default:'' }}" placeholder="seuemail@exemplo.com" required>
                                 </div>
                                 <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold">
-                                    <i class="fab fa-mercado-pago me-2"></i> 
-                                    PAGAR COM MERCADO PAGO
+                                    <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
                                 </button>
                             </form>
 
-                            <!-- Stripe -->
+                            <!-- Stripe - Botão Mais Bonito -->
                             <form method="post" action="{% url 'criar_sessao_stripe' %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold">
-                                    <i class="fab fa-stripe me-2"></i> 
-                                    PAGAR COM STRIPE (Cartão • PIX • Boleto)
+                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-lg border-0"
+                                        style="background: linear-gradient(135deg, #635bff, #8a7eff);">
+                                    <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> 
+                                    PAGAR COM STRIPE
+                                    <small class="d-block text-light opacity-90 mt-1">Cartão • PIX • Boleto</small>
                                 </button>
                             </form>
 
@@ -159,10 +139,6 @@
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" 
                                      alt="Stripe" style="height: 45px;">
                             </div>
-
-                            <p class="text-center text-light small">
-                                Cartão • PIX • Boleto • Parcelamento
-                            </p>
 
                             <div class="d-flex align-items-center justify-content-center gap-2 text-light small">
                                 <i class="fas fa-shield-alt"></i>
