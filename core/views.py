@@ -181,39 +181,34 @@ def criar_preferencia_mercadopago(request):
             "currency_id": "BRL",
         })
 
-    # ✅ MÁXIMA FORÇA: nome completo + telefone + email (ajuda muito no pre-fill)
+    # ✅ MÁXIMA FORÇA: nome completo + telefone + email
     payer_name = request.user.get_full_name() or request.user.username or "Jaques Silva"
     first_name = payer_name.split()[0] if payer_name else "Cliente"
     last_name = " ".join(payer_name.split()[1:]) if len(payer_name.split()) > 1 else "Silva"
 
-    # Telefone (se existir no perfil)
     phone_data = {}
     if request.user.is_authenticated:
         try:
             profile = request.user.profile
             if hasattr(profile, 'phone') and profile.phone:
                 phone_str = str(profile.phone)
-                # Remove +55 ou outros prefixos
                 if phone_str.startswith('+55'):
                     phone_str = phone_str[3:]
                 if len(phone_str) >= 10:
                     area_code = phone_str[:2]
                     number = phone_str[2:]
-                    phone_data = {
-                        "area_code": area_code,
-                        "number": number
-                    }
+                    phone_data = {"area_code": area_code, "number": number}
         except:
             pass
 
     preference_data = {
         "items": items,
         "payer": {
-            "name": payer_name,           # ← ajuda bastante
+            "name": payer_name,
             "first_name": first_name,
             "last_name": last_name,
-            "email": email,               # ← principal
-            **({"phone": phone_data} if phone_data else {}),   # ← telefone extra
+            "email": email,
+            **({"phone": phone_data} if phone_data else {}),
         },
         "back_urls": {
             "success": request.build_absolute_uri(reverse('core:checkout_sucesso')),
@@ -237,6 +232,57 @@ def criar_preferencia_mercadopago(request):
         print("❌ Erro completo ao criar preferência:", str(e))
         messages.error(request, f'Erro ao gerar pagamento: {str(e)}')
         return redirect('core:carrinho')
+
+
+# ==================== STRIPE - NOVA ALTERNATIVA (OTIMIZADA) ====================
+@login_required(login_url='accounts:login')
+def criar_sessao_stripe(request):
+    carrinho = request.session.get('carrinho', {})
+    if not carrinho:
+        messages.warning(request, 'Seu carrinho está vazio!')
+        return redirect('core:home')
+
+    # Calcula total uma única vez
+    total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
+    if total <= 0:
+        messages.error(request, 'Valor inválido para pagamento.')
+        return redirect('core:carrinho')
+
+    # Monta os itens para o Stripe
+    line_items = []
+    for item in carrinho.values():
+        line_items.append({
+            'price_data': {
+                'currency': 'brl',
+                'product_data': {
+                    'name': item['nome'],
+                    'description': f"{item['tamanho']} • {item['cor']}",
+                },
+                'unit_amount': int(item['preco'] * 100),  # centavos
+            },
+            'quantity': item['quantidade'],
+        })
+
+    try:
+        import stripe
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card', 'pix', 'boleto'],
+            line_items=line_items,
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('core:checkout_sucesso')),
+            cancel_url=request.build_absolute_uri(reverse('core:checkout_falha')),
+            customer_email=request.user.email,
+            metadata={'user_id': str(request.user.id)},
+        )
+
+        return redirect(checkout_session.url)
+
+    except Exception as e:
+        print("❌ Erro Stripe:", str(e))
+        messages.error(request, f'Erro ao gerar pagamento com Stripe: {str(e)}')
+        return redirect('core:checkout')
 
 
 # ==================== CHECKOUT SUCESSO ====================
@@ -365,7 +411,7 @@ def admin_gate(request):
 # ==================== CREATE SUPERUSER (RESTRITO AO DEBUG) ====================
 def create_superuser_view(request):
     if not settings.DEBUG:
-        return HttpResponse(status=404)   # Bloqueado em produção
+        return HttpResponse(status=404)
 
     if request.method == 'POST':
         master_password = request.POST.get('master_password', '').strip()
