@@ -145,7 +145,7 @@ def checkout(request):
     })
 
 
-# ==================== FUNÇÃO ATUALIZADA ====================
+# ==================== FUNÇÃO ATUALIZADA (MÁXIMA FORÇA NO PAYER) ====================
 def criar_preferencia_mercadopago(request):
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
@@ -158,7 +158,6 @@ def criar_preferencia_mercadopago(request):
 
     email = request.POST.get('email', '').strip()
     if not email:
-        # Se o usuário não digitou, usa o e-mail cadastrado na conta
         email = request.user.email if request.user.is_authenticated and request.user.email else 'contato@sualoja.com'
 
     if '@' not in email or '.' not in email:
@@ -182,18 +181,39 @@ def criar_preferencia_mercadopago(request):
             "currency_id": "BRL",
         })
 
-    # ✅ MELHORIA: Envia nome + sobrenome + e-mail completo
-    # Isso faz o Mercado Pago preencher automaticamente o e-mail na tela do Pix
-    payer_name = request.user.get_full_name() or request.user.username
+    # ✅ MÁXIMA FORÇA: nome completo + telefone + email (ajuda muito no pre-fill)
+    payer_name = request.user.get_full_name() or request.user.username or "Jaques Silva"
     first_name = payer_name.split()[0] if payer_name else "Cliente"
     last_name = " ".join(payer_name.split()[1:]) if len(payer_name.split()) > 1 else "Silva"
+
+    # Telefone (se existir no perfil)
+    phone_data = {}
+    if request.user.is_authenticated:
+        try:
+            profile = request.user.profile
+            if hasattr(profile, 'phone') and profile.phone:
+                phone_str = str(profile.phone)
+                # Remove +55 ou outros prefixos
+                if phone_str.startswith('+55'):
+                    phone_str = phone_str[3:]
+                if len(phone_str) >= 10:
+                    area_code = phone_str[:2]
+                    number = phone_str[2:]
+                    phone_data = {
+                        "area_code": area_code,
+                        "number": number
+                    }
+        except:
+            pass
 
     preference_data = {
         "items": items,
         "payer": {
+            "name": payer_name,           # ← ajuda bastante
             "first_name": first_name,
             "last_name": last_name,
-            "email": email,                    # ← principal correção
+            "email": email,               # ← principal
+            **({"phone": phone_data} if phone_data else {}),   # ← telefone extra
         },
         "back_urls": {
             "success": request.build_absolute_uri(reverse('core:checkout_sucesso')),
