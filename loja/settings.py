@@ -18,13 +18,15 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
 ]
 
-# ✅ CSRF CORRIGIDO PARA RENDER
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-452l.onrender.com',
     'https://*.onrender.com',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# ✅ NOVO: Token do Mercado Pago (obrigatório)
+MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
 
 # ==================== APPS ====================
 
