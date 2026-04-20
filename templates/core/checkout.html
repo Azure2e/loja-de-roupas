@@ -14,7 +14,7 @@
                     <i class="fas fa-lock me-2"></i> Checkout Seguro
                 </h1>
                 <p class="lead text-success mb-0">
-                    Pagamento 100% protegido pelo Mercado Pago
+                    Pagamento 100% protegido por Mercado Pago e Stripe
                 </p>
             </div>
 
@@ -113,12 +113,12 @@
                     </div>
                 </div>
 
-                <!-- COLUNA DIREITA: Pagamento -->
+                <!-- COLUNA DIREITA: Escolha de Pagamento -->
                 <div class="col-lg-5">
                     <div class="card bg-dark border-primary sticky-top" style="top: 20px;">
                         <div class="card-body p-4">
 
-                            <h4 class="mb-4 text-center text-white">💳 Como você quer pagar?</h4>
+                            <h4 class="mb-4 text-center text-white">💳 Escolha como pagar</h4>
 
                             {% if messages %}
                                 {% for message in messages %}
@@ -126,10 +126,10 @@
                                 {% endfor %}
                             {% endif %}
 
-                            <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}">
+                            <!-- Mercado Pago -->
+                            <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4">
                                 {% csrf_token %}
-
-                                <div class="mb-4">
+                                <div class="mb-3">
                                     <label class="form-label fw-bold text-white">📧 E-mail para o pagamento</label>
                                     <input type="email" 
                                            name="email" 
@@ -137,29 +137,36 @@
                                            value="{{ request.user.email|default:'' }}"
                                            placeholder="seuemail@exemplo.com"
                                            required>
-                                    <small class="text-light">
-                                        Este e-mail será usado para enviar o comprovante e o link de pagamento.
-                                    </small>
                                 </div>
-
-                                <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold rounded-4 shadow">
-                                    <i class="fas fa-credit-card me-2"></i> 
+                                <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold">
+                                    <i class="fab fa-mercado-pago me-2"></i> 
                                     PAGAR COM MERCADO PAGO
+                                </button>
+                            </form>
+
+                            <!-- Stripe -->
+                            <form method="post" action="{% url 'core:criar_sessao_stripe' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold">
+                                    <i class="fab fa-stripe me-2"></i> 
+                                    PAGAR COM STRIPE (Cartão • PIX • Boleto)
                                 </button>
                             </form>
 
                             <div class="text-center my-4">
                                 <img src="https://www.mercadopago.com.br/wp-content/themes/mercadopago/images/logo-mercadopago.png" 
-                                     alt="Mercado Pago" style="height: 45px;">
+                                     alt="Mercado Pago" style="height: 45px; margin-right: 15px;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" 
+                                     alt="Stripe" style="height: 45px;">
                             </div>
 
-                            <p class="text-center mb-4 text-light">
-                                Cartão • PIX • Boleto • Parcelamento em até 12x
+                            <p class="text-center text-light small">
+                                Cartão • PIX • Boleto • Parcelamento
                             </p>
 
                             <div class="d-flex align-items-center justify-content-center gap-2 text-light small">
                                 <i class="fas fa-shield-alt"></i>
-                                <span>Pagamento 100% seguro • Protegido pelo Mercado Pago</span>
+                                <span>Pagamento 100% seguro • Protegido por Mercado Pago e Stripe</span>
                             </div>
 
                             <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light w-100 mt-4">
