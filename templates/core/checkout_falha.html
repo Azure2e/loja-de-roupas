@@ -3,8 +3,26 @@
 
 {% block content %}
 <div class="container mt-5 text-center">
-    <h1 class="text-danger">❌ Pagamento Recusado</h1>
-    <p class="lead">Não foi possível processar seu pagamento.</p>
-    <a href="{% url 'core:ver_carrinho' %}" class="btn btn-primary btn-lg mt-4">Tentar Novamente</a>
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <h1 class="text-danger display-4 mb-4">❌ Pagamento Recusado</h1>
+            <p class="lead mb-4">Não foi possível processar seu pagamento.</p>
+            
+            <p class="text-muted mb-5">
+                Isso pode ter acontecido por um problema temporário no cartão, PIX ou no Mercado Pago.<br>
+                Tente novamente ou escolha outra forma de pagamento.
+            </p>
+
+            <a href="{% url 'core:carrinho' %}" class="btn btn-primary btn-lg px-5 py-3">
+                ← Voltar ao Carrinho e Tentar Novamente
+            </a>
+
+            <div class="mt-4">
+                <a href="{% url 'core:home' %}" class="text-decoration-underline text-muted">
+                    ← Voltar para a Loja
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
