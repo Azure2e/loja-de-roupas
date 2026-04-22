@@ -221,7 +221,7 @@
         }
 
         .checkout-left, .checkout-right {
-            animation-delay: 100ms; /* menos delay no mobile */
+            animation-delay: 100ms;
         }
     }
 </style>
@@ -268,14 +268,15 @@
 
             <h3 class="text-white mb-3">Escolha como pagar</h3>
 
-            <p class="trust text-success">🔒 Compra 100% segura • Protegida por Mercado Pago e Stripe</p>
+            <!-- ✅ TEXTO DE CONFIANÇA ATUALIZADO -->
+            <p class="trust text-success">🔒 Compra segura • Garantia de entrega • Pagamento protegido</p>
 
-            <!-- Mercado Pago -->
+            <!-- Mercado Pago - BOTÃO PRINCIPAL ATUALIZADO -->
             <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4" id="form-mp">
                 {% csrf_token %}
                 <button type="submit" id="btn-mp" class="btn primary btn-payment">
                     <span class="normal-text">
-                        💳 FINALIZAR COMPRA 🔒
+                        💳 FINALIZAR COMPRA AGORA 🔒
                     </span>
                     <span class="loading-text d-none">
                         <span class="loading-spinner me-2"></span> Processando...
