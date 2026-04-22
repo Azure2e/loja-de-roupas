@@ -5,9 +5,97 @@
 
 {% block content %}
 <style>
+    .checkout-container {
+        display: flex;
+        gap: 30px;
+        padding: 30px;
+        background: #0f172a;
+        color: white;
+        min-height: 100vh;
+        border-radius: 16px;
+    }
+
+    .checkout-left, .checkout-right {
+        flex: 1;
+    }
+
+    .box {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .item {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .total {
+        font-size: 20px;
+        margin-top: 10px;
+    }
+
+    .price {
+        color: #22c55e;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    .btn {
+        display: block;
+        text-align: center;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .primary {
+        background: #22c55e;
+        color: black;
+    }
+
+    .primary:hover {
+        background: #16a34a;
+        transform: translateY(-2px);
+    }
+
+    .secondary {
+        background: #e5e7eb;
+        color: black;
+    }
+
+    .secondary:hover {
+        background: #d1d5db;
+    }
+
+    .trust {
+        margin: 10px 0;
+        font-weight: 500;
+    }
+
+    .info {
+        font-size: 12px;
+        margin-top: 10px;
+        opacity: 0.8;
+    }
+
+    .urgency {
+        color: #facc15;
+        margin-top: 15px;
+        font-weight: 500;
+    }
+
+    /* Loading */
     .loading-spinner {
-        width: 22px;
-        height: 22px;
+        width: 24px; height: 24px;
         border: 3px solid rgba(255,255,255,0.3);
         border-top: 3px solid #fff;
         border-radius: 50%;
@@ -16,191 +104,99 @@
         vertical-align: middle;
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .btn-loading {
-        pointer-events: none;
-        opacity: 0.85;
-    }
+    .btn-loading { pointer-events: none; opacity: 0.85; }
 
     .overlay-loading {
-        position: fixed;
-        top: 0; left: 0;
+        position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.88);
+        background: rgba(0, 0, 0, 0.9);
         display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        flex-direction: column;
-        color: white;
-    }
-
-    .payment-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
+        align-items: center; justify-content: center;
+        z-index: 9999; flex-direction: column; color: white;
     }
 </style>
 
-<div class="container py-4 py-md-5">
+<div class="container py-5">
+    <div class="checkout-container">
 
-    <!-- Cabeçalho -->
-    <div class="text-center mb-4 mb-md-5">
-        <div class="d-inline-flex align-items-center bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 mb-3 small">
-            <i class="fas fa-lock me-1"></i>
-            PAGAMENTO 100% SEGURO
-        </div>
-        <h1 class="display-5 fw-bold text-white">
-            <i class="fas fa-lock me-2"></i> Checkout Seguro
-        </h1>
-        <p class="lead text-success mb-0">
-            Estamos felizes em atender você! ❤️
-        </p>
-    </div>
+        <!-- LADO ESQUERDO -->
+        <div class="checkout-left">
 
-    <div class="row g-4 g-md-5">
+            <h2 class="text-white mb-4">🔒 Checkout Seguro</h2>
 
-        <!-- COLUNA ESQUERDA -->
-        <div class="col-lg-7">
+            <div class="box">
+                <h3 class="text-white mb-3">👤 Informações do Cliente</h3>
+                <p><strong>Nome:</strong> {{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}</p>
+                <p><strong>Email:</strong> {{ request.user.email|default:"Não cadastrado" }}</p>
+                <p><strong>Telefone:</strong> {{ profile.phone|default:"Não cadastrado" }}</p>
+                <p><strong>Endereço:</strong> {{ profile.address|default:"Nenhum endereço cadastrado" }}</p>
+                <a href="{% url 'accounts:perfil' %}" class="text-info small">✏️ Editar informações</a>
+            </div>
 
-            <!-- Informações do Cliente -->
-            <div class="card bg-dark border border-secondary border-opacity-10 shadow-sm mb-4 payment-card">
-                <div class="card-header bg-black py-3">
-                    <h5 class="mb-0 text-white">👤 Informações do Cliente</h5>
+            <div class="box">
+                <h3 class="text-white mb-3">🛒 Resumo do Pedido</h3>
+
+                {% for item in carrinho.values %}
+                <div class="item">
+                    <span class="text-white">{{ item.nome }} ({{ item.tamanho }} • {{ item.cor }})</span>
+                    <span class="text-light">× {{ item.quantidade }}</span>
                 </div>
-                <div class="card-body text-light">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <strong class="text-white">Nome Completo:</strong><br>
-                            <span class="fs-5 text-white">{{ profile.nome_completo|default:request.user.get_full_name|default:request.user.username }}</span>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <strong class="text-white">E-mail:</strong><br>
-                            <span class="text-white">{{ request.user.email|default:"Não cadastrado" }}</span>
-                        </div>
-                        <div class="col-12 col-sm-6">
-                            <strong class="text-white">Telefone / WhatsApp:</strong><br>
-                            <span class="text-white">{{ profile.phone|default:"Não cadastrado" }}</span>
-                            {% if not profile.phone %}
-                                <a href="{% url 'accounts:perfil' %}" class="text-info small ms-2">Cadastrar →</a>
-                            {% endif %}
-                        </div>
-                        <div class="col-12">
-                            <hr class="border-secondary">
-                            <strong class="text-white">Endereço de Entrega:</strong><br>
-                            <span class="text-white">{{ profile.address|default:"Nenhum endereço cadastrado" }}</span>
-                            <br>
-                            <a href="{% url 'accounts:perfil' %}" class="text-primary text-decoration-underline small">✏️ Editar endereço no perfil →</a>
-                        </div>
-                    </div>
+                {% endfor %}
+
+                <hr class="border-secondary">
+
+                <div class="total d-flex justify-content-between">
+                    <strong>Total:</strong>
+                    <span class="price">R$ {{ total_final|floatformat:2 }}</span>
                 </div>
             </div>
 
-            <!-- Resumo do Pedido -->
-            <div class="card bg-dark border border-secondary border-opacity-10 shadow-sm payment-card">
-                <div class="card-header bg-black py-3">
-                    <h5 class="mb-0 text-white">🛒 Resumo do Pedido</h5>
-                </div>
-                <div class="card-body text-light">
-                    {% for item in carrinho.values %}
-                    <div class="d-flex gap-3 mb-4 align-items-center">
-                        <img src="{% static 'img/produtos/bermuda-de-praia-estampada.jpg' %}" 
-                             alt="{{ item.nome }}" class="rounded" style="width: 70px; height: 70px; object-fit: cover;">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1 text-white">{{ item.nome }}</h6>
-                            <small class="text-light">{{ item.tamanho }} • {{ item.cor }}</small>
-                            <div class="mt-2 d-flex justify-content-between">
-                                <span class="text-light">× {{ item.quantidade }}</span>
-                                <span class="fw-bold text-white">R$ {{ item.subtotal|floatformat:2 }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <hr class="border-secondary">
-                    <div class="d-flex justify-content-between mb-2 text-light">
-                        <span>Subtotal</span>
-                        <span class="fw-bold text-white">R$ {{ subtotal_geral|floatformat:2 }}</span>
-                    </div>
-                    {% if desconto > 0 %}
-                    <div class="d-flex justify-content-between mb-2 text-success">
-                        <span>Cupom aplicado</span>
-                        <span>- R$ {{ desconto|floatformat:2 }}</span>
-                    </div>
-                    {% endif %}
-                    <div class="d-flex justify-content-between fs-4 fw-bold text-white">
-                        <span>Total a pagar</span>
-                        <span class="text-success">R$ {{ total_final|floatformat:2 }}</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <!-- COLUNA DIREITA - PAGAMENTO -->
-        <div class="col-lg-5">
-            <div class="card bg-dark border border-secondary border-opacity-10 shadow-lg sticky-top" style="top: 20px;">
-                <div class="card-body p-4">
+        <!-- LADO DIREITO -->
+        <div class="checkout-right">
 
-                    <h4 class="mb-4 text-center text-white">💳 Escolha como pagar</h4>
+            <h3 class="text-white mb-3">Escolha como pagar</h3>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
+            <p class="trust text-success">🔒 Compra 100% segura • Protegida por Mercado Pago e Stripe</p>
 
-                    <!-- Mercado Pago -->
-                    <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4" id="form-mp">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-white">📧 E-mail para o pagamento</label>
-                            <input type="email" name="email" class="form-control form-control-lg bg-dark text-white border-secondary"
-                                   value="{{ request.user.email|default:'' }}" placeholder="seuemail@exemplo.com" required>
-                        </div>
-                        <button type="submit" id="btn-mp" class="btn btn-success btn-lg w-100 py-3 fw-bold btn-payment">
-                            <span class="normal-text">
-                                <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
-                            </span>
-                            <span class="loading-text d-none">
-                                <span class="loading-spinner me-2"></span> Processando...
-                            </span>
-                        </button>
-                    </form>
+            <!-- Mercado Pago -->
+            <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4" id="form-mp">
+                {% csrf_token %}
+                <button type="submit" id="btn-mp" class="btn primary btn-payment">
+                    <span class="normal-text">
+                        <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
+                    </span>
+                    <span class="loading-text d-none">
+                        <span class="loading-spinner me-2"></span> Processando...
+                    </span>
+                </button>
+            </form>
 
-                    <!-- Stripe -->
-                    <form method="post" action="{% url 'criar_sessao_stripe' %}" id="form-stripe">
-                        {% csrf_token %}
-                        <button type="submit" id="btn-stripe" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-lg border-0 btn-payment"
-                                style="background: linear-gradient(135deg, #635bff, #8a7eff);">
-                            <span class="normal-text">
-                                <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> PAGAR COM STRIPE
-                            </span>
-                            <span class="loading-text d-none">
-                                <span class="loading-spinner me-2"></span> Processando...
-                            </span>
-                            <small class="d-block text-light opacity-90 mt-1">Cartão • PIX • Boleto</small>
-                        </button>
-                    </form>
+            <!-- Stripe -->
+            <form method="post" action="{% url 'criar_sessao_stripe' %}" id="form-stripe">
+                {% csrf_token %}
+                <button type="submit" id="btn-stripe" class="btn secondary btn-payment">
+                    <span class="normal-text">
+                        <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> PAGAR COM STRIPE
+                    </span>
+                    <span class="loading-text d-none">
+                        <span class="loading-spinner me-2"></span> Processando...
+                    </span>
+                    <small class="d-block text-dark opacity-90 mt-1">Cartão • PIX • Boleto</small>
+                </button>
+            </form>
 
-                    <div class="text-center my-4">
-                        <img src="https://www.mercadopago.com.br/wp-content/themes/mercadopago/images/logo-mercadopago.png" 
-                             alt="Mercado Pago" style="height: 42px; margin-right: 15px;">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Stripe_Logo%2C_revised_2016.svg/2560px-Stripe_Logo%2C_revised_2016.svg.png" 
-                             alt="Stripe" style="height: 42px;">
-                    </div>
+            <p class="info text-center">
+                💳 Seu pagamento está protegido e em boas mãos ❤️
+            </p>
 
-                    <div class="bg-black rounded-3 p-3 text-center small d-flex align-items-center justify-content-center gap-2 text-light">
-                        <i class="fas fa-shield-alt text-success"></i>
-                        <span><strong>Pagamento 100% Seguro</strong><br>Você está protegido e em boas mãos ❤️</span>
-                    </div>
+            <p class="urgency text-center">
+                🔥 Alta demanda — finalize antes que acabe
+            </p>
 
-                    <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light w-100 mt-4">
-                        ← Voltar ao Carrinho
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -208,9 +204,9 @@
 <!-- Overlay de Loading -->
 <div id="loadingOverlay" class="overlay-loading">
     <div class="text-center">
-        <div class="loading-spinner" style="width: 50px; height: 50px; border-width: 5px;"></div>
+        <div class="loading-spinner" style="width: 55px; height: 55px; border-width: 6px;"></div>
         <h5 class="mt-4 mb-1 text-white">Processando seu pagamento...</h5>
-        <p class="text-light small">Por favor, aguarde um momento ❤️</p>
+        <p class="text-light">Aguarde um momento, estamos cuidando de tudo ❤️</p>
     </div>
 </div>
 
