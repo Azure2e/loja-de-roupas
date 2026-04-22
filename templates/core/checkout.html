@@ -4,25 +4,69 @@
 {% block title %}Checkout Seguro - SuaLoja{% endblock %}
 
 {% block content %}
+<style>
+    .loading-spinner {
+        width: 22px;
+        height: 22px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-top: 3px solid #fff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .btn-loading {
+        pointer-events: none;
+        opacity: 0.85;
+    }
+
+    .overlay-loading {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.88);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        flex-direction: column;
+        color: white;
+    }
+
+    .payment-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 35px rgba(0, 0, 0, 0.25);
+    }
+</style>
+
 <div class="container py-4 py-md-5">
 
     <!-- Cabeçalho -->
     <div class="text-center mb-4 mb-md-5">
+        <div class="d-inline-flex align-items-center bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 mb-3 small">
+            <i class="fas fa-lock me-1"></i>
+            PAGAMENTO 100% SEGURO
+        </div>
         <h1 class="display-5 fw-bold text-white">
             <i class="fas fa-lock me-2"></i> Checkout Seguro
         </h1>
         <p class="lead text-success mb-0">
-            Pagamento 100% protegido por Mercado Pago e Stripe
+            Estamos felizes em atender você! ❤️
         </p>
     </div>
 
     <div class="row g-4 g-md-5">
 
-        <!-- ==================== COLUNA ESQUERDA ==================== -->
+        <!-- COLUNA ESQUERDA -->
         <div class="col-lg-7">
 
             <!-- Informações do Cliente -->
-            <div class="card bg-dark border-primary mb-4">
+            <div class="card bg-dark border border-secondary border-opacity-10 shadow-sm mb-4 payment-card">
                 <div class="card-header bg-black py-3">
                     <h5 class="mb-0 text-white">👤 Informações do Cliente</h5>
                 </div>
@@ -55,7 +99,7 @@
             </div>
 
             <!-- Resumo do Pedido -->
-            <div class="card bg-dark border-primary">
+            <div class="card bg-dark border border-secondary border-opacity-10 shadow-sm payment-card">
                 <div class="card-header bg-black py-3">
                     <h5 class="mb-0 text-white">🛒 Resumo do Pedido</h5>
                 </div>
@@ -88,15 +132,15 @@
                     {% endif %}
                     <div class="d-flex justify-content-between fs-4 fw-bold text-white">
                         <span>Total a pagar</span>
-                        <span>R$ {{ total_final|floatformat:2 }}</span>
+                        <span class="text-success">R$ {{ total_final|floatformat:2 }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== COLUNA DIREITA - PAGAMENTO ==================== -->
+        <!-- COLUNA DIREITA - PAGAMENTO -->
         <div class="col-lg-5">
-            <div class="card bg-dark border-primary sticky-top" style="top: 20px;">
+            <div class="card bg-dark border border-secondary border-opacity-10 shadow-lg sticky-top" style="top: 20px;">
                 <div class="card-body p-4">
 
                     <h4 class="mb-4 text-center text-white">💳 Escolha como pagar</h4>
@@ -108,27 +152,34 @@
                     {% endif %}
 
                     <!-- Mercado Pago -->
-                    <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4">
+                    <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4" id="form-mp">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label fw-bold text-white">📧 E-mail para o pagamento</label>
-                            <input type="email" name="email" 
-                                   class="form-control form-control-lg bg-dark text-white border-primary"
-                                   value="{{ request.user.email|default:'' }}" 
-                                   placeholder="seuemail@exemplo.com" required>
+                            <input type="email" name="email" class="form-control form-control-lg bg-dark text-white border-secondary"
+                                   value="{{ request.user.email|default:'' }}" placeholder="seuemail@exemplo.com" required>
                         </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100 py-3 fw-bold">
-                            <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
+                        <button type="submit" id="btn-mp" class="btn btn-success btn-lg w-100 py-3 fw-bold btn-payment">
+                            <span class="normal-text">
+                                <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
+                            </span>
+                            <span class="loading-text d-none">
+                                <span class="loading-spinner me-2"></span> Processando...
+                            </span>
                         </button>
                     </form>
 
                     <!-- Stripe -->
-                    <form method="post" action="{% url 'criar_sessao_stripe' %}">
+                    <form method="post" action="{% url 'criar_sessao_stripe' %}" id="form-stripe">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-lg border-0"
+                        <button type="submit" id="btn-stripe" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-lg border-0 btn-payment"
                                 style="background: linear-gradient(135deg, #635bff, #8a7eff);">
-                            <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> 
-                            PAGAR COM STRIPE
+                            <span class="normal-text">
+                                <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> PAGAR COM STRIPE
+                            </span>
+                            <span class="loading-text d-none">
+                                <span class="loading-spinner me-2"></span> Processando...
+                            </span>
                             <small class="d-block text-light opacity-90 mt-1">Cartão • PIX • Boleto</small>
                         </button>
                     </form>
@@ -140,9 +191,9 @@
                              alt="Stripe" style="height: 42px;">
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-center gap-2 text-light small">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Pagamento 100% seguro • Protegido por Mercado Pago e Stripe</span>
+                    <div class="bg-black rounded-3 p-3 text-center small d-flex align-items-center justify-content-center gap-2 text-light">
+                        <i class="fas fa-shield-alt text-success"></i>
+                        <span><strong>Pagamento 100% Seguro</strong><br>Você está protegido e em boas mãos ❤️</span>
                     </div>
 
                     <a href="{% url 'core:carrinho' %}" class="btn btn-outline-light w-100 mt-4">
@@ -153,4 +204,29 @@
         </div>
     </div>
 </div>
+
+<!-- Overlay de Loading -->
+<div id="loadingOverlay" class="overlay-loading">
+    <div class="text-center">
+        <div class="loading-spinner" style="width: 50px; height: 50px; border-width: 5px;"></div>
+        <h5 class="mt-4 mb-1 text-white">Processando seu pagamento...</h5>
+        <p class="text-light small">Por favor, aguarde um momento ❤️</p>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const btn = this.querySelector('button');
+            if (btn) {
+                btn.classList.add('btn-loading');
+                const normal = btn.querySelector('.normal-text');
+                const loading = btn.querySelector('.loading-text');
+                if (normal) normal.classList.add('d-none');
+                if (loading) loading.classList.remove('d-none');
+            }
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        });
+    });
+</script>
 {% endblock %}
