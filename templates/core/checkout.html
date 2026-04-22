@@ -1,4 +1,4 @@
-meu checkout {% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Checkout Seguro - SuaLoja{% endblock %}
@@ -51,10 +51,52 @@ meu checkout {% extends 'base.html' %}
         animation: fadeInUp 0.5s ease forwards;
     }
 
-    .item:nth-child(1) { animation-delay: 400ms; }
-    .item:nth-child(2) { animation-delay: 500ms; }
-    .item:nth-child(3) { animation-delay: 600ms; }
-    .item:nth-child(4) { animation-delay: 700ms; }
+    /* ==================== PROVA SOCIAL COM ESTRELAS ==================== */
+    .badge-total {
+        background: linear-gradient(90deg, #22c55e, #86efac);
+        color: #0f172a;
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-weight: 700;
+        text-align: center;
+        margin: 12px 0;
+    }
+
+    .social-proof-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #22c55e;
+    }
+
+    .testimonial {
+        background: rgba(34, 197, 94, 0.08);
+        padding: 14px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        border-left: 4px solid #22c55e;
+    }
+
+    .stars {
+        color: #facc15;
+        font-size: 1.35rem;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .testimonial-author img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 
     .total {
         font-size: 20px;
@@ -130,30 +172,11 @@ meu checkout {% extends 'base.html' %}
     }
 
     /* Animações */
-    @keyframes fadeInScale {
-        from { opacity: 0; transform: scale(0.95); }
-        to   { opacity: 1; transform: scale(1); }
-    }
-
-    @keyframes slideUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes trustGlow {
-        0%, 100% { text-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
-        50%      { text-shadow: 0 0 25px rgba(34, 197, 94, 1); }
-    }
-
-    @keyframes urgencyPulse {
-        0%, 100% { transform: scale(1); }
-        50%      { transform: scale(1.08); }
-    }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes trustGlow { 0%, 100% { text-shadow: 0 0 10px rgba(34, 197, 94, 0.6); } 50% { text-shadow: 0 0 25px rgba(34, 197, 94, 1); } }
+    @keyframes urgencyPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 
     .loading-spinner {
         width: 24px; height: 24px;
@@ -164,7 +187,6 @@ meu checkout {% extends 'base.html' %}
         display: inline-block;
         vertical-align: middle;
     }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .btn-loading { pointer-events: none; opacity: 0.85; }
@@ -172,57 +194,18 @@ meu checkout {% extends 'base.html' %}
     .overlay-loading {
         position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.92);
+        background: rgba(0,0,0,0.92);
         display: none;
         align-items: center; justify-content: center;
         z-index: 9999; flex-direction: column; color: white;
         animation: fadeIn 0.4s ease forwards;
     }
 
-    /* ====================== RESPONSIVO PARA MOBILE ====================== */
+    /* Responsivo */
     @media (max-width: 768px) {
-        .checkout-container {
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px 15px;
-            min-height: auto;
-            border-radius: 12px;
-        }
-
-        .box {
-            padding: 18px;
-            margin-bottom: 16px;
-        }
-
-        .item {
-            font-size: 0.95rem;
-        }
-
-        .total {
-            font-size: 18px;
-        }
-
-        .price {
-            font-size: 22px;
-        }
-
-        .btn {
-            padding: 16px;
-            font-size: 1.05rem;
-            margin-top: 12px;
-        }
-
-        h2 {
-            font-size: 1.8rem;
-        }
-
-        h3 {
-            font-size: 1.35rem;
-        }
-
-        .checkout-left, .checkout-right {
-            animation-delay: 100ms;
-        }
+        .checkout-container { flex-direction: column; gap: 20px; padding: 20px 15px; border-radius: 12px; }
+        .box { padding: 18px; margin-bottom: 16px; }
+        .btn { padding: 16px; font-size: 1.05rem; }
     }
 </style>
 
@@ -231,7 +214,6 @@ meu checkout {% extends 'base.html' %}
 
         <!-- LADO ESQUERDO -->
         <div class="checkout-left">
-
             <h2 class="text-white mb-4">🔒 Checkout Seguro</h2>
 
             <div class="box">
@@ -245,22 +227,18 @@ meu checkout {% extends 'base.html' %}
 
             <div class="box">
                 <h3 class="text-white mb-3">🛒 Resumo do Pedido</h3>
-
                 {% for item in carrinho.values %}
                 <div class="item">
                     <span class="text-white">{{ item.nome }} ({{ item.tamanho }} • {{ item.cor }})</span>
                     <span class="text-light">× {{ item.quantidade }}</span>
                 </div>
                 {% endfor %}
-
                 <hr class="border-secondary">
-
                 <div class="total d-flex justify-content-between">
                     <strong>Total:</strong>
                     <span class="price">R$ {{ total_final|floatformat:2 }}</span>
                 </div>
             </div>
-
         </div>
 
         <!-- LADO DIREITO -->
@@ -268,19 +246,48 @@ meu checkout {% extends 'base.html' %}
 
             <h3 class="text-white mb-3">Escolha como pagar</h3>
 
-            <!-- ✅ TEXTO DE CONFIANÇA ATUALIZADO -->
             <p class="trust text-success">🔒 Compra segura • Garantia de entrega • Pagamento protegido</p>
 
-            <!-- Mercado Pago - BOTÃO PRINCIPAL ATUALIZADO -->
+            <!-- PROVA SOCIAL DINÂMICA COM ESTRELAS -->
+            <div class="badge-total">
+                ✅ +2.347 clientes já compraram nesta loja
+            </div>
+
+            <div class="social-proof-header">❤️ O que nossos clientes estão dizendo</div>
+
+            {% for testimonial in testimonials %}
+            <div class="testimonial">
+                <!-- Estrelas -->
+                <div class="stars">
+                    {% for i in '12345'|make_list %}
+                        {% if i|add:0 <= testimonial.rating %}
+                            ⭐
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p>“{{ testimonial.texto }}”</p>
+                <div class="testimonial-author">
+                    {% if testimonial.foto %}
+                        <img src="{{ testimonial.foto.url }}" alt="{{ testimonial.nome }}">
+                    {% else %}
+                        <img src="https://i.pravatar.cc/32?u={{ testimonial.nome }}" alt="">
+                    {% endif %}
+                    <div>
+                        <strong>{{ testimonial.nome }}</strong><br>
+                        <small>{{ testimonial.cidade }} • Comprou há {{ testimonial.data|timesince }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Mercado Pago -->
             <form method="post" action="{% url 'core:criar_preferencia_mercadopago' %}" class="mb-4" id="form-mp">
                 {% csrf_token %}
                 <button type="submit" id="btn-mp" class="btn primary btn-payment">
-                    <span class="normal-text">
-                        💳 FINALIZAR COMPRA AGORA 🔒
-                    </span>
-                    <span class="loading-text d-none">
-                        <span class="loading-spinner me-2"></span> Processando...
-                    </span>
+                    <span class="normal-text">💳 FINALIZAR COMPRA AGORA 🔒</span>
+                    <span class="loading-text d-none"><span class="loading-spinner me-2"></span> Processando...</span>
                 </button>
             </form>
 
@@ -288,26 +295,14 @@ meu checkout {% extends 'base.html' %}
             <form method="post" action="{% url 'criar_sessao_stripe' %}" id="form-stripe">
                 {% csrf_token %}
                 <button type="submit" id="btn-stripe" class="btn secondary btn-payment">
-                    <span class="normal-text">
-                        💳 Pagar com Cartão / Pix / Boleto
-                    </span>
-                    <span class="loading-text d-none">
-                        <span class="loading-spinner me-2"></span> Processando...
-                    </span>
-                    <small class="d-block text-dark opacity-90 mt-1">
-                        Cartão • PIX • Boleto
-                    </small>
+                    <span class="normal-text">💳 Pagar com Cartão / Pix / Boleto</span>
+                    <span class="loading-text d-none"><span class="loading-spinner me-2"></span> Processando...</span>
+                    <small class="d-block text-dark opacity-90 mt-1">Cartão • PIX • Boleto</small>
                 </button>
             </form>
 
-            <p class="info text-center">
-                💳 Seu pagamento está protegido e em boas mãos ❤️
-            </p>
-
-            <p class="urgency text-center">
-                🔥 Alta demanda — finalize antes que acabe
-            </p>
-
+            <p class="info text-center">💳 Seu pagamento está protegido e em boas mãos ❤️</p>
+            <p class="urgency text-center">🔥 Alta demanda — finalize antes que acabe</p>
         </div>
     </div>
 </div>
