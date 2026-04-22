@@ -13,11 +13,17 @@
         color: white;
         min-height: 100vh;
         border-radius: 16px;
+        animation: fadeInScale 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }
 
     .checkout-left, .checkout-right {
         flex: 1;
+        opacity: 0;
+        animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
     }
+
+    .checkout-left { animation-delay: 100ms; }
+    .checkout-right { animation-delay: 300ms; }
 
     .box {
         background: #1e293b;
@@ -25,6 +31,14 @@
         border-radius: 12px;
         margin-bottom: 20px;
         border: 1px solid rgba(255,255,255,0.08);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    }
+
+    .box:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4),
+                    0 0 0 4px rgba(34, 197, 94, 0.15);
     }
 
     .item {
@@ -33,7 +47,15 @@
         margin: 10px 0;
         padding: 8px 0;
         border-bottom: 1px solid rgba(255,255,255,0.08);
+        opacity: 0;
+        animation: fadeInUp 0.5s ease forwards;
     }
+
+    /* Staggered animation nos itens */
+    .item:nth-child(1) { animation-delay: 400ms; }
+    .item:nth-child(2) { animation-delay: 500ms; }
+    .item:nth-child(3) { animation-delay: 600ms; }
+    .item:nth-child(4) { animation-delay: 700ms; }
 
     .total {
         font-size: 20px;
@@ -54,7 +76,23 @@
         border-radius: 10px;
         text-decoration: none;
         font-weight: bold;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 150%;
     }
 
     .primary {
@@ -64,7 +102,8 @@
 
     .primary:hover {
         background: #16a34a;
-        transform: translateY(-2px);
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
     }
 
     .secondary {
@@ -74,26 +113,50 @@
 
     .secondary:hover {
         background: #d1d5db;
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 0 30px rgba(229, 231, 235, 0.5);
     }
 
     .trust {
         margin: 10px 0;
         font-weight: 500;
-    }
-
-    .info {
-        font-size: 12px;
-        margin-top: 10px;
-        opacity: 0.8;
+        animation: trustGlow 3s ease-in-out infinite;
     }
 
     .urgency {
         color: #facc15;
         margin-top: 15px;
         font-weight: 500;
+        animation: urgencyPulse 2s ease-in-out infinite;
     }
 
-    /* Loading */
+    /* Animações avançadas */
+    @keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes trustGlow {
+        0%, 100% { text-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
+        50%      { text-shadow: 0 0 25px rgba(34, 197, 94, 1); }
+    }
+
+    @keyframes urgencyPulse {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.08); }
+    }
+
+    /* Loading aprimorado */
     .loading-spinner {
         width: 24px; height: 24px;
         border: 3px solid rgba(255,255,255,0.3);
@@ -111,10 +174,11 @@
     .overlay-loading {
         position: fixed; top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(0, 0, 0, 0.92);
         display: none;
         align-items: center; justify-content: center;
         z-index: 9999; flex-direction: column; color: white;
+        animation: fadeIn 0.4s ease forwards;
     }
 </style>
 
