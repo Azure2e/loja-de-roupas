@@ -51,7 +51,6 @@
         animation: fadeInUp 0.5s ease forwards;
     }
 
-    /* Staggered animation nos itens */
     .item:nth-child(1) { animation-delay: 400ms; }
     .item:nth-child(2) { animation-delay: 500ms; }
     .item:nth-child(3) { animation-delay: 600ms; }
@@ -130,7 +129,7 @@
         animation: urgencyPulse 2s ease-in-out infinite;
     }
 
-    /* Animações avançadas */
+    /* Animações */
     @keyframes fadeInScale {
         from { opacity: 0; transform: scale(0.95); }
         to   { opacity: 1; transform: scale(1); }
@@ -156,7 +155,6 @@
         50%      { transform: scale(1.08); }
     }
 
-    /* Loading aprimorado */
     .loading-spinner {
         width: 24px; height: 24px;
         border: 3px solid rgba(255,255,255,0.3);
@@ -179,6 +177,52 @@
         align-items: center; justify-content: center;
         z-index: 9999; flex-direction: column; color: white;
         animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* ====================== RESPONSIVO PARA MOBILE ====================== */
+    @media (max-width: 768px) {
+        .checkout-container {
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px 15px;
+            min-height: auto;
+            border-radius: 12px;
+        }
+
+        .box {
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .item {
+            font-size: 0.95rem;
+        }
+
+        .total {
+            font-size: 18px;
+        }
+
+        .price {
+            font-size: 22px;
+        }
+
+        .btn {
+            padding: 16px;
+            font-size: 1.05rem;
+            margin-top: 12px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            font-size: 1.35rem;
+        }
+
+        .checkout-left, .checkout-right {
+            animation-delay: 100ms; /* menos delay no mobile */
+        }
     }
 </style>
 
@@ -231,7 +275,7 @@
                 {% csrf_token %}
                 <button type="submit" id="btn-mp" class="btn primary btn-payment">
                     <span class="normal-text">
-                        <i class="fab fa-mercado-pago me-2"></i> PAGAR COM MERCADO PAGO
+                        💳 FINALIZAR COMPRA 🔒
                     </span>
                     <span class="loading-text d-none">
                         <span class="loading-spinner me-2"></span> Processando...
@@ -244,12 +288,14 @@
                 {% csrf_token %}
                 <button type="submit" id="btn-stripe" class="btn secondary btn-payment">
                     <span class="normal-text">
-                        <i class="fab fa-stripe me-2" style="font-size: 1.6rem;"></i> PAGAR COM STRIPE
+                        💳 Pagar com Cartão / Pix / Boleto
                     </span>
                     <span class="loading-text d-none">
                         <span class="loading-spinner me-2"></span> Processando...
                     </span>
-                    <small class="d-block text-dark opacity-90 mt-1">Cartão • PIX • Boleto</small>
+                    <small class="d-block text-dark opacity-90 mt-1">
+                        Cartão • PIX • Boleto
+                    </small>
                 </button>
             </form>
 
