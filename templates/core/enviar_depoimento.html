@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Deixe seu Depoimento - SuaLoja{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Cabeçalho -->
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold">🗣️ Deixe seu Depoimento</h2>
+                <p class="lead text-muted">Sua opinião é muito importante para nós e para outros clientes!</p>
+            </div>
+
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4 p-md-5">
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Cidade -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Cidade / Estado</label>
+                            {{ form.cidade }}
+                            <small class="text-muted">Ex: São Paulo - SP</small>
+                        </div>
+
+                        <!-- Avaliação em Estrelas -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Qual sua avaliação?</label>
+                            <div class="d-flex gap-2 fs-3">
+                                {{ form.rating }}
+                            </div>
+                        </div>
+
+                        <!-- Depoimento -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Seu depoimento</label>
+                            {{ form.texto }}
+                            <small class="text-muted">Conte sua experiência com a loja</small>
+                        </div>
+
+                        <!-- Foto (opcional) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Foto sua (opcional)</label>
+                            {{ form.foto }}
+                            <small class="text-muted">Uma foto sua usando nossas roupas fica ainda mais legal!</small>
+                        </div>
+
+                        <!-- Botão -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg py-3 fw-bold">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                ENVIAR DEPOIMENTO
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    Seu depoimento será analisado pela equipe antes de aparecer no site.<br>
+                    Obrigado por ajudar a crescer a SuaLoja! ❤️
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
