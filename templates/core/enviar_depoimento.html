@@ -1,73 +1,72 @@
-{% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Deixe seu Depoimento - SuaLoja{% endblock %}
+<section class="py-5 bg-light" id="depoimentos">
+    <div class="container">
+        
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">❤️ O que nossos clientes dizem</h2>
+            <p class="lead text-muted">Depoimentos reais de quem já comprou na SuaLoja</p>
+        </div>
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            
-            <!-- Cabeçalho -->
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold">🗣️ Deixe seu Depoimento</h2>
-                <p class="lead text-muted">Sua opinião é muito importante para nós e para outros clientes!</p>
-            </div>
-
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-4 p-md-5">
-                    
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-
-                        <!-- Cidade -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Cidade / Estado</label>
-                            {{ form.cidade }}
-                            <small class="text-muted">Ex: São Paulo - SP</small>
+        <div class="row g-4">
+            {% for depoimento in testimonials %}
+                {% if depoimento.ativo %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
+                        
+                        <!-- Foto do cliente -->
+                        <div class="text-center pt-4 pb-2">
+                            {% if depoimento.foto %}
+                                <img src="{{ depoimento.foto.url }}" 
+                                     class="rounded-circle border border-4 border-white shadow"
+                                     alt="{{ depoimento.nome }}"
+                                     width="100" height="100" style="object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white"
+                                     style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                    👤
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <!-- Avaliação em Estrelas -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Qual sua avaliação?</label>
-                            <div class="d-flex gap-2 fs-3">
-                                {{ form.rating }}
+                        <div class="card-body text-center px-4">
+                            
+                            <!-- Estrelas -->
+                            <div class="mb-3 fs-4">
+                                {% for i in '12345'|make_list %}
+                                    {% if i|add:0 <= depoimento.rating %}
+                                        ⭐
+                                    {% else %}
+                                        ☆
+                                    {% endif %}
+                                {% endfor %}
                             </div>
+
+                            <!-- Texto -->
+                            <p class="card-text fst-italic text-muted mb-4">
+                                “{{ depoimento.texto }}”
+                            </p>
+
+                            <!-- Nome e cidade -->
+                            <h5 class="fw-bold mb-1">{{ depoimento.nome }}</h5>
+                            <small class="text-muted">
+                                {{ depoimento.cidade|default:"Brasil" }}
+                            </small>
                         </div>
 
-                        <!-- Depoimento -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Seu depoimento</label>
-                            {{ form.texto }}
-                            <small class="text-muted">Conte sua experiência com a loja</small>
+                        <div class="card-footer text-center bg-white border-0 py-3">
+                            <small class="text-muted">
+                                {{ depoimento.data|date:"d 'de' F 'de' Y" }}
+                            </small>
                         </div>
-
-                        <!-- Foto (opcional) -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Foto sua (opcional)</label>
-                            {{ form.foto }}
-                            <small class="text-muted">Uma foto sua usando nossas roupas fica ainda mais legal!</small>
-                        </div>
-
-                        <!-- Botão -->
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-success btn-lg py-3 fw-bold">
-                                <i class="fas fa-paper-plane me-2"></i>
-                                ENVIAR DEPOIMENTO
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <p class="text-muted small">
-                    Seu depoimento será analisado pela equipe antes de aparecer no site.<br>
-                    Obrigado por ajudar a crescer a SuaLoja! ❤️
-                </p>
-            </div>
-
+                {% endif %}
+            {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted lead">Ainda não temos depoimentos cadastrados.</p>
+                </div>
+            {% endfor %}
         </div>
     </div>
-</div>
-{% endblock %}
+</section>
