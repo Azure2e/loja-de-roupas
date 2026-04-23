@@ -6,8 +6,9 @@ from django.conf import settings
 from django.urls import reverse
 
 # ==================== IMPORTS ATUALIZADOS ====================
-from .models import Produto, Variante, Pedido, Testimonial   # ← Testimonial já está aqui
+from .models import Produto, Variante, Pedido, Testimonial
 from accounts.models import OTPCode
+from .forms import TestimonialForm   # ← Formulário de depoimento
 
 import mercadopago
 import random
@@ -22,19 +23,20 @@ import json
 
 # ==================== PÁGINAS PRINCIPAIS ====================
 def home(request):
-    # Produtos para mostrar na home (otimizado e limitado)
+    # Produtos para mostrar na home
     produtos = Produto.objects.filter(
         disponivel=True
     ).select_related('categoria').order_by('-criado_em')[:12]
 
-    # Depoimentos ativos (máximo 6 - perfeito para a tela)
+    # Depoimentos ATIVOS e APROVADOS
     testimonials = Testimonial.objects.filter(
-        ativo=True
+        ativo=True,
+        aprovado=True
     ).order_by('-data')[:6]
 
     context = {
         'produtos': produtos,
-        'testimonials': testimonials,   # ← Agora o template depoimentos.html funciona
+        'testimonials': testimonials,
     }
 
     return render(request, 'core/home.html', context)
@@ -139,7 +141,7 @@ def aplicar_desconto(request):
     return redirect('core:carrinho')
 
 
-# ==================== CHECKOUT (ATUALIZADO COM DEPOIMENTOS) ====================
+# ==================== CHECKOUT ====================
 @login_required(login_url='accounts:login')
 def checkout(request):
     carrinho = request.session.get('carrinho', {})
@@ -152,8 +154,10 @@ def checkout(request):
     total_final = max(subtotal_geral - desconto, 0)
     profile = request.user.profile
 
-    # ✅ Busca os depoimentos ativos (máximo 6)
-    testimonials = Testimonial.objects.filter(ativo=True).order_by('-data')[:6]
+    testimonials = Testimonial.objects.filter(
+        ativo=True,
+        aprovado=True
+    ).order_by('-data')[:6]
 
     return render(request, 'core/checkout.html', {
         'carrinho': carrinho,
@@ -165,9 +169,25 @@ def checkout(request):
     })
 
 
-# ==================== (TODO O RESTO DO ARQUIVO FICA IGUAL) ====================
-# ... todo o código que você já tinha (criar_preferencia_mercadopago, stripe, etc.)
+# ==================== ENVIAR DEPOIMENTO (CLIENTE) ====================
+@login_required(login_url='accounts:login')
+def enviar_depoimento(request):
+    if request.method == 'POST':
+        form = TestimonialForm(request.POST, request.FILES)
+        if form.is_valid():
+            testimonial = form.save(commit=False)
+            testimonial.user = request.user
+            testimonial.nome = request.user.get_full_name() or request.user.username
+            testimonial.save()
+            messages.success(request, '✅ Seu depoimento foi enviado com sucesso! Um administrador vai analisar em breve.')
+            return redirect('core:home')
+    else:
+        form = TestimonialForm()
 
+    return render(request, 'core/enviar_depoimento.html', {'form': form})
+
+
+# ==================== (TODO O RESTO DO CÓDIGO FICA IGUAL) ====================
 def criar_preferencia_mercadopago(request):
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
