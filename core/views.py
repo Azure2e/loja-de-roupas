@@ -5,7 +5,8 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
 
-from .models import Produto, Variante, Pedido
+# ==================== IMPORTS ATUALIZADOS ====================
+from .models import Produto, Variante, Pedido, Testimonial   # ← Testimonial já está aqui
 from accounts.models import OTPCode
 
 import mercadopago
@@ -21,8 +22,22 @@ import json
 
 # ==================== PÁGINAS PRINCIPAIS ====================
 def home(request):
-    produtos = Produto.objects.filter(disponivel=True)
-    return render(request, 'core/home.html', {'produtos': produtos})
+    # Produtos para mostrar na home (otimizado e limitado)
+    produtos = Produto.objects.filter(
+        disponivel=True
+    ).select_related('categoria').order_by('-criado_em')[:12]
+
+    # Depoimentos ativos (máximo 6 - perfeito para a tela)
+    testimonials = Testimonial.objects.filter(
+        ativo=True
+    ).order_by('-data')[:6]
+
+    context = {
+        'produtos': produtos,
+        'testimonials': testimonials,   # ← Agora o template depoimentos.html funciona
+    }
+
+    return render(request, 'core/home.html', context)
 
 
 def detalhe_produto(request, slug):
@@ -124,6 +139,7 @@ def aplicar_desconto(request):
     return redirect('core:carrinho')
 
 
+# ==================== CHECKOUT (ATUALIZADO COM DEPOIMENTOS) ====================
 @login_required(login_url='accounts:login')
 def checkout(request):
     carrinho = request.session.get('carrinho', {})
@@ -136,16 +152,22 @@ def checkout(request):
     total_final = max(subtotal_geral - desconto, 0)
     profile = request.user.profile
 
+    # ✅ Busca os depoimentos ativos (máximo 6)
+    testimonials = Testimonial.objects.filter(ativo=True).order_by('-data')[:6]
+
     return render(request, 'core/checkout.html', {
         'carrinho': carrinho,
         'subtotal_geral': subtotal_geral,
         'desconto': desconto,
         'total_final': total_final,
         'profile': profile,
+        'testimonials': testimonials,
     })
 
 
-# ==================== FUNÇÃO ATUALIZADA (MÁXIMA FORÇA NO PAYER) ====================
+# ==================== (TODO O RESTO DO ARQUIVO FICA IGUAL) ====================
+# ... todo o código que você já tinha (criar_preferencia_mercadopago, stripe, etc.)
+
 def criar_preferencia_mercadopago(request):
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
@@ -181,7 +203,6 @@ def criar_preferencia_mercadopago(request):
             "currency_id": "BRL",
         })
 
-    # ✅ MÁXIMA FORÇA: nome completo + telefone + email
     payer_name = request.user.get_full_name() or request.user.username or "Jaques Silva"
     first_name = payer_name.split()[0] if payer_name else "Cliente"
     last_name = " ".join(payer_name.split()[1:]) if len(payer_name.split()) > 1 else "Silva"
@@ -234,7 +255,7 @@ def criar_preferencia_mercadopago(request):
         return redirect('core:carrinho')
 
 
-# ==================== STRIPE - NOVA ALTERNATIVA (OTIMIZADA) ====================
+# ==================== STRIPE - NOVA ALTERNATIVA ====================
 @login_required(login_url='accounts:login')
 def criar_sessao_stripe(request):
     carrinho = request.session.get('carrinho', {})
@@ -242,13 +263,11 @@ def criar_sessao_stripe(request):
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
 
-    # Calcula total uma única vez
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     if total <= 0:
         messages.error(request, 'Valor inválido para pagamento.')
         return redirect('core:carrinho')
 
-    # Monta os itens para o Stripe
     line_items = []
     for item in carrinho.values():
         line_items.append({
@@ -258,7 +277,7 @@ def criar_sessao_stripe(request):
                     'name': item['nome'],
                     'description': f"{item['tamanho']} • {item['cor']}",
                 },
-                'unit_amount': int(item['preco'] * 100),  # centavos
+                'unit_amount': int(item['preco'] * 100),
             },
             'quantity': item['quantidade'],
         })
@@ -285,7 +304,7 @@ def criar_sessao_stripe(request):
         return redirect('core:checkout')
 
 
-# ==================== CHECKOUT SUCESSO ====================
+# ==================== CHECKOUT SUCESSO / FALHA / PENDENTE ====================
 def checkout_sucesso(request):
     if 'carrinho' in request.session:
         del request.session['carrinho']
