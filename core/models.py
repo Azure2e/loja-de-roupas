@@ -2,7 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from decimal import Decimal
-from django.conf import settings   # ← Adicionado para usar AUTH_USER_MODEL
+from django.conf import settings   
+
+# ==================== CLOUDINARY ====================
+from cloudinary.models import CloudinaryField
 
 
 # ==================== CATEGORIAS ====================
@@ -107,7 +110,6 @@ class Pedido(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
     
-    # ✅ Campo novo para integração com Mercado Pago
     external_reference = models.CharField(
         max_length=100, 
         blank=True, 
@@ -124,6 +126,38 @@ class Pedido(models.Model):
         ordering = ['-criado_em']
         verbose_name = "Pedido"
         verbose_name_plural = "Pedidos"
+
+
+# ==================== DEPOIMENTOS (TESTIMONIAL) ====================
+class Testimonial(models.Model):
+    nome = models.CharField(max_length=100, verbose_name="Nome do cliente")
+    cidade = models.CharField(max_length=100, blank=True, verbose_name="Cidade/Estado")
+    texto = models.TextField(verbose_name="Depoimento")
+    
+    # ⭐ ESTRELAS DE AVALIAÇÃO
+    rating = models.PositiveSmallIntegerField(
+        default=5,
+        choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')],
+        verbose_name="Avaliação (estrelas)"
+    )
+    
+    # ✅ CORRIGIDO - Sem argumento posicional 'image'
+    foto = CloudinaryField(
+        blank=True,
+        null=True,
+        verbose_name="Foto do cliente"
+    )
+    
+    data = models.DateTimeField(auto_now_add=True)
+    ativo = models.BooleanField(default=True, verbose_name="Mostrar no site")
+
+    class Meta:
+        verbose_name = "Depoimento"
+        verbose_name_plural = "Depoimentos"
+        ordering = ['-data']
+
+    def __str__(self):
+        return f"{self.nome} - {self.cidade} ({self.rating}⭐)"
 
 
 # ==================== PERFIL DO USUÁRIO (Fidelidade) ====================
