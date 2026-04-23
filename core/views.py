@@ -28,10 +28,9 @@ def home(request):
         disponivel=True
     ).select_related('categoria').order_by('-criado_em')[:12]
 
-    # Depoimentos ATIVOS e APROVADOS
+    # Depoimentos ATIVOS (sem filtro de aprovado por enquanto)
     testimonials = Testimonial.objects.filter(
-        ativo=True,
-        aprovado=True
+        ativo=True
     ).order_by('-data')[:6]
 
     context = {
@@ -154,9 +153,9 @@ def checkout(request):
     total_final = max(subtotal_geral - desconto, 0)
     profile = request.user.profile
 
+    # Depoimentos ATIVOS (sem filtro de aprovado por enquanto)
     testimonials = Testimonial.objects.filter(
-        ativo=True,
-        aprovado=True
+        ativo=True
     ).order_by('-data')[:6]
 
     return render(request, 'core/checkout.html', {
