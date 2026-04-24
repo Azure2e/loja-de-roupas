@@ -1,11 +1,12 @@
 from django import forms
 from .models import Testimonial
 
+
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
         fields = ['cidade', 'texto', 'rating', 'foto']
-        
+
         widgets = {
             'texto': forms.Textarea(attrs={
                 'rows': 5,
@@ -23,7 +24,7 @@ class TestimonialForm(forms.ModelForm):
                 'class': 'form-control'
             }),
         }
-        
+
         labels = {
             'cidade': 'Cidade / Estado',
             'texto': 'Seu depoimento',
