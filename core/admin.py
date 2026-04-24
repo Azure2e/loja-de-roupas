@@ -72,5 +72,5 @@ class PedidoAdmin(admin.ModelAdmin):
     search_fields = ['external_reference', 'user__username']
 
 
-# Registra todos os modelos (segurança)
-admin.site.register([Categoria, Produto, Variante, Cupom, Pedido, Testimonial])
+# ==================== FIM ====================
+# Não precisa mais registrar manualmente aqui (todos já estão registrados com @admin.register)
