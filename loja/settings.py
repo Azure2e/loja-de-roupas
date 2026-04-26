@@ -101,7 +101,7 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS - RAILWAY (VERSÃO ROBUSTA) ====================
+# ==================== BANCO DE DADOS - RAILWAY (VERSÃO FINAL) ====================
 import dj_database_url
 import os
 
