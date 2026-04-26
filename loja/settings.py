@@ -101,23 +101,32 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS - RAILWAY (VERSÃO MAIS SIMPLES) ====================
+# ==================== BANCO DE DADOS - RAILWAY (VERSÃO ROBUSTA) ====================
 import dj_database_url
 import os
 
-DATABASES = {
-    'default': dj_database_url.config(
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=True,
-    )
-}
-print("✅ DATABASE_URL configurado (Railway)")
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+    print("✅ DATABASE_URL encontrado → PostgreSQL do Railway configurado")
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print("⚠️ WARNING: No DATABASE_URL set → usando SQLite local")
 
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'          # ← CORRIGIDO (com underline)
+TIME_ZONE = 'America/La_Paz'          # ← já corrigido
 
 USE_I18N = True
 USE_TZ = True
