@@ -109,7 +109,7 @@ DATABASES = {
     'default': dj_database_url.config(
         conn_max_age=600,
         conn_health_checks=True,
-        ssl_require=True, # obrigatório no Railway
+        ssl_require=True,
     )
 }
 print("✅ DATABASE_URL configurado (Railway)")
@@ -117,7 +117,8 @@ print("✅ DATABASE_URL configurado (Railway)")
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La Paz'
+TIME_ZONE = 'America/La_Paz'          # ← CORRIGIDO (com underline)
+
 USE_I18N = True
 USE_TZ = True
 
