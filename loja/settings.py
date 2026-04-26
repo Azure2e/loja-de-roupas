@@ -126,7 +126,7 @@ else:
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'          # ← já corrigido
+TIME_ZONE = 'America/La_Paz'
 
 USE_I18N = True
 USE_TZ = True
