@@ -129,7 +129,15 @@ class Pedido(models.Model):
 
 
 # ==================== DEPOIMENTOS (TESTIMONIAL) ====================
+# ✅ ATUALIZADO: cliente logado + foto + aprovação do admin + método rating_stars
 class Testimonial(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+        verbose_name="Cliente"
+    )
     nome = models.CharField(max_length=100, verbose_name="Nome do cliente")
     cidade = models.CharField(max_length=100, blank=True, verbose_name="Cidade/Estado")
     texto = models.TextField(verbose_name="Depoimento")
@@ -137,11 +145,10 @@ class Testimonial(models.Model):
     # ⭐ ESTRELAS DE AVALIAÇÃO
     rating = models.PositiveSmallIntegerField(
         default=5,
-        choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')],
-        verbose_name="Avaliação (estrelas)"
+        choices=[(i, f'{i} ⭐') for i in range(1, 6)],
+        verbose_name="Avaliação"
     )
     
-    # ✅ CORRIGIDO - Sem argumento posicional 'image'
     foto = CloudinaryField(
         blank=True,
         null=True,
@@ -149,7 +156,8 @@ class Testimonial(models.Model):
     )
     
     data = models.DateTimeField(auto_now_add=True)
-    ativo = models.BooleanField(default=True, verbose_name="Mostrar no site")
+    ativo = models.BooleanField(default=True, verbose_name="Ativo no site")
+    aprovado = models.BooleanField(default=False, verbose_name="Aprovado pelo admin")
 
     class Meta:
         verbose_name = "Depoimento"
@@ -157,7 +165,12 @@ class Testimonial(models.Model):
         ordering = ['-data']
 
     def __str__(self):
-        return f"{self.nome} - {self.cidade} ({self.rating}⭐)"
+        return f"{self.nome} - {self.rating}⭐"
+
+    def rating_stars(self):
+        """Método usado no Admin e nos templates"""
+        return '⭐' * self.rating
+    rating_stars.short_description = 'Avaliação'
 
 
 # ==================== PERFIL DO USUÁRIO (Fidelidade) ====================

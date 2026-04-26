@@ -4,18 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
-
 # ==================== IMPORTS ATUALIZADOS ====================
 from .models import Produto, Variante, Pedido, Testimonial
 from accounts.models import OTPCode
-from .forms import TestimonialForm   # ← Formulário de depoimento
-
+from .forms import TestimonialForm
 import mercadopago
 import random
 from datetime import timedelta
 from django.utils import timezone
 from core.utils.whatsapp import enviar_whatsapp
-
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -27,18 +24,31 @@ def home(request):
     produtos = Produto.objects.filter(
         disponivel=True
     ).select_related('categoria').order_by('-criado_em')[:12]
-
-    # Depoimentos ATIVOS (sem filtro de aprovado por enquanto)
+    
+    # ✅ DEPOIMENTOS: agora só mostra os APROVADOS + ATIVOS
     testimonials = Testimonial.objects.filter(
-        ativo=True
+        ativo=True,
+        aprovado=True
     ).order_by('-data')[:6]
 
     context = {
         'produtos': produtos,
         'testimonials': testimonials,
     }
-
     return render(request, 'core/home.html', context)
+
+
+def depoimentos(request):
+    """Página dedicada aos depoimentos (só os aprovados)"""
+    testimonials = Testimonial.objects.filter(
+        ativo=True,
+        aprovado=True
+    ).order_by('-data')
+    
+    context = {
+        'testimonials': testimonials,
+    }
+    return render(request, 'depoimentos.html', context)
 
 
 def detalhe_produto(request, slug):
@@ -50,10 +60,10 @@ def detalhe_produto(request, slug):
     })
 
 
+# ==================== CARRINHO (mantido igual) ====================
 def adicionar_ao_carrinho(request, variante_id):
     variante = get_object_or_404(Variante, id=variante_id)
     carrinho = request.session.get('carrinho', {})
-
     if str(variante_id) in carrinho:
         carrinho[str(variante_id)]['quantidade'] += 1
     else:
@@ -65,7 +75,6 @@ def adicionar_ao_carrinho(request, variante_id):
             'quantidade': 1,
             'variante_id': variante_id
         }
-
     request.session['carrinho'] = carrinho
     messages.success(request, f'{variante.produto.nome} ({variante.tamanho} - {variante.cor}) adicionado ao carrinho!')
     return redirect('core:carrinho')
@@ -75,11 +84,9 @@ def ver_carrinho(request):
     carrinho = request.session.get('carrinho', {})
     for item in carrinho.values():
         item['subtotal'] = item['preco'] * item['quantidade']
-
     subtotal_geral = sum(item['subtotal'] for item in carrinho.values())
     desconto = request.session.get('desconto', 0)
     total_final = max(subtotal_geral - desconto, 0)
-
     return render(request, 'core/carrinho.html', {
         'carrinho': carrinho,
         'subtotal_geral': subtotal_geral,
@@ -99,7 +106,7 @@ def remover_do_carrinho(request, variante_id):
 
 def atualizar_quantidade(request, variante_id):
     carrinho = request.session.get('carrinho', {})
-    
+   
     if str(variante_id) in carrinho:
         try:
             nova_quantidade = int(request.POST.get('quantidade', 1))
@@ -115,7 +122,7 @@ def atualizar_quantidade(request, variante_id):
             messages.error(request, 'Quantidade inválida.')
     else:
         messages.error(request, 'Item não encontrado no carrinho.')
-    
+   
     return redirect('core:carrinho')
 
 
@@ -147,15 +154,16 @@ def checkout(request):
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
-
+    
     subtotal_geral = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     desconto = request.session.get('desconto', 0)
     total_final = max(subtotal_geral - desconto, 0)
     profile = request.user.profile
-
-    # Depoimentos ATIVOS (sem filtro de aprovado por enquanto)
+    
+    # ✅ DEPOIMENTOS: agora só mostra os APROVADOS + ATIVOS
     testimonials = Testimonial.objects.filter(
-        ativo=True
+        ativo=True,
+        aprovado=True
     ).order_by('-data')[:6]
 
     return render(request, 'core/checkout.html', {
@@ -182,7 +190,6 @@ def enviar_depoimento(request):
             return redirect('core:home')
     else:
         form = TestimonialForm()
-
     return render(request, 'core/enviar_depoimento.html', {'form': form})
 
 
@@ -192,26 +199,20 @@ def criar_preferencia_mercadopago(request):
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
-
     if request.method != 'POST':
         messages.error(request, 'Acesso inválido. Use o formulário do checkout.')
         return redirect('core:checkout')
-
     email = request.POST.get('email', '').strip()
     if not email:
         email = request.user.email if request.user.is_authenticated and request.user.email else 'contato@sualoja.com'
-
     if '@' not in email or '.' not in email:
         messages.error(request, '⚠️ Por favor, insira um e-mail válido.')
         return redirect('core:checkout')
-
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     if total <= 0:
         messages.error(request, 'Valor inválido para pagamento.')
         return redirect('core:carrinho')
-
     sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
-
     items = []
     for item in carrinho.values():
         items.append({
@@ -221,11 +222,9 @@ def criar_preferencia_mercadopago(request):
             "unit_price": float(item['preco']),
             "currency_id": "BRL",
         })
-
     payer_name = request.user.get_full_name() or request.user.username or "Jaques Silva"
     first_name = payer_name.split()[0] if payer_name else "Cliente"
     last_name = " ".join(payer_name.split()[1:]) if len(payer_name.split()) > 1 else "Silva"
-
     phone_data = {}
     if request.user.is_authenticated:
         try:
@@ -240,7 +239,6 @@ def criar_preferencia_mercadopago(request):
                     phone_data = {"area_code": area_code, "number": number}
         except:
             pass
-
     preference_data = {
         "items": items,
         "payer": {
@@ -258,7 +256,6 @@ def criar_preferencia_mercadopago(request):
         "statement_descriptor": "SUALOJA",
         "external_reference": f"pedido-{request.user.id if request.user.is_authenticated else 'guest'}",
     }
-
     try:
         preference_response = sdk.preference().create(preference_data)
         if preference_response.get("status") == 201:
@@ -281,12 +278,10 @@ def criar_sessao_stripe(request):
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
         return redirect('core:home')
-
     total = sum(item['preco'] * item['quantidade'] for item in carrinho.values())
     if total <= 0:
         messages.error(request, 'Valor inválido para pagamento.')
         return redirect('core:carrinho')
-
     line_items = []
     for item in carrinho.values():
         line_items.append({
@@ -300,11 +295,9 @@ def criar_sessao_stripe(request):
             },
             'quantity': item['quantidade'],
         })
-
     try:
         import stripe
         stripe.api_key = settings.STRIPE_SECRET_KEY
-
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card', 'pix', 'boleto'],
             line_items=line_items,
@@ -314,9 +307,7 @@ def criar_sessao_stripe(request):
             customer_email=request.user.email,
             metadata={'user_id': str(request.user.id)},
         )
-
         return redirect(checkout_session.url)
-
     except Exception as e:
         print("❌ Erro Stripe:", str(e))
         messages.error(request, f'Erro ao gerar pagamento com Stripe: {str(e)}')
@@ -372,24 +363,20 @@ def gerar_otp(request):
         if not phone:
             messages.error(request, 'Número de telefone é obrigatório.')
             return render(request, 'core/gerar_otp.html')
-
         code = str(random.randint(100000, 999999))
         OTPCode.objects.create(
             user=request.user if request.user.is_authenticated else None,
             phone=phone,
             code=code
         )
-
         mensagem = f"Seu código de verificação da SuaLoja é: {code}\nVálido por 5 minutos."
         sucesso = enviar_whatsapp(phone, mensagem)
-
         if sucesso:
             messages.success(request, 'Código enviado para o seu WhatsApp!')
             request.session['otp_phone'] = phone
             return redirect('core:verificar_otp')
         else:
             messages.error(request, 'Erro ao enviar código.')
-
     return render(request, 'core/gerar_otp.html')
 
 
@@ -397,14 +384,12 @@ def verificar_otp(request):
     if request.method == 'POST':
         phone = request.session.get('otp_phone')
         code_digitado = request.POST.get('code')
-
         otp = OTPCode.objects.filter(
             phone=phone,
             code=code_digitado,
             is_used=False,
             created_at__gte=timezone.now() - timedelta(minutes=5)
         ).first()
-
         if otp:
             otp.is_used = True
             otp.save()
@@ -412,7 +397,6 @@ def verificar_otp(request):
             return redirect('core:home')
         else:
             messages.error(request, 'Código inválido ou expirado.')
-
     return render(request, 'core/verificar_otp.html')
 
 
@@ -421,10 +405,8 @@ def enviar_boas_vindas(user):
         return False
     mensagem = f"""
 Olá {user.first_name or user.username}! 👋
-
 Bem-vindo(a) à SuaLoja! 🛍️
 Use o cupom **BEMVINDO15** e ganhe 15% OFF na sua primeira compra.
-
 Aproveite!
     """
     return enviar_whatsapp(str(user.profile.phone), mensagem.strip())
@@ -434,7 +416,7 @@ Aproveite!
 def admin_gate(request):
     if request.method == 'POST':
         senha_digitada = request.POST.get('senha', '').strip()
-       
+      
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
             request.session.save()
@@ -442,7 +424,6 @@ def admin_gate(request):
             return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, '❌ Senha master incorreta! Tente novamente.')
- 
     return render(request, 'core/admin_gate.html')
 
 
@@ -450,15 +431,14 @@ def admin_gate(request):
 def create_superuser_view(request):
     if not settings.DEBUG:
         return HttpResponse(status=404)
-
     if request.method == 'POST':
         master_password = request.POST.get('master_password', '').strip()
-       
+      
         if master_password == settings.ADMIN_MASTER_PASSWORD:
             username = request.POST.get('username', 'admin')
             email = request.POST.get('email', '')
             password = request.POST.get('password', '')
-           
+          
             User = get_user_model()
             if User.objects.filter(username=username).exists():
                 messages.warning(request, f"Usuário '{username}' já existe!")
@@ -468,7 +448,6 @@ def create_superuser_view(request):
                 return redirect('/gestao-secreta-jaques-2026/admin/')
         else:
             messages.error(request, "Senha master incorreta!")
- 
     return render(request, 'core/create_superuser.html')
 
 
@@ -477,13 +456,11 @@ def painel_suporte(request):
     if not request.user.is_staff:
         messages.error(request, '❌ Acesso negado! Apenas a loja pode acessar o painel de suporte.')
         return redirect('core:home')
-
     User = get_user_model()
     customers = User.objects.filter(
         is_staff=False,
         is_active=True
     ).order_by('-last_login')
-
     return render(request, 'accounts/suporte.html', {
         'customers': customers,
     })
@@ -536,5 +513,5 @@ def webhook_mercadopago(request):
                                 print(f"Erro ao processar pedido no webhook: {e}")
         except Exception as e:
             print("Erro no webhook Mercado Pago:", str(e))
-  
+ 
     return HttpResponse(status=200)

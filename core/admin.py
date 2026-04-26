@@ -13,18 +13,21 @@ class TestimonialAdmin(admin.ModelAdmin):
     ordering = ['-data']
     readonly_fields = ['data']
 
-    # Ações rápidas no admin
+    # Ações em massa (aprovar / reprovar)
     actions = ['aprovar_depoimentos', 'reprovar_depoimentos']
 
     def rating_stars(self, obj):
-        return format_html('⭐' * obj.rating)
+        """Usa o método que criamos no modelo (mais limpo)"""
+        return format_html(obj.rating_stars())
     rating_stars.short_description = 'Avaliação'
 
     def aprovar_depoimentos(self, request, queryset):
+        """Ação em massa: aprovar selecionados"""
         queryset.update(aprovado=True)
     aprovar_depoimentos.short_description = '✅ Aprovar selecionados'
 
     def reprovar_depoimentos(self, request, queryset):
+        """Ação em massa: reprovar selecionados"""
         queryset.update(aprovado=False)
     reprovar_depoimentos.short_description = '❌ Reprovar selecionados'
 
@@ -73,4 +76,3 @@ class PedidoAdmin(admin.ModelAdmin):
 
 
 # ==================== FIM ====================
-# Não precisa registrar manualmente aqui (todos já estão com @admin.register)
