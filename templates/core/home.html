@@ -77,20 +77,29 @@
     </div>
 </div>
 
-<!-- ==================== BOTÃO DE DEPOIMENTO ==================== -->
+<!-- ==================== CTA DEPOIMENTOS (ATUALIZADO) ==================== -->
 <div class="container my-5 text-center">
     <div class="bg-light rounded-4 p-5 shadow-sm">
         <h3 class="mb-3">❤️ O que achou da nossa loja?</h3>
-        <p class="lead text-muted mb-4">Compartilhe sua experiência e ajude outros clientes!</p>
+        <p class="lead text-muted mb-4">Compartilhe sua experiência e veja o que outros clientes estão dizendo!</p>
         
-        <a href="{% url 'core:enviar_depoimento' %}" 
-           class="btn btn-success btn-lg px-5 py-3 fw-bold shadow">
-            <i class="fas fa-star"></i> DEIXE SEU DEPOIMENTO
-        </a>
+        <div class="d-grid d-md-flex justify-content-center gap-3">
+            <!-- Botão: Deixe seu depoimento -->
+            <a href="{% url 'core:enviar_depoimento' %}" 
+               class="btn btn-success btn-lg px-5 py-3 fw-bold shadow">
+                <i class="fas fa-star"></i> DEIXE SEU DEPOIMENTO
+            </a>
+            
+            <!-- Botão: Ver todos os depoimentos -->
+            <a href="{% url 'core:depoimentos' %}" 
+               class="btn btn-outline-primary btn-lg px-5 py-3 fw-bold shadow">
+                Ver todos os depoimentos →
+            </a>
+        </div>
     </div>
 </div>
 
-<!-- DEPOIMENTOS -->
+<!-- DEPOIMENTOS (include que você já tinha) -->
 {% include 'core/depoimentos.html' %}
 
 {% endblock %}

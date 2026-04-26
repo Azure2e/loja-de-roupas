@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Importando todas as views do core com alias (melhor prática)
+# Importando as views do core
 from core import views as core_views
 
 # Personalização do painel administrativo
@@ -18,13 +18,13 @@ urlpatterns = [
     # ===================== CRIAR SUPERUSUÁRIO =====================
     path('gestao-secreta-jaques-2026/criar-superusuario/', core_views.create_superuser_view, name='create_superuser'),
 
-    # ===================== PAINEL DE SUPORTE DA LOJA =====================
+    # ===================== PAINEL DE SUPORTE =====================
     path('gestao-secreta-jaques-2026/suporte/', core_views.painel_suporte, name='painel_suporte'),
 
-    # ===================== PAINEL ADMIN DO DJANGO =====================
+    # ===================== ADMIN DJANGO =====================
     path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
 
-    # ===================== ROTAS NORMAIS DA LOJA =====================
+    # ===================== ROTAS DA LOJA =====================
     path('', include('core.urls', namespace='core')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
 
@@ -35,5 +35,6 @@ urlpatterns = [
     path('criar-sessao-stripe/', core_views.criar_sessao_stripe, name='criar_sessao_stripe'),
 ]
 
-# ===================== ARQUIVOS DE MÍDIA =====================
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# ===================== ARQUIVOS DE MÍDIA (só em desenvolvimento) =====================
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
