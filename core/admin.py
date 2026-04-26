@@ -13,7 +13,7 @@ class TestimonialAdmin(admin.ModelAdmin):
     ordering = ['-data']
     readonly_fields = ['data']
 
-    # Ações rápidas
+    # Ações rápidas no admin
     actions = ['aprovar_depoimentos', 'reprovar_depoimentos']
 
     def rating_stars(self, obj):
@@ -73,4 +73,4 @@ class PedidoAdmin(admin.ModelAdmin):
 
 
 # ==================== FIM ====================
-# Não precisa mais registrar manualmente aqui (todos já estão registrados com @admin.register)
+# Não precisa registrar manualmente aqui (todos já estão com @admin.register)
