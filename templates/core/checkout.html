@@ -51,162 +51,54 @@
         animation: fadeInUp 0.5s ease forwards;
     }
 
-    /* ==================== PROVA SOCIAL COM ESTRELAS ==================== */
-    .badge-total {
-        background: linear-gradient(90deg, #22c55e, #86efac);
-        color: #0f172a;
-        padding: 8px 18px;
-        border-radius: 30px;
-        font-weight: 700;
-        text-align: center;
-        margin: 12px 0;
-    }
-
+    /* ==================== DEPOIMENTOS (DARK THEME) ==================== */
     .social-proof-header {
         font-size: 1.1rem;
         font-weight: 600;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
         color: #22c55e;
     }
 
-    .testimonial {
+    .testimonial-card-dark {
         background: rgba(34, 197, 94, 0.08);
-        padding: 14px;
         border-radius: 12px;
-        margin-bottom: 12px;
-        border-left: 4px solid #22c55e;
+        padding: 18px;
+        margin-bottom: 14px;
+        border-left: 5px solid #22c55e;
+        transition: all 0.3s ease;
     }
 
-    .stars {
+    .testimonial-card-dark:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(34, 197, 94, 0.15);
+    }
+
+    .stars-dark {
+        font-size: 1.45rem;
+        letter-spacing: 4px;
+        margin-bottom: 10px;
         color: #facc15;
-        font-size: 1.35rem;
-        letter-spacing: 3px;
-        margin-bottom: 8px;
     }
 
-    .testimonial-author {
+    .testimonial-author-dark {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-top: 10px;
+        gap: 12px;
+        margin-top: 12px;
     }
 
-    .testimonial-author img {
-        width: 32px;
-        height: 32px;
+    .testimonial-author-dark img {
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         object-fit: cover;
+        border: 2px solid #22c55e;
     }
 
-    .total {
-        font-size: 20px;
-        margin-top: 10px;
-    }
-
-    .price {
-        color: #22c55e;
-        font-weight: bold;
-        font-size: 24px;
-    }
-
-    .btn {
-        display: block;
-        text-align: center;
-        padding: 15px;
-        margin-top: 15px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 40%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        transition: 0.6s;
-    }
-
-    .btn:hover::before {
-        left: 150%;
-    }
-
-    .primary {
-        background: #22c55e;
-        color: black;
-    }
-
-    .primary:hover {
-        background: #16a34a;
-        transform: translateY(-4px) scale(1.05);
-        box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
-    }
-
-    .secondary {
-        background: #e5e7eb;
-        color: black;
-    }
-
-    .secondary:hover {
-        background: #d1d5db;
-        transform: translateY(-4px) scale(1.05);
-        box-shadow: 0 0 30px rgba(229, 231, 235, 0.5);
-    }
-
-    .trust {
-        margin: 10px 0;
-        font-weight: 500;
-        animation: trustGlow 3s ease-in-out infinite;
-    }
-
-    .urgency {
-        color: #facc15;
-        margin-top: 15px;
-        font-weight: 500;
-        animation: urgencyPulse 2s ease-in-out infinite;
-    }
-
-    /* Animações */
+    /* Animações (mantidas) */
     @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes trustGlow { 0%, 100% { text-shadow: 0 0 10px rgba(34, 197, 94, 0.6); } 50% { text-shadow: 0 0 25px rgba(34, 197, 94, 1); } }
-    @keyframes urgencyPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-
-    .loading-spinner {
-        width: 24px; height: 24px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-top: 3px solid #fff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-        vertical-align: middle;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .btn-loading { pointer-events: none; opacity: 0.85; }
-
-    .overlay-loading {
-        position: fixed; top: 0; left: 0;
-        width: 100%; height: 100%;
-        background: rgba(0,0,0,0.92);
-        display: none;
-        align-items: center; justify-content: center;
-        z-index: 9999; flex-direction: column; color: white;
-        animation: fadeIn 0.4s ease forwards;
-    }
-
-    /* Responsivo */
-    @media (max-width: 768px) {
-        .checkout-container { flex-direction: column; gap: 20px; padding: 20px 15px; border-radius: 12px; }
-        .box { padding: 18px; margin-bottom: 16px; }
-        .btn { padding: 16px; font-size: 1.05rem; }
-    }
 </style>
 
 <div class="container py-5">
@@ -248,7 +140,7 @@
 
             <p class="trust text-success">🔒 Compra segura • Garantia de entrega • Pagamento protegido</p>
 
-            <!-- PROVA SOCIAL DINÂMICA COM ESTRELAS -->
+            <!-- PROVA SOCIAL -->
             <div class="badge-total">
                 ✅ +2.347 clientes já compraram nesta loja
             </div>
@@ -256,30 +148,28 @@
             <div class="social-proof-header">❤️ O que nossos clientes estão dizendo</div>
 
             {% for testimonial in testimonials %}
-            <div class="testimonial">
-                <!-- Estrelas -->
-                <div class="stars">
-                    {% for i in '12345'|make_list %}
-                        {% if i|add:0 <= testimonial.rating %}
-                            ⭐
-                        {% else %}
-                            ☆
-                        {% endif %}
-                    {% endfor %}
+            <div class="testimonial-card-dark">
+                <!-- Estrelas (usando método do modelo) -->
+                <div class="stars-dark">
+                    {{ testimonial.rating_stars|safe }}
                 </div>
-                <p>“{{ testimonial.texto }}”</p>
-                <div class="testimonial-author">
+                
+                <p class="mb-3">“{{ testimonial.texto }}”</p>
+                
+                <div class="testimonial-author-dark">
                     {% if testimonial.foto %}
                         <img src="{{ testimonial.foto.url }}" alt="{{ testimonial.nome }}">
                     {% else %}
-                        <img src="https://i.pravatar.cc/32?u={{ testimonial.nome }}" alt="">
+                        <div style="width:38px;height:38px;background:#334155;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">👤</div>
                     {% endif %}
                     <div>
                         <strong>{{ testimonial.nome }}</strong><br>
-                        <small>{{ testimonial.cidade }} • Comprou há {{ testimonial.data|timesince }}</small>
+                        <small class="text-light">{{ testimonial.cidade|default:"Brasil" }} • {{ testimonial.data|timesince }}</small>
                     </div>
                 </div>
             </div>
+            {% empty %}
+                <p class="text-muted small text-center">Nenhum depoimento aprovado no momento.</p>
             {% endfor %}
 
             <!-- Mercado Pago -->
