@@ -27,10 +27,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # ==================== PAGAMENTOS ====================
 
-# Mercado Pago
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-
-# ✅ STRIPE (nova alternativa)
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 
@@ -79,14 +76,10 @@ ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
-# ==================== CHANNELS (CHAT) ====================
-
+# ====================== CHANNELS ======================
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL")],
-        },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     },
 }
 
@@ -108,22 +101,23 @@ TEMPLATES = [
     },
 ]
 
-# ==================== DATABASE ====================
-
+# ==================== BANCO DE DADOS - RAILWAY (VERSÃO MAIS SIMPLES) ====================
 import dj_database_url
+import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True,
+        conn_health_checks=True,
+        ssl_require=True, # obrigatório no Railway
     )
 }
+print("✅ DATABASE_URL configurado (Railway)")
 
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'
+TIME_ZONE = 'America/La Paz'
 USE_I18N = True
 USE_TZ = True
 
