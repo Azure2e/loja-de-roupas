@@ -26,7 +26,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_unread_notifications()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -85,7 +85,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.set_user_status('online')
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -93,7 +93,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             )
             await self.set_user_status('offline')
 
-    async def receive(self, text_data):
+    async def receive(self, text_data): # type: ignore
         data = json.loads(text_data)
         status = data.get('status')
 
@@ -102,14 +102,14 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     async def set_user_status(self, status: str):
         await database_sync_to_async(cache.set)(
-            f"user_status_{self.user.id}", status, timeout=300
+            f"user_status_{self.user.id}", status, timeout=300 # pyright: ignore[reportOptionalMemberAccess]
         )
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'online_status_message',
-                'user_id': self.user.id,
+                'user_id': self.user.id, # pyright: ignore[reportOptionalMemberAccess]
                 'status': status
             }
         )
@@ -142,7 +142,7 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_chat_history()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # pyright: ignore[reportIncompatibleMethodOverride]
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -162,13 +162,13 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
             user=self.user
         ).order_by('created_at')
         return [{
-            'id': m.id,
+            'id': m.id, # type: ignore
             'message': m.message,
             'is_from_store': m.is_from_store,
             'time': m.created_at.strftime('%H:%M')
         } for m in messages]
 
-    async def receive(self, text_data):
+    async def receive(self, text_data): # type: ignore
         """Cliente enviou mensagem"""
         data = json.loads(text_data)
         message_text = data.get('message', '').strip()
@@ -230,14 +230,14 @@ class StoreSupportConsumer(AsyncWebsocketConsumer):
         self.customer_id = None
         await self.accept()
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, close_code): # type: ignore
         if self.customer_id:
             await self.channel_layer.group_discard(
                 f"support_chat_{self.customer_id}",
                 self.channel_name
             )
 
-    async def receive(self, text_data):
+    async def receive(self, text_data): # type: ignore
         data = json.loads(text_data)
 
         # Loja clicou em um cliente → entra na sala dele
