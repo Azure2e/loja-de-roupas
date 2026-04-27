@@ -37,6 +37,7 @@ django-browser-reload==1.21.0
 django-compressor==4.2
 django-crispy-forms==2.6
 django-filter==25.2
+django-phonenumber-field==8.4.0
 django-tailwind==4.4.2
 djangorestframework==3.17.1
 dnspython==2.8.0
