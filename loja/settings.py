@@ -11,11 +11,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# ==================== FIX TEMPORÁRIO PARA TESTE ====================
-ALLOWED_HOSTS = ['*']   # ← aceita QUALQUER domínio (só para testar)
+# TEMPORÁRIO PARA TESTE (depois podemos deixar mais seguro)
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://*',           # ← aceita qualquer https (só para teste)
+    'https://*',
     'http://*',
 ]
 
@@ -97,7 +97,7 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS - RAILWAY ====================
+# ==================== BANCO DE DADOS ====================
 import dj_database_url
 
 if os.getenv('DATABASE_URL'):
@@ -121,7 +121,7 @@ else:
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La Paz'
+TIME_ZONE = 'America/La_Paz'          # ← FIX AQUI (com underline!)
 
 USE_I18N = True
 USE_TZ = True
