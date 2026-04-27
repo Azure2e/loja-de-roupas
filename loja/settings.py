@@ -7,24 +7,23 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==================== SEGURANÇA ====================
-
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
-    "loja-de-roupas-452l.onrender.com",      # mantido (caso ainda use)
+    "loja-de-roupas-452l.onrender.com",
     "localhost",
     "127.0.0.1",
-    ".up.railway.app",                       # cobre TODOS os domínios do Railway
-    "loja-de-roupas-production.up.railway.app",  # seu domínio novo
+    ".up.railway.app", # ← essencial
+    "loja-de-roupas-production.up.railway.app", # ← seu domínio exato
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-452l.onrender.com',
     'https://*.onrender.com',
-    'https://loja-de-roupas-production.up.railway.app',   # novo
-    'https://*.up.railway.app',                           # novo (recomendado)
+    'https://loja-de-roupas-production.up.railway.app',
+    'https://*.up.railway.app', # ← essencial
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
