@@ -135,6 +135,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ==================== MEDIA (Cloudinary) ====================
 
+# FORÇANDO REBUILD NO RAILWAY - cloudinary
 import cloudinary
 
 cloudinary.config(
