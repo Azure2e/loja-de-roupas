@@ -11,19 +11,12 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    "loja-de-roupas-452l.onrender.com",
-    "localhost",
-    "127.0.0.1",
-    ".up.railway.app", # ← essencial
-    "loja-de-roupas-production.up.railway.app", # ← seu domínio exato
-]
+# ==================== FIX TEMPORÁRIO PARA TESTE ====================
+ALLOWED_HOSTS = ['*']   # ← aceita QUALQUER domínio (só para testar)
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://loja-de-roupas-452l.onrender.com',
-    'https://*.onrender.com',
-    'https://loja-de-roupas-production.up.railway.app',
-    'https://*.up.railway.app', # ← essencial
+    'https://*',           # ← aceita qualquer https (só para teste)
+    'http://*',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -104,7 +97,7 @@ TEMPLATES = [
     },
 ]
 
-# ==================== BANCO DE DADOS - RAILWAY (VERSÃO FINAL) ====================
+# ==================== BANCO DE DADOS - RAILWAY ====================
 import dj_database_url
 
 if os.getenv('DATABASE_URL'):
