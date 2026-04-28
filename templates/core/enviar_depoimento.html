@@ -13,7 +13,8 @@
                 <div class="col-lg-8">
                     <h2 class="display-5 fw-bold mb-2">❤️ Deixe seu depoimento e ganhe 10% OFF!</h2>
                     <p class="lead mb-0">
-                        Conte sua experiência e use o cupom <strong class="bg-white text-pink-600 px-3 py-1 rounded-3">DEPOIMENTO10</strong> 
+                        Conte sua experiência e use o cupom 
+                        <strong class="bg-white text-pink-600 px-3 py-1 rounded-3">DEPOIMENTO10</strong> 
                         na sua próxima compra!
                     </p>
                 </div>
@@ -49,7 +50,7 @@
                             <!-- Nome -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Seu nome</label>
-                                {{ form.nome|add_class:"form-control form-control-lg" }}
+                                {{ form.nome }}
                                 {% if form.nome.errors %}
                                     <div class="text-danger small">{{ form.nome.errors.0 }}</div>
                                 {% endif %}
@@ -72,7 +73,7 @@
                             <!-- Texto -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Seu depoimento <span class="text-danger">*</span></label>
-                                {{ form.texto|add_class:"form-control" }}
+                                {{ form.texto }}
                                 {% if form.texto.errors %}
                                     <div class="text-danger small">{{ form.texto.errors.0 }}</div>
                                 {% endif %}
@@ -81,7 +82,7 @@
                             <!-- Foto -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Foto da compra ou do produto (opcional)</label>
-                                {{ form.foto|add_class:"form-control" }}
+                                {{ form.foto }}
                                 <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
                                 {% if form.foto.errors %}
                                     <div class="text-danger small">{{ form.foto.errors.0 }}</div>
@@ -114,7 +115,6 @@
             const value = this.getAttribute('data-value');
             document.getElementById('rating-input').value = value;
 
-            // Atualiza visual
             document.querySelectorAll('.star').forEach(s => {
                 if (parseInt(s.getAttribute('data-value')) <= parseInt(value)) {
                     s.textContent = '★';
