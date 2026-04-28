@@ -32,8 +32,9 @@ urlpatterns = [
     path('gerar-otp/', views.gerar_otp, name='gerar_otp'),
     path('verificar-otp/', views.verificar_otp, name='verificar_otp'),
 
-    # ==================== DEPOIMENTOS (NOVO) ====================
+    # ==================== DEPOIMENTOS ====================
     path('enviar-depoimento/', views.enviar_depoimento, name='enviar_depoimento'),
+    path('depoimentos/', views.depoimentos, name='depoimentos'),   # ← ADICIONADO AQUI
 
     # ==================== WEBHOOK ====================
     path('webhook/mercadopago/', views.webhook_mercadopago, name='webhook_mercadopago'),
