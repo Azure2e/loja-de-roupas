@@ -1,80 +1,128 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Enviar Depoimento - SuaLoja{% endblock %}
+{% block title %}Deixe seu Depoimento - SuaLoja{% endblock %}
 
 {% block content %}
-<section class="py-5 bg-light" id="enviar-depoimento">
+<section class="py-5 bg-light">
     <div class="container">
-        
-        <!-- Cabeçalho -->
-        <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">❤️ Envie seu Depoimento</h2>
-            <p class="lead text-muted">Conte para todo mundo como foi sua experiência com a gente</p>
-        </div>
 
-        <!-- Mensagens do Django -->
-        {% if messages %}
-            <div class="row justify-content-center mb-4">
+        <!-- === MÓDULO CHAMATIVO COM CUPOM 10% === -->
+        <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-4 p-5 mb-5 shadow-lg text-center">
+            <div class="row align-items-center">
                 <div class="col-lg-8">
-                    {% for message in messages %}
-                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
+                    <h2 class="display-5 fw-bold mb-2">❤️ Deixe seu depoimento e ganhe 10% OFF!</h2>
+                    <p class="lead mb-0">
+                        Conte sua experiência e use o cupom <strong class="bg-white text-pink-600 px-3 py-1 rounded-3">DEPOIMENTO10</strong> 
+                        na sua próxima compra!
+                    </p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <div class="bg-white text-pink-600 rounded-3 py-3 px-4 d-inline-block">
+                        <small class="fw-bold">CUPOM DE 10%</small><br>
+                        <span class="fs-1 fw-bold">DEPOIMENTO10</span>
+                    </div>
                 </div>
             </div>
-        {% endif %}
+        </div>
 
+        <!-- === FORMULÁRIO DE DEPOIMENTO === -->
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-6">
-                
+            <div class="col-lg-8">
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-5">
+
+                        <h3 class="text-center mb-4 fw-bold">Conte sua experiência com a gente ❤️</h3>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
 
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
 
-                            <!-- Depoimento (texto) -->
+                            <!-- Nome -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Seu nome</label>
+                                {{ form.nome|add_class:"form-control form-control-lg" }}
+                                {% if form.nome.errors %}
+                                    <div class="text-danger small">{{ form.nome.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Nota (Estrelas clicáveis) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Qual nota você dá para a gente?</label>
+                                <div class="d-flex justify-content-center gap-2 fs-1" id="star-rating">
+                                    {% for i in '12345'|make_list %}
+                                        <span class="star text-warning" data-value="{{ i }}" style="cursor: pointer;">☆</span>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" name="rating" id="rating-input" value="5">
+                                {% if form.rating.errors %}
+                                    <div class="text-danger small">{{ form.rating.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Texto -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold">Seu depoimento <span class="text-danger">*</span></label>
                                 {{ form.texto|add_class:"form-control" }}
                                 {% if form.texto.errors %}
-                                    <div class="text-danger small mt-1">{{ form.texto.errors.0 }}</div>
+                                    <div class="text-danger small">{{ form.texto.errors.0 }}</div>
                                 {% endif %}
                             </div>
 
-                            <!-- Foto (opcional) -->
+                            <!-- Foto -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Foto do produto ou da sua compra <span class="text-muted">(opcional)</span></label>
+                                <label class="form-label fw-semibold">Foto da compra ou do produto (opcional)</label>
                                 {{ form.foto|add_class:"form-control" }}
                                 <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
                                 {% if form.foto.errors %}
-                                    <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
+                                    <div class="text-danger small">{{ form.foto.errors.0 }}</div>
                                 {% endif %}
                             </div>
 
-                            <!-- Botão -->
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-lg btn-primary rounded-3 py-3 fw-bold">
-                                    🚀 ENVIAR DEPOIMENTO
+                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold">
+                                    🚀 ENVIAR MEU DEPOIMENTO
                                 </button>
                             </div>
                         </form>
-
                     </div>
                 </div>
 
-                <!-- Link para ver depoimentos -->
                 <div class="text-center mt-4">
-                    <a href="{% url 'core:depoimentos' %}" class="text-decoration-none text-primary">
+                    <a href="{% url 'core:depoimentos' %}" class="text-decoration-none text-muted">
                         ← Ver todos os depoimentos
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    // Estrelas clicáveis
+    document.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            document.getElementById('rating-input').value = value;
+
+            // Atualiza visual
+            document.querySelectorAll('.star').forEach(s => {
+                if (parseInt(s.getAttribute('data-value')) <= parseInt(value)) {
+                    s.textContent = '★';
+                } else {
+                    s.textContent = '☆';
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
