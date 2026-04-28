@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==================== SEGURANÇA ====================
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = True   # ← FORÇADO PARA VER O ERRO COMPLETO
 
 # TEMPORÁRIO PARA TESTE (depois podemos deixar mais seguro)
 ALLOWED_HOSTS = ['*']
@@ -121,7 +121,7 @@ else:
 # ==================== INTERNACIONAL ====================
 
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'          # ← FIX AQUI (com underline!)
+TIME_ZONE = 'America/La_Paz'
 
 USE_I18N = True
 USE_TZ = True
