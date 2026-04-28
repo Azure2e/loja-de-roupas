@@ -202,3 +202,8 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+
+# ====================== SENHA MASTER PARA PAINEL SECRETO ======================
+# Troque pela senha que você quiser (use uma senha forte)
+ADMIN_MASTER_PASSWORD = 'J27a05#9'   # ← você já usou essa senha, pode deixar
