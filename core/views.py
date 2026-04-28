@@ -48,7 +48,7 @@ def depoimentos(request):
     context = {
         'testimonials': testimonials,
     }
-    return render(request, 'depoimentos.html', context)
+    return render(request, 'core/depoimentos.html', context)   # ← CORRIGIDO AQUI
 
 
 def detalhe_produto(request, slug):
