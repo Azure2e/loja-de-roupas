@@ -1,72 +1,80 @@
+{% extends 'core/base.html' %}
 {% load static %}
 
-<section class="py-5 bg-light" id="depoimentos">
+{% block title %}Enviar Depoimento - SuaLoja{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light" id="enviar-depoimento">
     <div class="container">
         
+        <!-- Cabeçalho -->
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">❤️ O que nossos clientes dizem</h2>
-            <p class="lead text-muted">Depoimentos reais de quem já comprou na SuaLoja</p>
+            <h2 class="display-5 fw-bold">❤️ Envie seu Depoimento</h2>
+            <p class="lead text-muted">Conte para todo mundo como foi sua experiência com a gente</p>
         </div>
 
-        <div class="row g-4">
-            {% for depoimento in testimonials %}
-                {% if depoimento.ativo %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
-                        
-                        <!-- Foto do cliente -->
-                        <div class="text-center pt-4 pb-2">
-                            {% if depoimento.foto %}
-                                <img src="{{ depoimento.foto.url }}" 
-                                     class="rounded-circle border border-4 border-white shadow"
-                                     alt="{{ depoimento.nome }}"
-                                     width="100" height="100" style="object-fit: cover;">
-                            {% else %}
-                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white"
-                                     style="width: 100px; height: 100px; font-size: 2.5rem;">
-                                    👤
-                                </div>
-                            {% endif %}
+        <!-- Mensagens do Django -->
+        {% if messages %}
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-8">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
 
-                        <div class="card-body text-center px-4">
-                            
-                            <!-- Estrelas -->
-                            <div class="mb-3 fs-4">
-                                {% for i in '12345'|make_list %}
-                                    {% if i|add:0 <= depoimento.rating %}
-                                        ⭐
-                                    {% else %}
-                                        ☆
-                                    {% endif %}
-                                {% endfor %}
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5">
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Depoimento (texto) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Seu depoimento <span class="text-danger">*</span></label>
+                                {{ form.texto|add_class:"form-control" }}
+                                {% if form.texto.errors %}
+                                    <div class="text-danger small mt-1">{{ form.texto.errors.0 }}</div>
+                                {% endif %}
                             </div>
 
-                            <!-- Texto do depoimento -->
-                            <p class="card-text fst-italic text-muted mb-4">
-                                “{{ depoimento.texto }}”
-                            </p>
+                            <!-- Foto (opcional) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Foto do produto ou da sua compra <span class="text-muted">(opcional)</span></label>
+                                {{ form.foto|add_class:"form-control" }}
+                                <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
+                                {% if form.foto.errors %}
+                                    <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
-                            <!-- Nome e cidade -->
-                            <h5 class="fw-bold mb-1">{{ depoimento.nome }}</h5>
-                            <small class="text-muted">
-                                {{ depoimento.cidade|default:"Brasil" }}
-                            </small>
-                        </div>
+                            <!-- Botão -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-lg btn-primary rounded-3 py-3 fw-bold">
+                                    🚀 ENVIAR DEPOIMENTO
+                                </button>
+                            </div>
+                        </form>
 
-                        <div class="card-footer text-center bg-white border-0 py-3">
-                            <small class="text-muted">
-                                {{ depoimento.data|date:"d 'de' F 'de' Y" }}
-                            </small>
-                        </div>
                     </div>
                 </div>
-                {% endif %}
-            {% empty %}
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted lead">Ainda não temos depoimentos cadastrados.</p>
+
+                <!-- Link para ver depoimentos -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:depoimentos' %}" class="text-decoration-none text-primary">
+                        ← Ver todos os depoimentos
+                    </a>
                 </div>
-            {% endfor %}
+
+            </div>
         </div>
     </div>
 </section>
+{% endblock %}
