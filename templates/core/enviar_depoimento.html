@@ -7,33 +7,18 @@
 <section class="py-5">
     <div class="container">
 
-        <!-- === MÓDULO CHAMATIVO COM CUPOM 10% === -->
-        <div class="bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-4 p-5 mb-5 shadow-lg text-center">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h2 class="display-5 fw-bold mb-2">❤️ Deixe seu depoimento e ganhe 10% OFF!</h2>
-                    <p class="lead mb-0">
-                        Conte sua experiência e use o cupom 
-                        <strong class="bg-white text-pink-600 px-3 py-1 rounded-3">DEPOIMENTO10</strong> 
-                        na sua próxima compra!
-                    </p>
-                </div>
-                <div class="col-lg-4 text-center">
-                    <div class="bg-white text-pink-600 rounded-3 py-3 px-4 d-inline-block">
-                        <small class="fw-bold">CUPOM DE 10%</small><br>
-                        <span class="fs-1 fw-bold">DEPOIMENTO10</span>
-                    </div>
-                </div>
-            </div>
+        <!-- Cabeçalho Emocional -->
+        <div class="text-center mb-5">
+            <div class="display-1 mb-3">❤️</div>
+            <h2 class="display-5 fw-bold text-white">Sua opinião faz toda a diferença</h2>
+            <p class="lead text-light">Conte como foi sua experiência com a gente.<br>É rapidinho e muito importante para nós!</p>
         </div>
 
-        <!-- === FORMULÁRIO DE DEPOIMENTO === -->
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow-lg border-0 rounded-4">
-                    <div class="card-body p-5">
 
-                        <h3 class="text-center mb-4 fw-bold">Conte sua experiência com a gente ❤️</h3>
+                <div class="card bg-white shadow-xl border-0 rounded-4 overflow-hidden">
+                    <div class="card-body p-5">
 
                         {% if messages %}
                             {% for message in messages %}
@@ -49,17 +34,17 @@
 
                             <!-- Nome -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Seu nome</label>
+                                <label class="form-label fw-semibold text-dark">Seu nome</label>
                                 {{ form.nome }}
                                 {% if form.nome.errors %}
-                                    <div class="text-danger small">{{ form.nome.errors.0 }}</div>
+                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
                                 {% endif %}
                             </div>
 
-                            <!-- Nota (Estrelas clicáveis) -->
+                            <!-- Nota com estrelas -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Qual nota você dá para a gente?</label>
-                                <div class="d-flex justify-content-center gap-2 fs-1" id="star-rating">
+                                <label class="form-label fw-semibold text-dark">Qual nota você dá para a gente?</label>
+                                <div class="d-flex justify-content-center gap-3 fs-1" id="star-rating">
                                     {% for i in '12345'|make_list %}
                                         <span class="star text-warning" data-value="{{ i }}" style="cursor: pointer;">☆</span>
                                     {% endfor %}
@@ -70,27 +55,27 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Texto -->
+                            <!-- Depoimento -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Seu depoimento <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold text-dark">Seu depoimento <span class="text-danger">*</span></label>
                                 {{ form.texto }}
                                 {% if form.texto.errors %}
-                                    <div class="text-danger small">{{ form.texto.errors.0 }}</div>
+                                    <div class="text-danger small mt-1">{{ form.texto.errors.0 }}</div>
                                 {% endif %}
                             </div>
 
                             <!-- Foto -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold">Foto da compra ou do produto (opcional)</label>
+                                <label class="form-label fw-semibold text-dark">Foto da compra ou do produto (opcional)</label>
                                 {{ form.foto }}
                                 <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
                                 {% if form.foto.errors %}
-                                    <div class="text-danger small">{{ form.foto.errors.0 }}</div>
+                                    <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
                                 {% endif %}
                             </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold">
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold rounded-3">
                                     🚀 ENVIAR MEU DEPOIMENTO
                                 </button>
                             </div>
@@ -99,7 +84,7 @@
                 </div>
 
                 <div class="text-center mt-4">
-                    <a href="{% url 'core:depoimentos' %}" class="text-decoration-none text-muted">
+                    <a href="{% url 'core:depoimentos' %}" class="text-decoration-none text-light">
                         ← Ver todos os depoimentos
                     </a>
                 </div>
