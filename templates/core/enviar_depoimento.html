@@ -35,7 +35,7 @@
                             <!-- Nome -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu nome</label>
-                                {{ form.nome }}
+                                {{ form.nome|add_class:"form-control form-control-lg text-dark" }}
                                 {% if form.nome.errors %}
                                     <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
                                 {% endif %}
@@ -44,7 +44,7 @@
                             <!-- Email -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu e-mail</label>
-                                {{ form.email }}
+                                {{ form.email|add_class:"form-control form-control-lg text-dark" }}
                                 {% if form.email.errors %}
                                     <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
                                 {% endif %}
@@ -64,10 +64,10 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Depoimento -->
+                            <!-- Depoimento (AGORA VISÍVEL) -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu depoimento <span class="text-danger">*</span></label>
-                                {{ form.texto }}
+                                {{ form.texto|add_class:"form-control text-dark" }}
                                 {% if form.texto.errors %}
                                     <div class="text-danger small mt-1">{{ form.texto.errors.0 }}</div>
                                 {% endif %}
@@ -76,7 +76,7 @@
                             <!-- Foto -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Foto da compra ou do produto (opcional)</label>
-                                {{ form.foto }}
+                                {{ form.foto|add_class:"form-control text-dark" }}
                                 <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
                                 {% if form.foto.errors %}
                                     <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
