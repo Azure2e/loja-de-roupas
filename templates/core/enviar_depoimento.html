@@ -35,19 +35,15 @@
                             <!-- Nome -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu nome</label>
-                                {{ form.nome|add_class:"form-control form-control-lg text-dark" }}
-                                {% if form.nome.errors %}
-                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
-                                {% endif %}
+                                <input type="text" name="nome" class="form-control form-control-lg text-dark" 
+                                       placeholder="Digite seu nome completo" required>
                             </div>
 
                             <!-- Email -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu e-mail</label>
-                                {{ form.email|add_class:"form-control form-control-lg text-dark" }}
-                                {% if form.email.errors %}
-                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
-                                {% endif %}
+                                <input type="email" name="email" class="form-control form-control-lg text-dark" 
+                                       placeholder="seu@email.com" required>
                             </div>
 
                             <!-- Nota com estrelas -->
@@ -59,12 +55,9 @@
                                     {% endfor %}
                                 </div>
                                 <input type="hidden" name="rating" id="rating-input" value="5">
-                                {% if form.rating.errors %}
-                                    <div class="text-danger small">{{ form.rating.errors.0 }}</div>
-                                {% endif %}
                             </div>
 
-                            <!-- Depoimento (AGORA VISÍVEL) -->
+                            <!-- Depoimento -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu depoimento <span class="text-danger">*</span></label>
                                 {{ form.texto|add_class:"form-control text-dark" }}
