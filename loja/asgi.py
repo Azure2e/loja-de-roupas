@@ -1,6 +1,6 @@
 """
 ASGI config for loja project.
-Configuração completa para WebSocket com Django Channels.
+Configuração completa para WebSocket com Django Channels + segurança.
 """
 
 import os
@@ -14,18 +14,18 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'loja.settings')
 
 django_asgi_app = get_asgi_application()
 
-# Importa o routing dos WebSockets (notificações + chat + status online)
-import accounts.routing
+# Importa o routing dos WebSockets (core/routing.py)
+import core.routing
 
 application = ProtocolTypeRouter({
-    # Rotas HTTP normais (páginas, admin, etc.)
+    # Rotas HTTP normais (páginas, admin, static, etc.)
     "http": django_asgi_app,
 
     # Rotas WebSocket com proteção de segurança
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                accounts.routing.websocket_urlpatterns
+                core.routing.websocket_urlpatterns
             )
         )
     ),
