@@ -10,15 +10,15 @@
         <!-- Cabeçalho Emocional -->
         <div class="text-center mb-5">
             <div class="display-1 mb-3">❤️</div>
-            <h2 class="display-5 fw-bold text-white">Sua opinião faz toda a diferença</h2>
-            <p class="lead text-light">Conte como foi sua experiência com a gente.<br>É rapidinho e muito importante para nós!</p>
+            <h2 class="display-5 fw-bold text-white">Sua opinião é muito importante pra gente</h2>
+            <p class="lead text-light">Conte como foi sua experiência.<br>Com amor e carinho, a SuaLoja ❤️</p>
         </div>
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
 
-                <div class="card bg-white shadow-xl border-0 rounded-4 overflow-hidden">
-                    <div class="card-body p-5">
+                <div class="card bg-white shadow-2xl border-0 rounded-4 overflow-hidden">
+                    <div class="card-body p-5 p-lg-6">
 
                         {% if messages %}
                             {% for message in messages %}
@@ -32,9 +32,27 @@
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
 
+                            <!-- Nome -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Seu nome</label>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Seu e-mail</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
                             <!-- Nota com estrelas -->
                             <div class="mb-4">
-                                <label class="form-label fw-semibold text-dark">Qual nota você dá para a gente?</label>
+                                <label class="form-label fw-semibold text-dark">Qual nota você dá pra gente?</label>
                                 <div class="d-flex justify-content-center gap-3 fs-1" id="star-rating">
                                     {% for i in '12345'|make_list %}
                                         <span class="star text-warning" data-value="{{ i }}" style="cursor: pointer;">☆</span>
@@ -65,9 +83,9 @@
                                 {% endif %}
                             </div>
 
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold rounded-3">
-                                    🚀 ENVIAR MEU DEPOIMENTO
+                            <div class="d-grid mt-5">
+                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold rounded-3 shadow">
+                                    🚀 ENVIAR MEU DEPOIMENTO COM AMOR
                                 </button>
                             </div>
                         </form>
