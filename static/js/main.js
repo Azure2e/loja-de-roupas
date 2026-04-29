@@ -111,12 +111,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnRemover = document.getElementById('btn-remover-foto');
 
     if (fileInput && previewImg) {
-        // Clique na foto abre o seletor
         previewImg.parentElement.addEventListener('click', function () {
             fileInput.click();
         });
 
-        // Preview em tempo real
         fileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
@@ -128,13 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Botão Remover Foto
         if (btnRemover) {
             btnRemover.addEventListener('click', function () {
                 fileInput.value = '';
                 previewImg.src = 'https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤';
-
-                // Feedback visual
+                
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert alert-info rounded-4 text-center mt-3';
                 alertDiv.textContent = 'Foto removida. Salve as alterações para confirmar.';
@@ -172,8 +168,51 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(() => {});
     }
 
-    // Atualiza notificações a cada 8 segundos
     setInterval(carregarNotificacoes, 8000);
-    carregarNotificacoes();   // Carrega imediatamente
+    carregarNotificacoes();
+
+    // ==================== STATUS ONLINE - BOLINHA (Verde / Amarelo) ====================
+    function connectOnlineStatus() {
+        const userId = document.getElementById('profile-pic-container')?.dataset.userId;
+        if (!userId) return;
+
+        const socket = new WebSocket('wss://' + window.location.host + '/ws/online/');
+
+        socket.onopen = function () {
+            console.log("✅ Status Online conectado");
+        };
+
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'online_status' && String(data.user_id) === userId) {
+                updateStatusDot(data.status);
+            }
+        };
+
+        socket.onclose = function () {
+            console.log("❌ Status Online desconectado");
+            setTimeout(connectOnlineStatus, 3000);
+        };
+    }
+
+    function updateStatusDot(status) {
+        const dot = document.getElementById('online-dot');
+        if (!dot) return;
+
+        if (status === 'online') {
+            dot.style.backgroundColor = '#22c55e';   // Verde
+            dot.style.display = 'block';
+        } 
+        else if (status === 'ausente') {
+            dot.style.backgroundColor = '#eab308';   // Amarelo
+            dot.style.display = 'block';
+        } 
+        else {
+            dot.style.display = 'none';              // Offline
+        }
+    }
+
+    // Inicia o status online
+    connectOnlineStatus();
 
 });
