@@ -1,7 +1,7 @@
 // static/js/main.js
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ==================== reCAPTCHA v3 (invisível) ====================
+    // ==================== reCAPTCHA v3 ====================
     const RECAPTCHA_SITE_KEY = '6LcUda0sAAAAAMqlx5RebYZ-F-OIEnnqPzXsYM7x';
 
     function loadRecaptcha() {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const infoEstoque = document.getElementById('info-estoque');
 
     if (selectTamanho) {
-        const basePreco = parseFloat(precoAtual.dataset.basePreco) || 0;
+        const basePreco = parseFloat(precoAtual?.dataset.basePreco) || 0;
 
         selectTamanho.addEventListener('change', function () {
             const tamanhoId = this.value;
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            const variantes = JSON.parse(document.getElementById('variantes-data').textContent || '[]');
+            const variantes = JSON.parse(document.getElementById('variantes-data')?.textContent || '[]');
 
             variantes.forEach(v => {
                 if (String(v.tamanho_id) === tamanhoId) {
@@ -67,61 +67,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         btnAdicionar.addEventListener('click', function () {
             const varianteId = this.dataset.varianteId;
-            if (varianteId) {
-                window.location.href = `/adicionar/${varianteId}/`;
-            }
-        });
-    }
-
-    // ==================== reCAPTCHA NO FORMULÁRIO DE LOGIN ====================
-    const loginForm = document.getElementById('login-form');
-
-    if (loginForm) {
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            if (!window.grecaptcha) {
-                alert('reCAPTCHA não carregou. Recarregue a página e tente novamente.');
-                return;
-            }
-
-            grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'login' })
-                .then(function (token) {
-                    let tokenInput = document.getElementById('recaptcha-token');
-                    if (!tokenInput) {
-                        tokenInput = document.createElement('input');
-                        tokenInput.type = 'hidden';
-                        tokenInput.name = 'g-recaptcha-response';
-                        tokenInput.id = 'recaptcha-token';
-                        loginForm.appendChild(tokenInput);
-                    }
-                    tokenInput.value = token;
-                    loginForm.submit();
-                })
-                .catch(function (error) {
-                    console.error('Erro no reCAPTCHA:', error);
-                    alert('Erro ao verificar reCAPTCHA. Tente novamente.');
-                });
+            if (varianteId) window.location.href = `/adicionar/${varianteId}/`;
         });
     }
 
     // ==================== UPLOAD E PREVIEW DE FOTO NO PERFIL ====================
-    const fileInput  = document.getElementById('foto-upload');
+    const fileInput = document.getElementById('foto-upload');
     const previewImg = document.getElementById('preview-img');
     const btnRemover = document.getElementById('btn-remover-foto');
 
     if (fileInput && previewImg) {
-        previewImg.parentElement.addEventListener('click', function () {
-            fileInput.click();
-        });
+        previewImg.parentElement.addEventListener('click', () => fileInput.click());
 
         fileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    previewImg.src = e.target.result;
-                };
+                reader.onload = e => previewImg.src = e.target.result;
                 reader.readAsDataURL(file);
             }
         });
@@ -130,12 +92,6 @@ document.addEventListener('DOMContentLoaded', function () {
             btnRemover.addEventListener('click', function () {
                 fileInput.value = '';
                 previewImg.src = 'https://via.placeholder.com/160x160/1a0033/00d4ff?text=👤';
-                
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-info rounded-4 text-center mt-3';
-                alertDiv.textContent = 'Foto removida. Salve as alterações para confirmar.';
-                document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
-                setTimeout(() => alertDiv.remove(), 4000);
             });
         }
     }
@@ -143,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==================== NOTIFICAÇÕES (Bell) ====================
     function carregarNotificacoes() {
         fetch('/accounts/notifications/')
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
                 const countEl = document.getElementById('notification-count');
                 const listEl = document.getElementById('notification-list');
@@ -173,23 +129,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ==================== STATUS ONLINE - BOLINHA (Verde / Amarelo) ====================
     function connectOnlineStatus() {
-        const userId = document.getElementById('profile-pic-container')?.dataset.userId;
+        const container = document.getElementById('profile-pic-container');
+        if (!container) return;
+        const userId = container.getAttribute('data-user-id');
         if (!userId) return;
 
         const socket = new WebSocket('wss://' + window.location.host + '/ws/online/');
 
-        socket.onopen = function () {
-            console.log("✅ Status Online conectado");
-        };
+        socket.onopen = () => console.log("✅ Status Online conectado");
 
-        socket.onmessage = function (e) {
+        socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             if (data.type === 'online_status' && String(data.user_id) === userId) {
                 updateStatusDot(data.status);
             }
         };
 
-        socket.onclose = function () {
+        socket.onclose = () => {
             console.log("❌ Status Online desconectado");
             setTimeout(connectOnlineStatus, 3000);
         };
@@ -212,7 +168,66 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Inicia o status online
+    // ==================== CHAT ONLINE ====================
+    let chatSocket = null;
+
+    window.toggleChat = function() {
+        const windowEl = document.getElementById('chat-window');
+        windowEl.classList.toggle('d-none');
+
+        if (!windowEl.classList.contains('d-none') && !chatSocket) {
+            connectChat();
+        }
+    };
+
+    function connectChat() {
+        const userId = "{{ user.id }}";
+        if (!userId) return;
+
+        chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
+
+        chatSocket.onopen = () => console.log("✅ Chat conectado");
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'chat_history' || data.type === 'chat_message') {
+                renderMessages(data.messages || [data]);
+            }
+        };
+
+        chatSocket.onclose = () => {
+            console.log("Chat desconectado");
+            setTimeout(connectChat, 3000);
+        };
+    }
+
+    function renderMessages(messages) {
+        const body = document.getElementById('chat-body');
+        body.innerHTML = '';
+
+        messages.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = msg.is_from_store ? 'text-end mb-2' : 'text-start mb-2';
+            div.innerHTML = `
+                <div class="d-inline-block px-3 py-2 rounded-3 ${msg.is_from_store ? 'bg-primary text-white' : 'bg-secondary text-white'}">
+                    ${msg.message}
+                    <small class="d-block text-light opacity-75">${msg.time}</small>
+                </div>`;
+            body.appendChild(div);
+        });
+        body.scrollTop = body.scrollHeight;
+    }
+
+    window.sendChatMessage = function() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (!message || !chatSocket) return;
+
+        chatSocket.send(JSON.stringify({ message: message }));
+        input.value = '';
+    };
+
+    // ==================== INICIALIZAÇÃO ====================
     connectOnlineStatus();
 
 });
