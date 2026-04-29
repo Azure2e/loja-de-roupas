@@ -57,10 +57,10 @@
                         </ul>
                     </li>
 
-                    <!-- Foto de Perfil + Status Online REAL -->
+                    <!-- Foto de Perfil + Status Online -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="position-relative" id="profile-pic-container">
+                            <div class="position-relative" id="profile-pic-container" data-user-id="{{ user.id }}">
                                 {% if user.profile.picture %}
                                     <img src="{{ user.profile.picture.url }}" 
                                          alt="Foto de perfil" 
@@ -73,9 +73,10 @@
                                          style="width: 38px; height: 38px; object-fit: cover;">
                                 {% endif %}
                                 
-                                <!-- Bolinha verde de Online -->
-                                <span id="online-dot" class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle"
-                                      style="width: 12px; height: 12px; z-index: 11; display: none;"></span>
+                                <!-- Bolinha de Status -->
+                                <span id="online-dot" 
+                                      class="position-absolute bottom-0 end-0 border border-dark rounded-circle"
+                                      style="width: 14px; height: 14px; z-index: 11; display: none;"></span>
                             </div>
                         </a>
                         <ul class="dropdown-menu bg-dark border-primary">
@@ -110,26 +111,20 @@
     {% block content %}{% endblock %}
 </div>
 
-<!-- ==================== CHAT FLUTUANTE (Cliente → Loja) ==================== -->
+<!-- ==================== CHAT FLUTUANTE ==================== -->
 <div class="chat-floating" id="chat-widget">
     <button onclick="toggleChat()" class="btn btn-primary rounded-circle shadow-lg position-fixed bottom-0 end-0 m-4"
             style="width: 65px; height: 65px; font-size: 1.8rem; z-index: 1050;">
         <i class="fas fa-comment-dots"></i>
     </button>
 
-    <!-- Janela do Chat -->
     <div id="chat-window" class="chat-window position-fixed bottom-0 end-0 bg-dark border border-primary rounded-4 shadow-xl d-none"
          style="width: 380px; height: 520px; z-index: 1060; margin: 20px;">
-        
         <div class="chat-header bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
             <strong>💬 Chat com a Loja</strong>
             <button onclick="toggleChat()" class="btn btn-sm btn-light">✕</button>
         </div>
-
-        <div id="chat-body" class="chat-body p-3 overflow-auto" style="height: 400px;">
-            <!-- Mensagens aparecem aqui -->
-        </div>
-
+        <div id="chat-body" class="chat-body p-3 overflow-auto" style="height: 400px;"></div>
         <div class="chat-footer p-3 border-top">
             <div class="input-group">
                 <input id="chat-input" type="text" class="form-control" placeholder="Digite sua mensagem..." 
@@ -150,93 +145,10 @@
     </div>
 </footer>
 
-<!-- ==================== SCRIPTS ==================== -->
+<!-- ==================== SCRIPTS (AGORA SEPARADOS) ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/main.js' %}" defer></script>
 
 {% block extra_js %}{% endblock %}
-
-<!-- ==================== STATUS ONLINE REAL ==================== -->
-<script>
-    function connectOnlineStatus() {
-        const userId = "{{ user.id }}";
-        if (!userId) return;
-
-        const socket = new WebSocket('wss://' + window.location.host + '/ws/online/');
-
-        socket.onopen = function() {
-            console.log("✅ Status Online conectado");
-            document.getElementById('online-dot').style.display = 'block';
-        };
-
-        socket.onclose = function() {
-            console.log("❌ Status Online desconectado");
-            document.getElementById('online-dot').style.display = 'none';
-            setTimeout(connectOnlineStatus, 2000);
-        };
-    }
-    window.addEventListener('load', connectOnlineStatus);
-</script>
-
-<!-- ==================== CHAT ONLINE SCRIPT ==================== -->
-<script>
-    let chatSocket = null;
-
-    function toggleChat() {
-        const window = document.getElementById('chat-window');
-        window.classList.toggle('d-none');
-
-        if (!window.classList.contains('d-none') && !chatSocket) {
-            connectChat();
-        }
-    }
-
-    function connectChat() {
-        const userId = "{{ user.id }}";
-        if (!userId) return;
-
-        chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
-
-        chatSocket.onopen = () => console.log("✅ Chat conectado");
-
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            if (data.type === 'chat_history' || data.type === 'chat_message') {
-                renderMessages(data.messages || [data]);
-            }
-        };
-
-        chatSocket.onclose = () => {
-            console.log("Chat desconectado");
-            setTimeout(connectChat, 3000);
-        };
-    }
-
-    function renderMessages(messages) {
-        const body = document.getElementById('chat-body');
-        body.innerHTML = '';
-
-        messages.forEach(msg => {
-            const div = document.createElement('div');
-            div.className = msg.is_from_store ? 'text-end mb-2' : 'text-start mb-2';
-            div.innerHTML = `
-                <div class="d-inline-block px-3 py-2 rounded-3 ${msg.is_from_store ? 'bg-primary text-white' : 'bg-secondary text-white'}">
-                    ${msg.message}
-                    <small class="d-block text-light opacity-75">${msg.time}</small>
-                </div>`;
-            body.appendChild(div);
-        });
-        body.scrollTop = body.scrollHeight;
-    }
-
-    function sendChatMessage() {
-        const input = document.getElementById('chat-input');
-        const message = input.value.trim();
-        if (!message || !chatSocket) return;
-
-        chatSocket.send(JSON.stringify({ message: message }));
-        input.value = '';
-    }
-</script>
 </body>
 </html>
