@@ -32,15 +32,6 @@
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
 
-                            <!-- Nome -->
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold text-dark">Seu nome</label>
-                                {{ form.nome }}
-                                {% if form.nome.errors %}
-                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-
                             <!-- Nota com estrelas -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Qual nota você dá para a gente?</label>
