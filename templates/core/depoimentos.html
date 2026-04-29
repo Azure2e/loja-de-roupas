@@ -1,17 +1,20 @@
 {% load static %}
 
-<section class="py-5 bg-light" id="depoimentos">
+<section class="py-5" id="depoimentos">
     <div class="container">
-        
+
+        <!-- Cabeçalho Emocional -->
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">❤️ O que nossos clientes dizem</h2>
-            <p class="lead text-muted">Depoimentos reais de quem já comprou na SuaLoja</p>
+            <div class="display-1 mb-3">❤️</div>
+            <h2 class="display-5 fw-bold text-white">O que nossos clientes dizem</h2>
+            <p class="lead text-light">Depoimentos reais de quem já comprou e amou a SuaLoja</p>
         </div>
 
         <div class="row g-4">
+
             {% for testimonial in testimonials %}
                 <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 shadow-lg border-0 rounded-4 overflow-hidden">
+                    <div class="card h-100 shadow-xl border-0 rounded-4 overflow-hidden hover-scale">
                         
                         <!-- Foto do cliente -->
                         <div class="text-center pt-4 pb-2">
@@ -19,29 +22,29 @@
                                 <img src="{{ testimonial.foto.url }}" 
                                      class="rounded-circle border border-4 border-white shadow"
                                      alt="{{ testimonial.nome }}"
-                                     width="100" height="100" style="object-fit: cover;">
+                                     width="110" height="110" style="object-fit: cover;">
                             {% else %}
-                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white"
-                                     style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center mx-auto text-white"
+                                     style="width: 110px; height: 110px; font-size: 3rem;">
                                     👤
                                 </div>
                             {% endif %}
                         </div>
 
                         <div class="card-body text-center px-4">
-                            
-                            <!-- Estrelas (usando o método do modelo - mais limpo) -->
-                            <div class="mb-3 fs-4">
+
+                            <!-- Estrelas -->
+                            <div class="mb-3 fs-3">
                                 {{ testimonial.rating_stars|safe }}
                             </div>
 
                             <!-- Texto do depoimento -->
-                            <p class="card-text fst-italic text-muted mb-4">
+                            <p class="card-text fst-italic text-muted mb-4 fs-5">
                                 “{{ testimonial.texto }}”
                             </p>
 
                             <!-- Nome e cidade -->
-                            <h5 class="fw-bold mb-1">{{ testimonial.nome }}</h5>
+                            <h5 class="fw-bold mb-1 text-dark">{{ testimonial.nome }}</h5>
                             <small class="text-muted">
                                 {{ testimonial.cidade|default:"Brasil" }}
                             </small>
@@ -56,9 +59,28 @@
                 </div>
             {% empty %}
                 <div class="col-12 text-center py-5">
-                    <p class="text-muted lead">Nenhum depoimento aprovado no momento.</p>
+                    <div class="py-5">
+                        <div class="display-1 mb-3">😔</div>
+                        <p class="lead text-muted">Ainda não temos depoimentos aprovados...</p>
+                        <p class="text-muted">Seja o primeiro a contar sua experiência!</p>
+                        <a href="{% url 'core:enviar_depoimento' %}" class="btn btn-primary btn-lg mt-3">
+                            Deixar meu depoimento ❤️
+                        </a>
+                    </div>
                 </div>
             {% endfor %}
+
         </div>
     </div>
 </section>
+
+<!-- Efeito hover suave nos cards -->
+<style>
+    .hover-scale {
+        transition: all 0.3s ease;
+    }
+    .hover-scale:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
