@@ -168,7 +168,7 @@ class Testimonial(models.Model):
 
     @property
     def rating_stars(self):
-        """Método usado no template (mostra só as estrelas preenchidas)"""
+        """Mostra só as estrelas preenchidas (usado no template)"""
         return '⭐' * self.rating
 
     @property
@@ -177,8 +177,6 @@ class Testimonial(models.Model):
         full = '⭐' * self.rating
         empty = '☆' * (5 - self.rating)
         return full + empty
-
-    rating_stars.short_description = 'Avaliação'
 
 
 # ==================== PERFIL DO USUÁRIO (Fidelidade) ====================
