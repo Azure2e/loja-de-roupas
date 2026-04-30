@@ -13,16 +13,23 @@ admin.site.index_title = "Gerenciamento da Loja"
 
 urlpatterns = [
     # ===================== PORTA SECRETA =====================
-    path('gestao-secreta-jaques-2026/', core_views.admin_gate, name='admin_gate'),
+    path('gestao-secreta-jaques-2026/', 
+         core_views.admin_gate, 
+         name='admin_gate'),
     
-    # ===================== CRIAR SUPERUSUÁRIO =====================
-    path('gestao-secreta-jaques-2026/criar-superusuario/', core_views.create_superuser_view, name='create_superuser'),
+    # ===================== CRIAR SUPERUSUÁRIO (NOVA VIEW) =====================
+    path('gestao-secreta-jaques-2026/criar-superusuario/', 
+         core_views.criar_superusuario_view,      # ← AGORA USA A VIEW CORRETA
+         name='create_superuser'),
 
     # ===================== PAINEL DE SUPORTE =====================
-    path('gestao-secreta-jaques-2026/suporte/', core_views.painel_suporte, name='painel_suporte'),
+    path('gestao-secreta-jaques-2026/suporte/', 
+         core_views.painel_suporte, 
+         name='painel_suporte'),
 
     # ===================== ADMIN DJANGO =====================
-    path('gestao-secreta-jaques-2026/admin/', admin.site.urls),
+    path('gestao-secreta-jaques-2026/admin/', 
+         admin.site.urls),
 
     # ===================== ROTAS DA LOJA =====================
     path('', include('core.urls', namespace='core')),
@@ -32,7 +39,9 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 
     # ===================== STRIPE =====================
-    path('criar-sessao-stripe/', core_views.criar_sessao_stripe, name='criar_sessao_stripe'),
+    path('criar-sessao-stripe/', 
+         core_views.criar_sessao_stripe, 
+         name='criar_sessao_stripe'),
 ]
 
 # ===================== ARQUIVOS DE MÍDIA (só em desenvolvimento) =====================
