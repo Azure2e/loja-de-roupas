@@ -3,7 +3,7 @@
 <section class="py-5" id="depoimentos">
     <div class="container">
 
-        <!-- Cabeçalho Simples -->
+        <!-- Cabeçalho -->
         <div class="text-center mb-5">
             <div class="display-1 mb-3">❤️</div>
             <h2 class="display-5 fw-bold text-dark">O que nossos clientes dizem</h2>
@@ -11,14 +11,14 @@
                 Compartilhe sua experiência e veja o que outros clientes estão dizendo!
             </p>
 
-            <!-- CTA Cupom 10% -->
-            <div class="bg-light rounded-4 p-4 shadow-sm d-inline-block mb-5">
-                <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
-                    <span class="badge bg-success fs-6 px-3 py-2">🎟️ CUPOM 10%</span>
-                    <div class="text-start">
-                        <strong class="text-dark fs-5">Deixe seu depoimento agora</strong><br>
-                        <small class="text-muted">e ganhe <strong class="text-success">10% OFF</strong> na sua próxima compra!</small>
-                    </div>
+            <!-- CUPOM ATUALIZADO - TEXTO EXATO QUE VOCÊ PEDIU -->
+            <div class="bg-warning-subtle border border-warning rounded-4 p-4 shadow-sm mx-auto mb-5" style="max-width: 520px;">
+                <div class="text-center">
+                    <span class="badge bg-success fs-5 px-4 py-2 mb-3">🎟️ CUPOM 10%</span>
+                    <h4 class="text-dark fw-bold mb-2">Deixe seu depoimento</h4>
+                    <p class="text-muted fs-5 mb-3">
+                        e ganha um <strong class="text-success">cupom de desconto</strong>
+                    </p>
                     <a href="{% url 'core:enviar_depoimento' %}" 
                        class="btn btn-primary btn-lg px-5 py-3 fw-bold rounded-3">
                         ✨ DEIXAR MEU DEPOIMENTO
@@ -37,7 +37,7 @@
                         <!-- Foto -->
                         <div class="text-center mb-3">
                             {% if testimonial.foto %}
-                                <img src="{{ testimonial.foto.url }}" 
+                                <img src="{{ testimonial.foto.url }}"
                                      class="rounded-circle border border-4 border-white shadow"
                                      alt="{{ testimonial.nome }}"
                                      width="100" height="100" style="object-fit: cover;">
