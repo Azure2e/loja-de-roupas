@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     loadRecaptcha();
 
-    // ==================== LÓGICA DE PRODUTOS (tamanho / cor) ====================
+    // ==================== LÓGICA DE PRODUTOS ====================
     const selectTamanho = document.getElementById('select-tamanho');
     const selectCor = document.getElementById('select-cor');
     const btnAdicionar = document.getElementById('btn-adicionar');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ==================== NOTIFICAÇÕES (Bell) ====================
+    // ==================== NOTIFICAÇÕES ====================
     function carregarNotificacoes() {
         fetch('/accounts/notifications/')
             .then(res => res.json())
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(carregarNotificacoes, 8000);
     carregarNotificacoes();
 
-    // ==================== STATUS ONLINE - BOLINHA (Verde / Amarelo) ====================
+    // ==================== STATUS ONLINE - BOLINHA ====================
     function connectOnlineStatus() {
         const container = document.getElementById('profile-pic-container');
         if (!container) return;
@@ -156,16 +156,33 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!dot) return;
 
         if (status === 'online') {
-            dot.style.backgroundColor = '#22c55e';   // Verde
+            dot.style.backgroundColor = '#22c55e';
             dot.style.display = 'block';
-        } 
-        else if (status === 'ausente') {
-            dot.style.backgroundColor = '#eab308';   // Amarelo
+        } else if (status === 'ausente') {
+            dot.style.backgroundColor = '#eab308';
             dot.style.display = 'block';
-        } 
-        else {
-            dot.style.display = 'none';              // Offline
+        } else {
+            dot.style.display = 'none';
         }
+    }
+
+    // ==================== ESTRELAS CLICÁVEIS (Depoimento) ====================
+    function initStarRating() {
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function () {
+                const value = this.getAttribute('data-value');
+                const ratingInput = document.getElementById('rating-input');
+                if (ratingInput) ratingInput.value = value;
+
+                document.querySelectorAll('.star').forEach(s => {
+                    if (parseInt(s.getAttribute('data-value')) <= parseInt(value)) {
+                        s.textContent = '★';
+                    } else {
+                        s.textContent = '☆';
+                    }
+                });
+            });
+        });
     }
 
     // ==================== CHAT ONLINE ====================
@@ -229,5 +246,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ==================== INICIALIZAÇÃO ====================
     connectOnlineStatus();
+    initStarRating();   // ← Ativa as estrelas do formulário de depoimento
 
 });
