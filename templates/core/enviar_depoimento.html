@@ -4,7 +4,7 @@
 {% block title %}Deixe seu Depoimento - SuaLoja{% endblock %}
 
 {% block content %}
-<section class="py-5">
+<section class="py-5 depoimento-section">
     <div class="container">
 
         <!-- Cabeçalho Emocional -->
@@ -17,7 +17,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
 
-                <div class="card bg-white shadow-2xl border-0 rounded-4 overflow-hidden">
+                <div class="card depoimento-card shadow-2xl border-0 rounded-4 overflow-hidden">
                     <div class="card-body p-5 p-lg-6">
 
                         {% if messages %}
@@ -35,32 +35,39 @@
                             <!-- Nome -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu nome</label>
-                                <input type="text" name="nome" class="form-control form-control-lg text-dark" 
-                                       placeholder="Digite seu nome completo" required>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Email -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu e-mail</label>
-                                <input type="email" name="email" class="form-control form-control-lg text-dark" 
-                                       placeholder="seu@email.com" required>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Nota com estrelas -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Qual nota você dá pra gente?</label>
-                                <div class="d-flex justify-content-center gap-3 fs-1" id="star-rating">
+                                <div class="d-flex justify-content-center gap-3 fs-1 star-container" id="star-rating">
                                     {% for i in '12345'|make_list %}
-                                        <span class="star text-warning" data-value="{{ i }}" style="cursor: pointer;">☆</span>
+                                        <span class="star text-warning" data-value="{{ i }}">☆</span>
                                     {% endfor %}
                                 </div>
                                 <input type="hidden" name="rating" id="rating-input" value="5">
+                                {% if form.rating.errors %}
+                                    <div class="text-danger small">{{ form.rating.errors.0 }}</div>
+                                {% endif %}
                             </div>
 
                             <!-- Depoimento -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Seu depoimento <span class="text-danger">*</span></label>
-                                {{ form.texto|add_class:"form-control text-dark" }}
+                                {{ form.texto }}
                                 {% if form.texto.errors %}
                                     <div class="text-danger small mt-1">{{ form.texto.errors.0 }}</div>
                                 {% endif %}
@@ -69,7 +76,7 @@
                             <!-- Foto -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">Foto da compra ou do produto (opcional)</label>
-                                {{ form.foto|add_class:"form-control text-dark" }}
+                                {{ form.foto }}
                                 <small class="text-muted">JPG, PNG ou WEBP • Máximo 5MB</small>
                                 {% if form.foto.errors %}
                                     <div class="text-danger small mt-1">{{ form.foto.errors.0 }}</div>
@@ -77,7 +84,7 @@
                             </div>
 
                             <div class="d-grid mt-5">
-                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold rounded-3 shadow">
+                                <button type="submit" class="btn btn-lg btn-primary py-4 fw-bold rounded-3">
                                     🚀 ENVIAR MEU DEPOIMENTO COM AMOR
                                 </button>
                             </div>
@@ -94,22 +101,4 @@
         </div>
     </div>
 </section>
-
-<script>
-    // Estrelas clicáveis
-    document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            document.getElementById('rating-input').value = value;
-
-            document.querySelectorAll('.star').forEach(s => {
-                if (parseInt(s.getAttribute('data-value')) <= parseInt(value)) {
-                    s.textContent = '★';
-                } else {
-                    s.textContent = '☆';
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}
