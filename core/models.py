@@ -129,7 +129,6 @@ class Pedido(models.Model):
 
 
 # ==================== DEPOIMENTOS (TESTIMONIAL) ====================
-# ✅ ATUALIZADO: cliente logado + foto + aprovação do admin + método rating_stars
 class Testimonial(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -167,9 +166,18 @@ class Testimonial(models.Model):
     def __str__(self):
         return f"{self.nome} - {self.rating}⭐"
 
+    @property
     def rating_stars(self):
-        """Método usado no Admin e nos templates"""
+        """Método usado no template (mostra só as estrelas preenchidas)"""
         return '⭐' * self.rating
+
+    @property
+    def rating_stars_complete(self):
+        """Mostra 5 estrelas completas (preenchidas + vazias) - mais bonito"""
+        full = '⭐' * self.rating
+        empty = '☆' * (5 - self.rating)
+        return full + empty
+
     rating_stars.short_description = 'Avaliação'
 
 
