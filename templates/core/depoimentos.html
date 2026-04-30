@@ -3,7 +3,7 @@
 <section class="py-5" id="depoimentos">
     <div class="container">
 
-        <!-- CABEÇALHO ATUALIZADO (com nome em preto + CTA + Cupom 10%) -->
+        <!-- Cabeçalho Simples -->
         <div class="text-center mb-5">
             <div class="display-1 mb-3">❤️</div>
             <h2 class="display-5 fw-bold text-dark">O que nossos clientes dizem</h2>
@@ -11,12 +11,10 @@
                 Compartilhe sua experiência e veja o que outros clientes estão dizendo!
             </p>
 
-            <!-- CTA COM CUPOM 10% -->
+            <!-- CTA Cupom 10% -->
             <div class="bg-light rounded-4 p-4 shadow-sm d-inline-block mb-5">
                 <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
-                    <div>
-                        <span class="badge bg-success fs-6 px-3 py-2">🎟️ CUPOM 10%</span>
-                    </div>
+                    <span class="badge bg-success fs-6 px-3 py-2">🎟️ CUPOM 10%</span>
                     <div class="text-start">
                         <strong class="text-dark fs-5">Deixe seu depoimento agora</strong><br>
                         <small class="text-muted">e ganhe <strong class="text-success">10% OFF</strong> na sua próxima compra!</small>
@@ -29,52 +27,53 @@
             </div>
         </div>
 
-        <!-- CARDS DOS DEPOIMENTOS -->
+        <!-- Depoimentos -->
         <div class="row g-4">
 
             {% for testimonial in testimonials %}
                 <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 shadow-xl border-0 rounded-4 overflow-hidden hover-scale">
-                        
-                        <!-- Foto do cliente -->
-                        <div class="text-center pt-4 pb-2">
+                    <div class="card h-100 border-0 shadow-sm p-4">
+
+                        <!-- Foto -->
+                        <div class="text-center mb-3">
                             {% if testimonial.foto %}
                                 <img src="{{ testimonial.foto.url }}" 
                                      class="rounded-circle border border-4 border-white shadow"
                                      alt="{{ testimonial.nome }}"
-                                     width="110" height="110" style="object-fit: cover;">
+                                     width="100" height="100" style="object-fit: cover;">
                             {% else %}
-                                <div class="rounded-circle bg-gradient d-flex align-items-center justify-content-center mx-auto text-white"
-                                     style="width: 110px; height: 110px; font-size: 3rem;">
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white"
+                                     style="width: 100px; height: 100px; font-size: 2.8rem;">
                                     👤
                                 </div>
                             {% endif %}
                         </div>
 
-                        <div class="card-body text-center px-4">
+                        <!-- Estrelas -->
+                        <div class="text-center mb-3 fs-2">
+                            {{ testimonial.rating_stars|safe }}
+                        </div>
 
-                            <!-- Estrelas -->
-                            <div class="mb-3 fs-3">
-                                {{ testimonial.rating_stars|safe }}
-                            </div>
+                        <!-- Texto -->
+                        <p class="text-center fst-italic text-muted mb-4">
+                            “{{ testimonial.texto }}”
+                        </p>
 
-                            <!-- Texto do depoimento -->
-                            <p class="card-text fst-italic text-muted mb-4 fs-5">
-                                “{{ testimonial.texto }}”
-                            </p>
-
-                            <!-- Nome e cidade (nome em preto forte) -->
-                            <h5 class="fw-bold mb-1 text-dark">{{ testimonial.nome }}</h5>
+                        <!-- Nome e Cidade -->
+                        <div class="text-center">
+                            <h5 class="fw-bold text-dark mb-1">{{ testimonial.nome }}</h5>
                             <small class="text-muted">
                                 {{ testimonial.cidade|default:"Brasil" }}
                             </small>
                         </div>
 
-                        <div class="card-footer text-center bg-white border-0 py-3">
+                        <!-- Data -->
+                        <div class="text-center mt-3">
                             <small class="text-muted">
                                 {{ testimonial.data|date:"d \d\e F \d\e Y" }}
                             </small>
                         </div>
+
                     </div>
                 </div>
             {% empty %}
@@ -93,14 +92,3 @@
         </div>
     </div>
 </section>
-
-<!-- Efeito hover suave nos cards -->
-<style>
-    .hover-scale {
-        transition: all 0.3s ease;
-    }
-    .hover-scale:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
-    } 
-</style>
