@@ -20,12 +20,10 @@ import json
 
 # ==================== PÁGINAS PRINCIPAIS ====================
 def home(request):
-    # Produtos para mostrar na home
     produtos = Produto.objects.filter(
         disponivel=True
     ).select_related('categoria').order_by('-criado_em')[:12]
     
-    # ✅ DEPOIMENTOS: agora só mostra os APROVADOS + ATIVOS
     testimonials = Testimonial.objects.filter(
         ativo=True,
         aprovado=True
@@ -39,7 +37,6 @@ def home(request):
 
 
 def depoimentos(request):
-    """Página dedicada aos depoimentos (só os aprovados)"""
     testimonials = Testimonial.objects.filter(
         ativo=True,
         aprovado=True
@@ -48,7 +45,7 @@ def depoimentos(request):
     context = {
         'testimonials': testimonials,
     }
-    return render(request, 'core/depoimentos.html', context)   # ← CORRIGIDO AQUI
+    return render(request, 'core/depoimentos.html', context)
 
 
 def detalhe_produto(request, slug):
@@ -60,7 +57,7 @@ def detalhe_produto(request, slug):
     })
 
 
-# ==================== CARRINHO (mantido igual) ====================
+# ==================== CARRINHO ====================
 def adicionar_ao_carrinho(request, variante_id):
     variante = get_object_or_404(Variante, id=variante_id)
     carrinho = request.session.get('carrinho', {})
@@ -106,7 +103,6 @@ def remover_do_carrinho(request, variante_id):
 
 def atualizar_quantidade(request, variante_id):
     carrinho = request.session.get('carrinho', {})
-   
     if str(variante_id) in carrinho:
         try:
             nova_quantidade = int(request.POST.get('quantidade', 1))
@@ -122,7 +118,6 @@ def atualizar_quantidade(request, variante_id):
             messages.error(request, 'Quantidade inválida.')
     else:
         messages.error(request, 'Item não encontrado no carrinho.')
-   
     return redirect('core:carrinho')
 
 
@@ -160,7 +155,6 @@ def checkout(request):
     total_final = max(subtotal_geral - desconto, 0)
     profile = request.user.profile
     
-    # ✅ DEPOIMENTOS: agora só mostra os APROVADOS + ATIVOS
     testimonials = Testimonial.objects.filter(
         ativo=True,
         aprovado=True
@@ -176,7 +170,7 @@ def checkout(request):
     })
 
 
-# ==================== ENVIAR DEPOIMENTO (CLIENTE) ====================
+# ==================== ENVIAR DEPOIMENTO ====================
 @login_required(login_url='accounts:login')
 def enviar_depoimento(request):
     if request.method == 'POST':
@@ -193,8 +187,9 @@ def enviar_depoimento(request):
     return render(request, 'core/enviar_depoimento.html', {'form': form})
 
 
-# ==================== (TODO O RESTO DO CÓDIGO FICA IGUAL) ====================
+# ==================== OUTRAS FUNÇÕES ====================
 def criar_preferencia_mercadopago(request):
+    # (código mantido igual)
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
@@ -271,9 +266,9 @@ def criar_preferencia_mercadopago(request):
         return redirect('core:carrinho')
 
 
-# ==================== STRIPE - NOVA ALTERNATIVA ====================
 @login_required(login_url='accounts:login')
 def criar_sessao_stripe(request):
+    # (código mantido igual)
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
@@ -314,7 +309,6 @@ def criar_sessao_stripe(request):
         return redirect('core:checkout')
 
 
-# ==================== CHECKOUT SUCESSO / FALHA / PENDENTE ====================
 def checkout_sucesso(request):
     if 'carrinho' in request.session:
         del request.session['carrinho']
@@ -416,7 +410,6 @@ Aproveite!
 def admin_gate(request):
     if request.method == 'POST':
         senha_digitada = request.POST.get('senha', '').strip()
-      
         if senha_digitada == settings.ADMIN_MASTER_PASSWORD:
             request.session['admin_master_access'] = True
             request.session.save()
@@ -427,28 +420,41 @@ def admin_gate(request):
     return render(request, 'core/admin_gate.html')
 
 
-# ==================== CREATE SUPERUSER (RESTRITO AO DEBUG) ====================
-def create_superuser_view(request):
-    if not settings.DEBUG:
-        return HttpResponse(status=404)
+# ==================== CRIAR SUPERUSUÁRIO (VERSÃO SEGURA) ====================
+def criar_superusuario_view(request):
+    """View segura: não muda a senha toda vez que faz deploy"""
     if request.method == 'POST':
-        master_password = request.POST.get('master_password', '').strip()
-      
-        if master_password == settings.ADMIN_MASTER_PASSWORD:
-            username = request.POST.get('username', 'admin')
-            email = request.POST.get('email', '')
-            password = request.POST.get('password', '')
-          
-            User = get_user_model()
-            if User.objects.filter(username=username).exists():
-                messages.warning(request, f"Usuário '{username}' já existe!")
-            else:
-                user = User.objects.create_superuser(username=username, email=email, password=password)
-                messages.success(request, f"Superusuário '{username}' criado com sucesso!")
-                return redirect('/gestao-secreta-jaques-2026/admin/')
+        master_password = request.POST.get('master_password')
+        username = request.POST.get('username')
+        email = request.POST.get('email', '')
+        password = request.POST.get('password')
+
+        # Verifica senha master
+        if master_password != settings.ADMIN_MASTER_PASSWORD:
+            messages.error(request, "❌ Senha Master incorreta!")
+            return render(request, 'core/criar_superusuario.html', {})
+
+        # Cria ou atualiza o usuário (não duplica)
+        User = get_user_model()
+        user, created = User.objects.get_or_create(username=username)
+
+        # Define a senha de forma correta (com hash)
+        user.set_password(password)
+        user.email = email
+        user.is_superuser = True
+        user.is_staff = True
+        user.is_active = True
+        user.save()
+
+        if created:
+            messages.success(request, f"✅ Superusuário '{username}' criado com sucesso!")
         else:
-            messages.error(request, "Senha master incorreta!")
-    return render(request, 'core/create_superuser.html')
+            messages.success(request, f"✅ Senha do superusuário '{username}' atualizada com sucesso!")
+
+        return redirect('admin:login')
+
+    # GET → mostra o formulário
+    return render(request, 'core/criar_superusuario.html', {})
 
 
 @login_required(login_url='accounts:login')
