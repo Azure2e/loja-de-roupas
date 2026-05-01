@@ -16,6 +16,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     loadRecaptcha();
 
+    // ==================== HELPER reCAPTCHA v3 ====================
+    window.getRecaptchaToken = async function (action = 'general') {
+        if (!window.grecaptcha) {
+            console.error('❌ reCAPTCHA ainda não carregou');
+            return '';
+        }
+        try {
+            const token = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action });
+            console.log('✅ reCAPTCHA token gerado para:', action);
+            return token;
+        } catch (error) {
+            console.error('❌ Erro ao gerar token reCAPTCHA:', error);
+            return '';
+        }
+    };
+
     // ==================== LÓGICA DE PRODUTOS ====================
     const selectTamanho = document.getElementById('select-tamanho');
     const selectCor = document.getElementById('select-cor');
@@ -249,4 +265,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==================== INICIALIZAÇÃO ====================
     connectOnlineStatus();
     initStarRating();
+
+    console.log('✅ reCAPTCHA v3 carregado e pronto para uso!');
 });
