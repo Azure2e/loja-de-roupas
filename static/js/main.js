@@ -1,4 +1,6 @@
 // static/js/main.js
+// ==================== JavaScript Principal (carregado no final do <body>) ====================
+
 document.addEventListener('DOMContentLoaded', function () {
 
     // ==================== reCAPTCHA v3 ====================
@@ -246,6 +248,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ==================== INICIALIZAÇÃO ====================
     connectOnlineStatus();
-    initStarRating();   // ← Ativa as estrelas do formulário de depoimento
-
+    initStarRating();
 });
