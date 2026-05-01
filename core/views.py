@@ -431,7 +431,7 @@ def criar_superusuario_view(request):
         # Verifica senha master
         if master_password != settings.ADMIN_MASTER_PASSWORD:
             messages.error(request, "❌ Senha Master incorreta!")
-            return render(request, 'core/create_superuser.html', {})
+            return render(request, 'core/criar_superusuario.html', {})
 
         # Cria ou atualiza o usuário
         User = get_user_model()
@@ -452,7 +452,7 @@ def criar_superusuario_view(request):
         return redirect('admin:login')
 
     # GET - mostra o formulário
-    return render(request, 'core/create_superuser.html', {})
+    return render(request, 'core/criar_superusuario.html', {})
 
 
 @login_required(login_url='accounts:login')
