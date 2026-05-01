@@ -155,7 +155,7 @@ footer {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 9999;
+    z-index: 2147483647;     /* Z-INDEX MÁXIMO - fica acima do reCAPTCHA */
 }
 
 .chat-floating button {
@@ -171,6 +171,11 @@ footer {
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
 }
 
+/* Janela do chat também com z-index máximo */
+#chat-window {
+    z-index: 2147483647 !important;
+}
+
 /* ===================== RESPONSIVIDADE GERAL ===================== */
 @media (max-width: 576px) {
     .card-img-top { height: 200px; }
@@ -178,7 +183,6 @@ footer {
     #preco-atual { font-size: 1.9rem; }
     .btn-primary { padding: 12px 24px; font-size: 1rem; }
     
-    /* Chat fica um pouco mais ajustado no celular */
     .chat-floating {
         top: 15px;
         right: 15px;
@@ -213,7 +217,6 @@ footer {
 
 /* =============================================
    LOGIN & REGISTER - TELA QUASE CHEIA NO PC
-   Responsivo para Celular
    ============================================= */
 
 .bg-gradient {
@@ -225,7 +228,7 @@ footer {
 }
 
 /* =============================================
-   PERFIL DO USUÁRIO - ESTILO LINKEDIN (Mobile First)
+   PERFIL DO USUÁRIO - ESTILO LINKEDIN
    ============================================= */
 
 .linkedin-avatar {
@@ -240,17 +243,11 @@ footer {
 }
 
 @media (min-width: 576px) {
-    .linkedin-avatar {
-        width: 170px;
-        height: 170px;
-    }
+    .linkedin-avatar { width: 170px; height: 170px; }
 }
 
 @media (min-width: 768px) {
-    .linkedin-avatar {
-        width: 190px;
-        height: 190px;
-    }
+    .linkedin-avatar { width: 190px; height: 190px; }
 }
 
 .linkedin-avatar img {
