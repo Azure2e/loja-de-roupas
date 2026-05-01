@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
+
 # ==================== IMPORTS ATUALIZADOS ====================
 from .models import Produto, Variante, Pedido, Testimonial
 from accounts.models import OTPCode
