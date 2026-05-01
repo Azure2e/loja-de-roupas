@@ -6,8 +6,9 @@
 {% block content %}
 <div class="container-fluid mt-3 mt-md-4">
 
-    <!-- CABEÇALHO -->
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 gap-3">
+    <!-- CABEÇALHO - LOGO SOBE 12REM PARA CIMA -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 gap-3"
+         style="margin-top: -12rem; position: relative; z-index: 20;">
         <div class="d-flex align-items-center">
             <img src="{% static 'img/logo.png' %}" alt="SuaLoja" style="max-height: 42px; width: auto;" class="me-3">
             <h1 class="h4 fw-bold mb-0 text-white">
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <!-- ÁREA DO CHAT - MAIS PEQUENA E RESPONSIVA -->
+        <!-- ÁREA DO CHAT -->
         <div class="col-lg-8 col-xl-9">
             <div class="card h-100 border-0 shadow-lg bg-dark">
                 <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center py-3" id="chat-header">
@@ -62,13 +63,12 @@
                     </button>
                 </div>
 
-                <!-- Chat body menor -->
                 <div id="chat-body" class="card-body overflow-auto p-3"
                      style="height: 48vh; background: #1e1e1e; border-radius: 0 0 12px 12px;">
                     <!-- Mensagens aparecem aqui -->
                 </div>
 
-                <!-- INPUT SOBE 7REM PARA CIMA -->
+                <!-- INPUT DO CHAT (sobe 7rem) -->
                 <div class="card-footer bg-dark p-3" style="margin-top: -7rem; position: relative; z-index: 10;">
                     <div class="input-group">
                         <input id="store-message-input" type="text"
