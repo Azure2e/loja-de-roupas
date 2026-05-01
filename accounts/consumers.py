@@ -26,7 +26,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_unread_notifications()
 
-    async def disconnect(self, close_code): # type: ignore
+    async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -65,7 +65,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         }))
 
 
-# ===================== STATUS ONLINE / AUSENTE / OFFLINE =====================
+# ===================== STATUS ONLINE =====================
 class OnlineStatusConsumer(AsyncWebsocketConsumer):
     """Consumer para status Online / Ausente / Offline em tempo real"""
 
@@ -85,7 +85,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.set_user_status('online')
 
-    async def disconnect(self, close_code): # type: ignore
+    async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -93,7 +93,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
             )
             await self.set_user_status('offline')
 
-    async def receive(self, text_data): # type: ignore
+    async def receive(self, text_data):
         data = json.loads(text_data)
         status = data.get('status')
 
@@ -102,14 +102,14 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
 
     async def set_user_status(self, status: str):
         await database_sync_to_async(cache.set)(
-            f"user_status_{self.user.id}", status, timeout=300 # pyright: ignore[reportOptionalMemberAccess]
+            f"user_status_{self.user.id}", status, timeout=300
         )
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'online_status_message',
-                'user_id': self.user.id, # pyright: ignore[reportOptionalMemberAccess]
+                'user_id': self.user.id,
                 'status': status
             }
         )
@@ -142,7 +142,7 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_chat_history()
 
-    async def disconnect(self, close_code): # pyright: ignore[reportIncompatibleMethodOverride]
+    async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -158,18 +158,15 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat_history(self):
-        messages = ChatMessage.objects.filter(
-            user=self.user
-        ).order_by('created_at')
+        messages = ChatMessage.objects.filter(user=self.user).order_by('created_at')
         return [{
-            'id': m.id, # type: ignore
+            'id': m.id,
             'message': m.message,
             'is_from_store': m.is_from_store,
             'time': m.created_at.strftime('%H:%M')
         } for m in messages]
 
-    async def receive(self, text_data): # type: ignore
-        """Cliente enviou mensagem"""
+    async def receive(self, text_data):
         data = json.loads(text_data)
         message_text = data.get('message', '').strip()
         if not message_text:
@@ -203,7 +200,6 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
             'time': event['time']
         }))
 
-        # Se a loja respondeu → cria notificação automática para o cliente
         if event.get('is_from_store'):
             await self.create_notification(event['message'])
 
@@ -217,7 +213,7 @@ class SupportChatConsumer(AsyncWebsocketConsumer):
         )
 
 
-# ===================== CHAT PAINEL DE SUPORTE (LOJA) =====================
+# ===================== CHAT SUPORTE (LOJA) =====================
 class StoreSupportConsumer(AsyncWebsocketConsumer):
     """Chat em tempo real — lado da LOJA (painel de suporte)"""
 
@@ -230,23 +226,21 @@ class StoreSupportConsumer(AsyncWebsocketConsumer):
         self.customer_id = None
         await self.accept()
 
-    async def disconnect(self, close_code): # type: ignore
+    async def disconnect(self, close_code):
         if self.customer_id:
             await self.channel_layer.group_discard(
                 f"support_chat_{self.customer_id}",
                 self.channel_name
             )
 
-    async def receive(self, text_data): # type: ignore
+    async def receive(self, text_data):
         data = json.loads(text_data)
 
-        # Loja clicou em um cliente → entra na sala dele
         if data.get('type') == 'join_room':
             customer_id = data.get('customer_id')
             if not customer_id:
                 return
 
-            # Sai da sala anterior
             if self.customer_id:
                 await self.channel_layer.group_discard(
                     f"support_chat_{self.customer_id}",
@@ -254,16 +248,13 @@ class StoreSupportConsumer(AsyncWebsocketConsumer):
                 )
 
             self.customer_id = customer_id
-
             await self.channel_layer.group_add(
                 f"support_chat_{self.customer_id}",
                 self.channel_name
             )
-
             await self.send_chat_history()
             return
 
-        # Loja enviou mensagem
         message_text = data.get('message', '').strip()
         if not message_text or not self.customer_id:
             return
@@ -300,9 +291,7 @@ class StoreSupportConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat_history(self):
-        messages = ChatMessage.objects.filter(
-            user_id=self.customer_id
-        ).order_by('created_at')
+        messages = ChatMessage.objects.filter(user_id=self.customer_id).order_by('created_at')
         return [{
             'id': m.id,
             'message': m.message,
@@ -319,7 +308,6 @@ class StoreSupportConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
-        """Recebe broadcast da sala e envia para o painel"""
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': event['message'],

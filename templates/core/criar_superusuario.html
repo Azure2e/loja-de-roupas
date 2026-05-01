@@ -5,33 +5,41 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5">
-            <div class="card bg-dark border-primary">
+            <div class="card bg-dark border-primary shadow-lg">
                 <div class="card-body p-5 text-center">
                     <h3 class="mb-4 text-white">🔑 Criar Superusuário</h3>
-                    <p class="text-light mb-4">Digite a senha master para criar um novo administrador</p>
+                    <p class="text-light mb-4">Digite a senha master para criar ou atualizar um administrador</p>
 
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
                         {% endfor %}
                     {% endif %}
 
                     <form method="post">
                         {% csrf_token %}
+
                         <div class="mb-3">
                             <input type="password" name="master_password" class="form-control" placeholder="Senha Master" required>
                         </div>
+
                         <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Nome de usuário" value="admin" required>
+                            <input type="text" name="username" class="form-control" placeholder="Nome de usuário" value="jaquessilva" required>
                         </div>
+
                         <div class="mb-3">
                             <input type="email" name="email" class="form-control" placeholder="E-mail (opcional)">
                         </div>
+
                         <div class="mb-3">
                             <input type="password" name="password" class="form-control" placeholder="Senha do novo admin" required>
                         </div>
+
                         <button type="submit" class="btn btn-success btn-lg w-100">
-                            Criar Superusuário
+                            ✅ Criar / Atualizar Superusuário
                         </button>
                     </form>
                 </div>
