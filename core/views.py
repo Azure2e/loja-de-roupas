@@ -189,7 +189,6 @@ def enviar_depoimento(request):
 
 # ==================== OUTRAS FUNÇÕES ====================
 def criar_preferencia_mercadopago(request):
-    # (código mantido igual)
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
@@ -268,7 +267,6 @@ def criar_preferencia_mercadopago(request):
 
 @login_required(login_url='accounts:login')
 def criar_sessao_stripe(request):
-    # (código mantido igual)
     carrinho = request.session.get('carrinho', {})
     if not carrinho:
         messages.warning(request, 'Seu carrinho está vazio!')
@@ -422,7 +420,7 @@ def admin_gate(request):
 
 # ==================== CRIAR SUPERUSUÁRIO (VERSÃO SEGURA) ====================
 def criar_superusuario_view(request):
-    """View segura: não muda a senha toda vez que faz deploy"""
+    """View segura para criar ou atualizar superusuário"""
     if request.method == 'POST':
         master_password = request.POST.get('master_password')
         username = request.POST.get('username')
@@ -432,13 +430,12 @@ def criar_superusuario_view(request):
         # Verifica senha master
         if master_password != settings.ADMIN_MASTER_PASSWORD:
             messages.error(request, "❌ Senha Master incorreta!")
-            return render(request, 'core/criar_superusuario.html', {})
+            return render(request, 'core/create_superuser.html', {})
 
-        # Cria ou atualiza o usuário (não duplica)
+        # Cria ou atualiza o usuário
         User = get_user_model()
         user, created = User.objects.get_or_create(username=username)
 
-        # Define a senha de forma correta (com hash)
         user.set_password(password)
         user.email = email
         user.is_superuser = True
@@ -453,8 +450,8 @@ def criar_superusuario_view(request):
 
         return redirect('admin:login')
 
-    # GET → mostra o formulário
-    return render(request, 'core/criar_superusuario.html', {})
+    # GET - mostra o formulário
+    return render(request, 'core/create_superuser.html', {})
 
 
 @login_required(login_url='accounts:login')
