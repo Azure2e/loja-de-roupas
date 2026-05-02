@@ -2,33 +2,59 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# ==================== CARREGA VARIÁVEIS DE AMBIENTE ====================
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==================== SEGURANÇA ====================
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True   # ← FORÇADO PARA VER O ERRO COMPLETO
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-# TEMPORÁRIO PARA TESTE (depois podemos deixar mais seguro)
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*',
-    'http://*',
-]
+CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# ==================== RECAPTCHA ====================
+RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
-# ==================== PAGAMENTOS ====================
+# ==================== EMAIL (Brevo) ====================
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+BREVO_API_KEY = os.getenv('BREVO_API_KEY')
+
+# ==================== CLOUDINARY ====================
+CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
+
+import cloudinary
+cloudinary.config(
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True
+)
+
+# ==================== GOOGLE OAUTH ====================
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_SECRET = os.getenv('GOOGLE_SECRET')
+
+# ==================== MERCADO PAGO ====================
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
+
+# ==================== REDIS ====================
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/1')
 
 # ==================== APPS ====================
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,7 +79,6 @@ INSTALLED_APPS = [
 ]
 
 # ==================== MIDDLEWARE ====================
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -68,19 +93,12 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
+# ==================== URLS E APLICAÇÕES ====================
 ROOT_URLCONF = 'loja.urls'
 WSGI_APPLICATION = 'loja.wsgi.application'
 ASGI_APPLICATION = 'loja.asgi.application'
 
-# ====================== CHANNELS ======================
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    },
-}
-
 # ==================== TEMPLATES ====================
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -108,7 +126,6 @@ if os.getenv('DATABASE_URL'):
             ssl_require=True,
         )
     }
-    print("✅ DATABASE_URL encontrado → PostgreSQL do Railway configurado")
 else:
     DATABASES = {
         'default': {
@@ -116,39 +133,32 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-    print("⚠️ WARNING: No DATABASE_URL set → usando SQLite local")
 
-# ==================== INTERNACIONAL ====================
+# ==================== CHANNELS (Redis) ====================
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
+        },
+    },
+}
 
+# ==================== INTERNACIONALIZAÇÃO ====================
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/La_Paz'
-
 USE_I18N = True
 USE_TZ = True
 
-# ==================== STATIC ====================
-
+# ==================== STATIC & MEDIA ====================
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ==================== MEDIA (Cloudinary) ====================
-
-# FORÇANDO REBUILD NO RAILWAY - cloudinary
-import cloudinary
-
-cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
-    secure=True
-)
-
-MEDIA_URL = f"https://res.cloudinary.com/{os.getenv('CLOUDINARY_CLOUD_NAME')}/"
+MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/"
 
 # ==================== AUTH ====================
-
 LOGIN_REDIRECT_URL = 'core:home'
 LOGOUT_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'accounts:login'
@@ -160,7 +170,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # ==================== ALLAUTH ====================
-
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
@@ -169,41 +178,24 @@ ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_SECRET'),
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_SECRET,
             'key': ''
         }
     }
 }
 
-# ==================== EMAIL ====================
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-
-# ==================== AXES ====================
-
+# ==================== AXES (Proteção contra brute force) ====================
 AXES_FAILURE_LIMIT = 8
 AXES_COOLOFF_TIME = 180
 AXES_RESET_ON_SUCCESS = True
 
-# ==================== RECAPTCHA ====================
-
-RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
-RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
-
-# ==================== SEGURANÇA PRODUÇÃO ====================
-
+# ==================== SEGURANÇA EM PRODUÇÃO ====================
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-
-# ====================== SENHA MASTER PARA PAINEL SECRETO ======================
-# Troque pela senha que você quiser (use uma senha forte)
-ADMIN_MASTER_PASSWORD = 'J27a05#9'   # ← você já usou essa senha, pode deixar
+# ==================== SENHA MASTER (Painel Secreto) ====================
+ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
