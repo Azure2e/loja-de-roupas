@@ -155,8 +155,6 @@ footer {
     position: fixed;
     top: 25px;
     right: 40px;           /* mais espaço para não colidir com o badge do reCAPTCHA */
-    z-index: 2147483647 !important;
-}
 
 .chat-floating button {
     width: 65px;
