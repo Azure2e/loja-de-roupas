@@ -3,6 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
+# ==================== CARREGA VARIÁVEIS DE AMBIENTE ====================
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +34,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
 ]
 
-# ==================== SITE ID (OBRIGATÓRIO para allauth + Google) ====================
+# ==================== SITE ID (OBRIGATÓRIO PARA ALLAUTH + GOOGLE) ====================
 SITE_ID = 1
 
 # ==================== STRIPE ====================
@@ -135,13 +136,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': GOOGLE_SECRET,
             'key': ''
         },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
 
