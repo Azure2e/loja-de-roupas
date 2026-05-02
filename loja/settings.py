@@ -33,7 +33,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
 ]
 
-# ==================== SITE ID (OBRIGATÓRIO PARA ALLAUTH + GOOGLE) ====================
+# ==================== SITE ID (OBRIGATÓRIO PARA ALLAUTH) ====================
 SITE_ID = 1
 
 # ==================== STRIPE ====================
@@ -89,7 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'django.contrib.sites',                    # ← Obrigatório para Allauth
+    'django.contrib.sites',                    # ← Obrigatório
 
     'core',
     'accounts',
@@ -125,8 +125,8 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-SOCIALACCOUNT_AUTO_SIGNUP = False          # Evita criar conta automaticamente
-SOCIALACCOUNT_LOGIN_ON_GET = True          # Melhora experiência do botão Google
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
