@@ -18,7 +18,7 @@
           rel="stylesheet"
           crossorigin="anonymous">
 
-    <!-- Seu CSS personalizado -->
+    <!-- Seu CSS personalizado (style.css) - AGORA CARREGADO CORRETAMENTE -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
    
     {% block extra_css %}{% endblock %}
@@ -59,7 +59,6 @@
                             </span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end bg-dark border-primary" id="notification-list" style="width: 320px; max-height: 420px; overflow-y: auto;">
-                            <!-- Preenchido via JavaScript -->
                         </ul>
                     </li>
 
@@ -79,7 +78,6 @@
                                          style="width: 38px; height: 38px; object-fit: cover;">
                                 {% endif %}
                                 
-                                <!-- Bolinha de Status -->
                                 <span id="online-dot" 
                                       class="position-absolute bottom-0 end-0 border border-dark rounded-circle"
                                       style="width: 14px; height: 14px; z-index: 11; display: none;"></span>
@@ -117,15 +115,14 @@
     {% block content %}{% endblock %}
 </div>
 
-<!-- ==================== CHAT FLUTUANTE ==================== -->
+<!-- ==================== CHAT FLUTUANTE (usa o CSS do style.css) ==================== -->
 <div class="chat-floating" id="chat-widget">
-    <button onclick="toggleChat()" class="btn btn-primary rounded-circle shadow-lg position-fixed bottom-0 end-0 m-4"
-            style="width: 65px; height: 65px; font-size: 1.8rem; z-index: 1050;">
+    <button onclick="toggleChat()" class="btn btn-primary rounded-circle shadow-lg">
         <i class="fas fa-comment-dots"></i>
     </button>
 
-    <div id="chat-window" class="chat-window position-fixed bottom-0 end-0 bg-dark border border-primary rounded-4 shadow-xl d-none"
-         style="width: 380px; height: 520px; z-index: 1060; margin: 20px;">
+    <div id="chat-window" class="chat-window position-fixed bg-dark border border-primary rounded-4 shadow-xl d-none"
+         style="width: 380px; height: 520px; z-index: 2147483647; margin: 20px;">
         <div class="chat-header bg-primary text-white p-3 d-flex justify-content-between align-items-center rounded-top-4">
             <strong>💬 Chat com a Loja</strong>
             <button onclick="toggleChat()" class="btn btn-sm btn-light">✕</button>
@@ -152,7 +149,6 @@
 </footer>
 
 <!-- ==================== SCRIPTS ==================== -->
-<!-- Bootstrap JS foi removido conforme sua solicitação (está no main.js) -->
 <script src="{% static 'js/main.js' %}" defer></script>
 
 {% block extra_js %}{% endblock %}
