@@ -150,11 +150,13 @@ footer {
     padding: 60px 0 30px;
 }
 
-/* ===================== CHAT FLUTUANTE - CANTO DIREITO SUPERIOR ==================== */
+/* ===================== CHAT FLUTUANTE - CANTO DIREITO SUPERIOR (NÃO PRESO NO TOPO) ==================== */
 .chat-floating {
     position: fixed;
-    top: 25px;
-    right: 40px;           /* mais espaço para não colidir com o badge do reCAPTCHA */
+    top: 90px;      /* espaço bom abaixo da navbar */
+    right: 30px;    /* posição confortável à direita */
+    z-index: 2147483647 !important;
+}
 
 .chat-floating button {
     width: 65px;
@@ -182,8 +184,8 @@ footer {
     .btn-primary { padding: 12px 24px; font-size: 1rem; }
     
     .chat-floating {
-        top: 18px;
-        right: 85px;     /* ajuste fino no celular */
+        top: 75px;
+        right: 20px;
     }
 }
 
