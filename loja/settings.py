@@ -3,7 +3,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
-# ==================== CARREGA VARIÁVEIS DE AMBIENTE ====================
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,7 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'django.contrib.sites',                    # ← Obrigatório para allauth
+    'django.contrib.sites',                    # ← Obrigatório para Allauth
 
     'core',
     'accounts',
