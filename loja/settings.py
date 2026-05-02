@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured   # ← Import obrigatório
 
 # ==================== CARREGA VARIÁVEIS DE AMBIENTE ====================
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ==================== DEBUG (deve vir ANTES do SECRET_KEY) ====================
+# ==================== DEBUG ====================
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # ==================== SEGURANÇA ====================
@@ -28,7 +29,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(
 # ==================== CSRF - CORRIGIDO PARA RAILWAY ====================
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-production.up.railway.app',
-    'https://*.railway.app',           # cobre todos os subdomínios do Railway
+    'https://*.railway.app',
     'http://localhost',
     'http://127.0.0.1',
     'https://localhost',
@@ -43,13 +44,14 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
-# ==================== EMAIL (Brevo) ====================
+# ==================== EMAIL (Brevo) - CORRIGIDO ====================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@sualoja.com'
 
 BREVO_API_KEY = os.getenv('BREVO_API_KEY')
 
@@ -220,5 +222,5 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ==================== SENHA MASTER (Painel Secreto) ====================
+# ==================== SENHA MASTER ====================
 ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
