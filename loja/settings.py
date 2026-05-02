@@ -126,7 +126,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = False          # Evita criar conta automaticamente
-SOCIALACCOUNT_LOGIN_ON_GET = True          # Melhora a experiência do botão Google
+SOCIALACCOUNT_LOGIN_ON_GET = True          # Melhora experiência do botão Google
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
