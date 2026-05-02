@@ -3,7 +3,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
-# ==================== CARREGA VARIÁVEIS DE AMBIENTE ====================
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +25,6 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
-# ==================== CSRF - CORRIGIDO PARA RAILWAY ====================
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-production.up.railway.app',
     'https://*.railway.app',
@@ -35,7 +33,10 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
 ]
 
-# ==================== STRIPE PAGAMENTOS ====================
+# ==================== SITE ID (OBRIGATÓRIO para allauth + Google) ====================
+SITE_ID = 1
+
+# ==================== STRIPE ====================
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
@@ -44,12 +45,11 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.getenv('RECAPTCHA_PRIVATE_KEY')
 
-# ==================== EMAIL (BREVO) - CONFIGURAÇÃO OTIMIZADA ====================
+# ==================== EMAIL (Brevo) ====================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@sualoja.com'
@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'django.contrib.sites',                    # ← Obrigatório para allauth
 
     'core',
     'accounts',
@@ -118,6 +119,31 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 ]
+
+# ==================== ALLAUTH CONFIG ====================
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+SOCIALACCOUNT_AUTO_SIGNUP = False          # Evita criar conta automaticamente
+SOCIALACCOUNT_LOGIN_ON_GET = True          # Melhora a experiência do botão Google
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_SECRET,
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
 
 # ==================== URLS E APLICAÇÕES ====================
 ROOT_URLCONF = 'loja.urls'
@@ -194,22 +220,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-
-# ==================== ALLAUTH ====================
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret': GOOGLE_SECRET,
-            'key': ''
-        }
-    }
-}
 
 # ==================== AXES ====================
 AXES_FAILURE_LIMIT = 8
