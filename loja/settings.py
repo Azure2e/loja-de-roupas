@@ -25,7 +25,14 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
-CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']
+# ==================== CSRF - CORRIGIDO PARA RAILWAY ====================
+CSRF_TRUSTED_ORIGINS = [
+    'https://loja-de-roupas-production.up.railway.app',
+    'https://*.railway.app',           # cobre todos os subdomínios do Railway
+    'http://localhost',
+    'http://127.0.0.1',
+    'https://localhost',
+]
 
 # ==================== STRIPE PAGAMENTOS ====================
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
