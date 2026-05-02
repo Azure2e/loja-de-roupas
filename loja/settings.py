@@ -11,8 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 if not SECRET_KEY:
-    if DEBUG:
-        # Chave temporária segura apenas para desenvolvimento local
+    if DEBUG:  # DEBUG ainda não foi definido, usamos valor padrão temporário
         SECRET_KEY = 'django-insecure-temporary-key-for-local-dev-only-2026'
         print("⚠️  Usando SECRET_KEY temporária (apenas para desenvolvimento local)")
     else:
@@ -26,6 +25,11 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
 CSRF_TRUSTED_ORIGINS = ['https://*', 'http://*']
+
+# ==================== STRIPE PAGAMENTOS ====================
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')   # ← Obrigatório para Webhook
 
 # ==================== RECAPTCHA ====================
 RECAPTCHA_PUBLIC_KEY = os.getenv('RECAPTCHA_PUBLIC_KEY')
@@ -196,7 +200,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# ==================== AXES (Proteção contra brute force) ====================
+# ==================== AXES ====================
 AXES_FAILURE_LIMIT = 8
 AXES_COOLOFF_TIME = 180
 AXES_RESET_ON_SUCCESS = True
