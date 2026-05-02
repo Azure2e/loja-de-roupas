@@ -153,8 +153,8 @@ footer {
 /* ===================== CHAT FLUTUANTE - CANTO DIREITO SUPERIOR ==================== */
 .chat-floating {
     position: fixed;
-    top: 78px;
-    right: 120px;           /* Aumentado para não colidir com o badge do reCAPTCHA */
+    top: 25px;
+    right: 100px;           /* mais espaço para não colidir com o badge do reCAPTCHA */
     z-index: 2147483647 !important;
 }
 
@@ -174,7 +174,6 @@ footer {
 /* Janela do chat também com z-index máximo */
 #chat-window {
     z-index: 2147483647 !important;
-
 }
 
 /* ===================== RESPONSIVIDADE GERAL ===================== */
@@ -186,7 +185,7 @@ footer {
     
     .chat-floating {
         top: 18px;
-        right: 80px;     /* Ajuste no mobile */
+        right: 85px;     /* ajuste fino no celular */
     }
 }
 
