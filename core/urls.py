@@ -1,5 +1,11 @@
 from django.urls import path
 from . import views
+from .views_stripe import (
+    create_checkout_session,
+    PaymentSuccessView,
+    PaymentCancelView,
+    stripe_webhook,
+)
 
 app_name = 'core'
 
@@ -19,6 +25,11 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('criar-preferencia/', views.criar_preferencia_mercadopago, name='criar_preferencia_mercadopago'),
 
+    # ==================== STRIPE PAGAMENTOS ====================
+    path('pagamento/create-checkout/', create_checkout_session, name='create_checkout'),
+    path('pagamento/sucesso/', PaymentSuccessView.as_view(), name='payment_success'),
+    path('pagamento/cancelado/', PaymentCancelView.as_view(), name='payment_cancel'),
+
     # ==================== RETORNO DO MERCADO PAGO ====================
     path('checkout/sucesso/', views.checkout_sucesso, name='checkout_sucesso'),
     path('checkout/falha/', views.checkout_falha, name='checkout_falha'),
@@ -31,11 +42,10 @@ urlpatterns = [
     path('meus-pedidos/', views.meus_pedidos, name='meus_pedidos'),
     path('gerar-otp/', views.gerar_otp, name='gerar_otp'),
     path('verificar-otp/', views.verificar_otp, name='verificar_otp'),
-
-    # ==================== DEPOIMENTOS ====================
     path('enviar-depoimento/', views.enviar_depoimento, name='enviar_depoimento'),
-    path('depoimentos/', views.depoimentos, name='depoimentos'),   # ← ADICIONADO AQUI
+    path('depoimentos/', views.depoimentos, name='depoimentos'),
 
-    # ==================== WEBHOOK ====================
+    # ==================== WEBHOOKS ====================
     path('webhook/mercadopago/', views.webhook_mercadopago, name='webhook_mercadopago'),
+    path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),   # ← Webhook do Stripe
 ]
