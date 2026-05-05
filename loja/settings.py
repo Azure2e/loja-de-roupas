@@ -36,6 +36,10 @@ CSRF_TRUSTED_ORIGINS = [
 # ==================== SITE ID (OBRIGATÓRIO PARA ALLAUTH) ====================
 SITE_ID = 1
 
+# ==================== FACEBOOK LOGIN ====================
+FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')          # ← Seu App ID
+FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')  # ← Coloque o Secret aqui
+
 # ==================== STRIPE ====================
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
@@ -69,10 +73,6 @@ cloudinary.config(
     secure=True
 )
 
-# ==================== GOOGLE OAUTH ====================
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-GOOGLE_SECRET = os.getenv('GOOGLE_SECRET')
-
 # ==================== MERCADO PAGO ====================
 MERCADO_PAGO_ACCESS_TOKEN = os.getenv('MERCADO_PAGO_ACCESS_TOKEN')
 MERCADO_PAGO_PUBLIC_KEY = os.getenv('MERCADO_PAGO_PUBLIC_KEY')
@@ -102,7 +102,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',   # ← Facebook ativado
 ]
 
 # ==================== MIDDLEWARE ====================
@@ -129,14 +129,16 @@ SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 SOCIALACCOUNT_PROVIDERS = {
-    'google': {
+    'facebook': {
         'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret': GOOGLE_SECRET,
+            'client_id': FACEBOOK_APP_ID,
+            'secret': FACEBOOK_APP_SECRET,
             'key': ''
         },
-        'SCOPE': ['profile', 'email'],
-        'AUTH_PARAMS': {'access_type': 'online'},
+        'SCOPE': ['email', 'public_profile'],
+        'AUTH_PARAMS': {'auth_type': 'rerequest'},
+        'METHOD': 'oauth2',
+        'VERIFIED_EMAIL': False,
     }
 }
 
