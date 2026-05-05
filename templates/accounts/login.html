@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load socialaccount %}
 
 {% block title %}Entrar - SuaLoja{% endblock %}
 
@@ -7,111 +8,112 @@
 
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-gradient">
     <div class="row w-100 justify-content-center">
-        <div class="col-lg-5 col-md-7 col-sm-10">        <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-5 overflow-hidden">
-            <div class="card-body p-5">
+        <div class="col-lg-5 col-md-7 col-sm-10">
+            
+            <div class="card border-0 shadow-2xl bg-dark bg-opacity-95 rounded-5 overflow-hidden">
+                <div class="card-body p-5">
 
-                <!-- HEADER -->
-                <div class="text-center mb-5">
-                    <div class="mx-auto mb-4 d-flex align-items-center justify-content-center"
-                         style="width: 90px; height: 90px; background: linear-gradient(135deg, #00ff88, #00b4ff); border-radius: 50%; box-shadow: 0 0 60px rgba(0, 255, 136, 0.6);">
-                        👋
-                    </div>
-                    <h1 class="display-4 fw-bold text-white mb-2">Olá, que bom te ver!</h1>
-                    <p class="lead text-light opacity-75">Faça login e continue sua experiência</p>
-                </div>
-
-                <!-- AVISO CHECKOUT -->
-                {% if request.GET.next and 'checkout' in request.GET.next %}
-                    <div class="alert alert-info rounded-4 text-center mb-4">
-                        🔒 Você precisa estar logado para <strong>finalizar a compra</strong>.
-                    </div>
-                {% endif %}
-
-                <!-- ERRO DE LOGIN -->
-                {% if form.errors %}
-                    <div class="alert alert-danger text-center rounded-4 mb-4">
-                        ❌ Usuário ou senha inválidos
-                    </div>
-                {% endif %}
-
-                <!-- MESSAGES -->
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4">
-                            {{ message }}
+                    <!-- HEADER -->
+                    <div class="text-center mb-5">
+                        <div class="mx-auto mb-4 d-flex align-items-center justify-content-center"
+                             style="width: 90px; height: 90px; background: linear-gradient(135deg, #00ff88, #00b4ff); border-radius: 50%; box-shadow: 0 0 60px rgba(0, 255, 136, 0.6);">
+                            👋
                         </div>
-                    {% endfor %}
-                {% endif %}
-
-                <!-- FORM -->
-                <form method="post" id="login-form">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="{{ request.GET.next }}">
-
-                    <div class="mb-4">
-                        <label class="form-label text-light small fw-medium">Usuário</label>
-                        <input type="text" name="username" 
-                               class="form-control bg-dark text-white border-0 rounded-4 py-3"
-                               placeholder="Digite seu usuário"
-                               autocomplete="username"
-                               required autofocus>
+                        <h1 class="display-4 fw-bold text-white mb-2">Olá, que bom te ver!</h1>
+                        <p class="lead text-light opacity-75">Faça login e continue sua experiência</p>
                     </div>
 
-                    <div class="mb-2">
-                        <label class="form-label text-light small fw-medium">Senha</label>
-                        <input type="password" name="password" 
-                               class="form-control bg-dark text-white border-0 rounded-4 py-3"
-                               placeholder="••••••••"
-                               autocomplete="current-password"
-                               required>
+                    <!-- AVISO CHECKOUT -->
+                    {% if request.GET.next and 'checkout' in request.GET.next %}
+                        <div class="alert alert-info rounded-4 text-center mb-4">
+                            🔒 Você precisa estar logado para <strong>finalizar a compra</strong>.
+                        </div>
+                    {% endif %}
+
+                    <!-- ERRO DE LOGIN -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger text-center rounded-4 mb-4">
+                            ❌ Usuário ou senha inválidos
+                        </div>
+                    {% endif %}
+
+                    <!-- MESSAGES -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-4 text-center mb-4">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- BOTÃO FACEBOOK (CORRIGIDO e funcionando) -->
+                    <a href="{% provider_login_url 'facebook' %}" 
+                       class="btn btn-primary w-100 mb-4 d-flex align-items-center justify-content-center gap-3 py-3 rounded-4 fw-semibold">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Continuar com o Facebook</span>
+                    </a>
+
+                    <!-- DIVISOR -->
+                    <div class="d-flex align-items-center my-4">
+                        <hr class="flex-grow-1 border-secondary">
+                        <span class="px-4 text-light small">OU</span>
+                        <hr class="flex-grow-1 border-secondary">
                     </div>
 
-                    <!-- ESQUECI SENHA -->
-                    <div class="text-end mb-4">
-                        <a href="{% url 'accounts:password_reset' %}" class="text-info small">
-                            Esqueceu sua senha?
-                        </a>
+                    <!-- FORMULÁRIO NORMAL (corrigido) -->
+                    <form method="post" action="{% url 'account_login' %}" id="login-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                        <div class="mb-4">
+                            <label class="form-label text-light small fw-medium">Usuário ou E-mail</label>
+                            <input type="text" name="login" 
+                                   class="form-control bg-dark text-white border-0 rounded-4 py-3"
+                                   placeholder="Digite seu usuário ou e-mail"
+                                   autocomplete="username"
+                                   required autofocus>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label text-light small fw-medium">Senha</label>
+                            <input type="password" name="password" 
+                                   class="form-control bg-dark text-white border-0 rounded-4 py-3"
+                                   placeholder="••••••••"
+                                   autocomplete="current-password"
+                                   required>
+                        </div>
+
+                        <div class="text-end mb-4">
+                            <a href="{% url 'account_reset_password' %}" class="text-info small">
+                                Esqueceu sua senha?
+                            </a>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold py-3 rounded-4" id="login-btn">
+                            🔑 Entrar
+                        </button>
+                    </form>
+
+                    <!-- REGISTRO -->
+                    <div class="text-center mt-5 pt-3 border-top border-secondary">
+                        <p class="mb-0 text-light">
+                            Ainda não tem conta? 
+                            <a href="{% url 'accounts:register' %}" class="text-primary fw-bold">
+                                Criar conta grátis →
+                            </a>
+                        </p>
                     </div>
 
-                    <!-- BOTÃO -->
-                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 rounded-4" id="login-btn">
-                        🔑 Entrar
-                    </button>
-                </form>
-
-                <!-- DIVISOR -->
-                <div class="d-flex align-items-center my-5">
-                    <hr class="flex-grow-1 border-secondary">
-                    <span class="px-4 text-light small">OU</span>
-                    <hr class="flex-grow-1 border-secondary">
                 </div>
-
-                <!-- LOGIN SOCIAL -->
-                <a href="#" 
-                   class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center gap-3 py-3 rounded-4 fw-semibold">
-                    <i class="fab fa-google text-danger"></i>
-                    Continuar com Google
-                </a>
-
-                <!-- REGISTRO -->
-                <div class="text-center mt-5 pt-3 border-top border-secondary">
-                    <p class="mb-0 text-light">
-                        Ainda não tem conta? 
-                        <a href="{% url 'accounts:register' %}" class="text-primary fw-bold">
-                            Criar conta grátis →
-                        </a>
-                    </p>
-                </div>
-
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
 
-</div>
-{% endblock %}{% block extra_js %}
+{% endblock %}
 
+{% block extra_js %}
 <script>
     const form = document.getElementById('login-form');
     const btn = document.getElementById('login-btn');
@@ -122,4 +124,5 @@
             btn.innerHTML = 'Entrando... ⏳';
         });
     }
-</script>{% endblock %}
+</script>
+{% endblock %}
