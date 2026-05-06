@@ -133,7 +133,7 @@ SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = False
 
-# ==================== SOCIALACCOUNT_PROVIDERS ====================
+# ==================== SOCIALACCOUNT_PROVIDERS (ATUALIZADO) ====================
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'APP': {
@@ -141,7 +141,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': FACEBOOK_APP_SECRET,
             'key': ''
         },
-        'SCOPE': ['email', 'public_profile'],
+        'SCOPE': ['public_profile'],          # ← 'email' removido
         'AUTH_PARAMS': {'auth_type': 'rerequest'},
         'METHOD': 'oauth2',
         'VERIFIED_EMAIL': False,
@@ -149,9 +149,8 @@ SOCIALACCOUNT_PROVIDERS = {
             'id',
             'first_name',
             'last_name',
-            'middle_name',
             'name',
-            'email',
+            # 'email',                        # ← comentado
         ],
         'EXCHANGE_TOKEN': True,
     }
@@ -210,7 +209,7 @@ CHANNEL_LAYERS = {
 
 # ==================== INTERNACIONALIZAÇÃO ====================
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'      # ← AQUI ESTÁ CORRIGIDO (com underline)
+TIME_ZONE = 'America/La_Paz'
 USE_I18N = True
 USE_TZ = True
 
