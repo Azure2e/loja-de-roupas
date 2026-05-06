@@ -26,7 +26,6 @@ if not SECRET_KEY:
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
 # ==================== RAILWAY - PROXY HTTPS ====================
-# Obrigatório quando o Railway faz proxy (HTTPS)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
@@ -38,7 +37,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost',
 ]
 
-# ==================== SITE ID (OBRIGATÓRIO PARA ALLAUTH) ====================
+# ==================== SITE ID ====================
 SITE_ID = 1
 
 # ==================== FACEBOOK LOGIN ====================
@@ -132,10 +131,9 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_LOGIN_ON_GET = True
-
-# Não armazena tokens do Facebook (melhor prática de segurança)
 SOCIALACCOUNT_STORE_TOKENS = False
 
+# ==================== SOCIALACCOUNT_PROVIDERS (ATUALIZADO) ====================
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'APP': {
@@ -147,6 +145,15 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'auth_type': 'rerequest'},
         'METHOD': 'oauth2',
         'VERIFIED_EMAIL': False,
+        'FIELDS': [
+            'id',
+            'first_name',
+            'last_name',
+            'middle_name',
+            'name',
+            'email',
+        ],
+        'EXCHANGE_TOKEN': True,   # ← ESSA LINHA É A CHAVE DO SUCESSO
     }
 }
 
@@ -203,7 +210,7 @@ CHANNEL_LAYERS = {
 
 # ==================== INTERNACIONALIZAÇÃO ====================
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La_Paz'
+TIME_ZONE = 'America/La Paz'
 USE_I18N = True
 USE_TZ = True
 
@@ -236,7 +243,6 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    # SECURE_PROXY_SSL_HEADER já está configurado acima (funciona em dev e prod)
 
 # ==================== SENHA MASTER ====================
 ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
