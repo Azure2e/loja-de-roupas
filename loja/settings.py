@@ -129,11 +129,13 @@ ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
-SOCIALACCOUNT_AUTO_SIGNUP = False
+ACCOUNT_EMAIL_REQUIRED = False          # ← NÃO EXIGE EMAIL
+SOCIALACCOUNT_EMAIL_REQUIRED = False    # ← SOCIAL TAMBÉM NÃO
+SOCIALACCOUNT_AUTO_SIGNUP = True        # ← CRIA CONTA AUTOMÁTICO
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = False
 
-# ==================== SOCIALACCOUNT_PROVIDERS (ATUALIZADO) ====================
+# ==================== SOCIALACCOUNT_PROVIDERS ====================
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'APP': {
@@ -141,7 +143,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': FACEBOOK_APP_SECRET,
             'key': ''
         },
-        'SCOPE': ['public_profile'],          # ← 'email' removido
+        'SCOPE': ['public_profile'],
         'AUTH_PARAMS': {'auth_type': 'rerequest'},
         'METHOD': 'oauth2',
         'VERIFIED_EMAIL': False,
@@ -150,7 +152,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'first_name',
             'last_name',
             'name',
-            # 'email',                        # ← comentado
+            # 'email',
         ],
         'EXCHANGE_TOKEN': True,
     }
