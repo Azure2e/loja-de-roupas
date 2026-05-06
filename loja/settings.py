@@ -133,7 +133,7 @@ SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = False
 
-# ==================== SOCIALACCOUNT_PROVIDERS (ATUALIZADO) ====================
+# ==================== SOCIALACCOUNT_PROVIDERS ====================
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
         'APP': {
@@ -153,7 +153,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'name',
             'email',
         ],
-        'EXCHANGE_TOKEN': True,   # ← ESSA LINHA É A CHAVE DO SUCESSO
+        'EXCHANGE_TOKEN': True,
     }
 }
 
@@ -210,7 +210,7 @@ CHANNEL_LAYERS = {
 
 # ==================== INTERNACIONALIZAÇÃO ====================
 LANGUAGE_CODE = 'pt-br'
-TIME_ZONE = 'America/La Paz'
+TIME_ZONE = 'America/La_Paz'      # ← AQUI ESTÁ CORRIGIDO (com underline)
 USE_I18N = True
 USE_TZ = True
 
