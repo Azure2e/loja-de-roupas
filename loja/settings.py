@@ -25,6 +25,11 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
 
+# ==================== RAILWAY - PROXY HTTPS ====================
+# Obrigatório quando o Railway faz proxy (HTTPS)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 CSRF_TRUSTED_ORIGINS = [
     'https://loja-de-roupas-production.up.railway.app',
     'https://*.railway.app',
@@ -37,8 +42,8 @@ CSRF_TRUSTED_ORIGINS = [
 SITE_ID = 1
 
 # ==================== FACEBOOK LOGIN ====================
-FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')          # ← Seu App ID
-FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')  # ← Coloque o Secret aqui
+FACEBOOK_APP_ID = os.getenv('FACEBOOK_APP_ID')
+FACEBOOK_APP_SECRET = os.getenv('FACEBOOK_APP_SECRET')
 
 # ==================== STRIPE ====================
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
@@ -89,7 +94,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-    'django.contrib.sites',                    # ← Obrigatório
+    'django.contrib.sites',
 
     'core',
     'accounts',
@@ -102,7 +107,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',   # ← Facebook ativado
+    'allauth.socialaccount.providers.facebook',
 ]
 
 # ==================== MIDDLEWARE ====================
@@ -127,6 +132,9 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Não armazena tokens do Facebook (melhor prática de segurança)
+SOCIALACCOUNT_STORE_TOKENS = False
 
 SOCIALACCOUNT_PROVIDERS = {
     'facebook': {
@@ -228,7 +236,7 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # SECURE_PROXY_SSL_HEADER já está configurado acima (funciona em dev e prod)
 
 # ==================== SENHA MASTER ====================
 ADMIN_MASTER_PASSWORD = os.getenv('ADMIN_MASTER_PASSWORD', 'adminjaques2026')
