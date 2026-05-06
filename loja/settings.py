@@ -125,15 +125,18 @@ MIDDLEWARE = [
 ]
 
 # ==================== ALLAUTH CONFIG ====================
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}          # ← ACEITA OS 2
+ACCOUNT_SIGNUP_FIELDS = ['username*', 'email', 'password1*', 'password2*']
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
-ACCOUNT_EMAIL_REQUIRED = False          # ← NÃO EXIGE EMAIL
-SOCIALACCOUNT_EMAIL_REQUIRED = False    # ← SOCIAL TAMBÉM NÃO
-SOCIALACCOUNT_AUTO_SIGNUP = True        # ← CRIA CONTA AUTOMÁTICO
+ACCOUNT_EMAIL_VERIFICATION = 'none'                    # ← DESLIGA VERIFICAÇÃO
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_USERNAME_REQUIRED = True                       # ← OBRIGA USERNAME
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_AUTO_SIGNUP = True                       # ← CRIA NA HORA
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = False
+SOCIALACCOUNT_ADAPTER = 'accounts.adapter.MySocialAccountAdapter'  # ← Gera username automático
 
 # ==================== SOCIALACCOUNT_PROVIDERS ====================
 SOCIALACCOUNT_PROVIDERS = {
