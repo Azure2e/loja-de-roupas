@@ -8,7 +8,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ==================== DEBUG ====================
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = True  # ← LIGA PRA VER ERRO AMARELO. DESLIGA DEPOIS QUE FUNCIONAR
 
 # ==================== SEGURANÇA ====================
 SECRET_KEY = os.getenv('SECRET_KEY')
@@ -131,6 +131,8 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'                    # ← DESLIGA VERIFICAÇÃO
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_USERNAME_REQUIRED = True                       # ← OBRIGA USERNAME
+ACCOUNT_LOGOUT_ON_GET = True                           # ← LOGOUT SEM CONFIRMAÇÃO
+
 SOCIALACCOUNT_EMAIL_REQUIRED = False
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_AUTO_SIGNUP = True                       # ← CRIA NA HORA
@@ -155,7 +157,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'first_name',
             'last_name',
             'name',
-            # 'email',
         ],
         'EXCHANGE_TOKEN': True,
     }
@@ -227,8 +228,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = f"https://res.cloudinary.com/{CLOUDINARY_CLOUD_NAME}/"
 
 # ==================== AUTH ====================
-LOGIN_REDIRECT_URL = 'core:home'
-LOGOUT_REDIRECT_URL = 'core:home'
+LOGIN_REDIRECT_URL = '/'  # ← MANDA PRA HOME DEPOIS DE LOGAR
+LOGOUT_REDIRECT_URL = '/'  # ← MANDA PRA HOME DEPOIS DE SAIR
 LOGIN_URL = 'accounts:login'
 
 AUTHENTICATION_BACKENDS = [
